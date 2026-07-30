@@ -1,0 +1,1008 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --purple-dark: #16002f;
+    --purple: #45008a;
+    --purple-light: #8c2de5;
+
+    --gold: #ffc928;
+    --gold-light: #ffe76b;
+    --orange: #ff7517;
+
+    --text: #ffffff;
+    --muted: #bda4cc;
+}
+
+
+/* =========================================
+   BODY
+========================================= */
+
+body {
+    margin: 0;
+
+    min-height: 100vh;
+
+    font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+    color: var(--text);
+
+    overflow-x: hidden;
+
+    background:
+            radial-gradient(
+                    circle at 50% 30%,
+                    #5e0fa0 0%,
+                    transparent 35%
+            ),
+            radial-gradient(
+                    circle at 80% 80%,
+                    rgba(255, 170, 0, .08),
+                    transparent 25%
+            ),
+            linear-gradient(
+                    135deg,
+                    #110021,
+                    #29004e 50%,
+                    #10001f
+            );
+}
+
+
+/* =========================================
+   ESTRELAS
+========================================= */
+
+.stars {
+    position: fixed;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    opacity: .65;
+
+    background-image:
+            radial-gradient(
+                    circle,
+                    white 1px,
+                    transparent 1.5px
+            );
+
+    background-size: 95px 95px;
+
+    animation:
+            starsAnimation 18s linear infinite;
+}
+
+.stars-two {
+    opacity: .3;
+
+    background-size: 145px 145px;
+
+    animation-duration: 30s;
+}
+
+@keyframes starsAnimation {
+
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(100px);
+    }
+
+}
+
+
+/* =========================================
+   MOEDAS
+========================================= */
+
+.floating-coin {
+    position: fixed;
+
+    z-index: 1;
+
+    font-size: 48px;
+
+    filter:
+            drop-shadow(
+                    0 7px 8px rgba(0,0,0,.5)
+            );
+
+    animation:
+            floatCoin 4s ease-in-out infinite;
+}
+
+.coin-one {
+    left: 7%;
+    top: 18%;
+}
+
+.coin-two {
+    right: 7%;
+    top: 15%;
+
+    animation-delay: 1s;
+}
+
+.coin-three {
+    right: 10%;
+    bottom: 12%;
+
+    animation-delay: 2s;
+}
+
+@keyframes floatCoin {
+
+    0%,
+    100% {
+        transform:
+                translateY(0)
+                rotate(-8deg);
+    }
+
+    50% {
+        transform:
+                translateY(-18px)
+                rotate(8deg);
+    }
+
+}
+
+
+/* =========================================
+   PÁGINA
+========================================= */
+
+.register-page {
+    min-height: 100vh;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 45px 25px;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+/* =========================================
+   CONTAINER
+========================================= */
+
+.register-container {
+    width: 100%;
+
+    max-width: 1020px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(390px, 1fr)
+        minmax(420px, 480px);
+
+    gap: 35px;
+
+    align-items: center;
+}
+
+
+/* =========================================
+   PAINEL PROMOCIONAL
+========================================= */
+
+.register-promo {
+    padding: 20px;
+
+    text-align: center;
+}
+
+
+/* =========================================
+   LOGO
+========================================= */
+
+.promo-logo {
+    display: inline-block;
+
+    transform: rotate(-2deg);
+
+    filter:
+            drop-shadow(
+                    0 7px 5px rgba(0,0,0,.6)
+            );
+}
+
+.promo-ludo,
+.promo-star {
+    font-family:
+            Impact,
+            "Arial Black",
+            sans-serif;
+
+    line-height: .8;
+
+    font-weight: 900;
+
+    -webkit-text-stroke:
+            2px #713000;
+
+    text-shadow:
+            0 3px #9b4900,
+            0 6px #4d2100,
+            0 10px 12px rgba(0,0,0,.5);
+}
+
+.promo-ludo {
+    color: #ffd536;
+
+    font-size: 65px;
+}
+
+.promo-star {
+    color: #ff6d16;
+
+    font-size: 58px;
+}
+
+.promo-ribbon {
+    margin-top: 15px;
+
+    padding: 6px 22px;
+
+    display: inline-block;
+
+    border: 2px solid var(--gold);
+
+    border-radius: 20px;
+
+    color: #ffe98b;
+
+    background:
+            linear-gradient(
+                    180deg,
+                    #8e20df,
+                    #480579
+            );
+
+    box-shadow:
+            0 4px 0 #4b2100;
+
+    font-size: 11px;
+
+    font-weight: 900;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================================
+   PROMO CONTENT
+========================================= */
+
+.promo-content {
+    margin-top: 45px;
+}
+
+.trophy-large {
+    width: 85px;
+    height: 85px;
+
+    margin: auto;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 25px;
+
+    color: #713700;
+
+    font-size: 40px;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    #fff17b,
+                    #e99b00
+            );
+
+    border: 3px solid #fff1a3;
+
+    box-shadow:
+            0 7px 15px rgba(0,0,0,.4),
+            inset 0 3px rgba(255,255,255,.6);
+}
+
+.promo-content h2 {
+    margin-top: 25px;
+
+    font-size: 29px;
+
+    font-weight: 900;
+
+    text-shadow:
+            0 3px 0 #3a075e;
+}
+
+.promo-content h2 strong {
+    color: var(--gold);
+
+    display: block;
+
+    font-size: 42px;
+
+    text-shadow:
+            0 3px 0 #704000;
+}
+
+.promo-content p {
+    max-width: 390px;
+
+    margin: 12px auto 0;
+
+    color: #d5bce1;
+
+    line-height: 1.6;
+
+    font-size: 14px;
+}
+
+
+/* =========================================
+   BENEFÍCIOS
+========================================= */
+
+.benefits {
+    max-width: 390px;
+
+    margin: 35px auto 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+
+    text-align: left;
+}
+
+.benefit {
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+
+    padding: 11px;
+
+    border-radius: 14px;
+
+    background:
+            rgba(255,255,255,.045);
+
+    border: 1px solid
+    rgba(194,119,232,.18);
+}
+
+.benefit-icon {
+    width: 43px;
+    height: 43px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    color: white;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    #a63cff,
+                    #5712a3
+            );
+}
+
+.benefit-icon.gold {
+    color: #754000;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    #ffe65f,
+                    #e59a00
+            );
+}
+
+.benefit-icon.blue {
+    background:
+            linear-gradient(
+                    145deg,
+                    #43caff,
+                    #1764c5
+            );
+}
+
+.benefit strong,
+.benefit span {
+    display: block;
+}
+
+.benefit strong {
+    font-size: 12px;
+
+    color: #fff;
+}
+
+.benefit span {
+    margin-top: 3px;
+
+    color: #a98ab8;
+
+    font-size: 10px;
+}
+
+.promo-footer {
+    margin-top: 28px;
+
+    color: #8e6aa2;
+
+    font-size: 10px;
+
+    font-weight: bold;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+
+.register-card {
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 31px;
+
+    border-radius: 27px;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    rgba(78, 13, 135, .98),
+                    rgba(32, 3, 66, .98)
+            );
+
+    border: 3px solid var(--gold);
+
+    box-shadow:
+            0 0 0 4px rgba(76,17,109,.8),
+            0 18px 45px rgba(0,0,0,.65);
+}
+
+.register-card::before {
+    content: "";
+
+    position: absolute;
+
+    width: 250px;
+    height: 250px;
+
+    top: -140px;
+    right: -100px;
+
+    border-radius: 50%;
+
+    background:
+            radial-gradient(
+                    circle,
+                    rgba(255,218,73,.18),
+                    transparent 70%
+            );
+
+    pointer-events: none;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.register-card-top {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 27px;
+
+    position: relative;
+    z-index: 2;
+}
+
+.register-icon {
+    width: 62px;
+    height: 62px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 18px;
+
+    color: #fff;
+
+    font-size: 27px;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    #9c32e9,
+                    #521098
+            );
+
+    border: 2px solid var(--gold);
+
+    box-shadow:
+            0 5px 12px rgba(0,0,0,.35);
+}
+
+.register-card-top h1 {
+    margin: 0;
+
+    font-size: 27px;
+
+    font-weight: 900;
+}
+
+.register-card-top p {
+    margin: 3px 0 0;
+
+    color: #b99bc9;
+
+    font-size: 12px;
+}
+
+
+/* =========================================
+   CAMPOS
+========================================= */
+
+.register-field {
+    margin-bottom: 17px;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+.register-field label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: var(--gold);
+
+    font-size: 12px;
+
+    font-weight: 900;
+
+    text-transform: uppercase;
+}
+
+.register-field label i {
+    margin-right: 5px;
+}
+
+.register-input {
+    height: 49px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 0 13px;
+
+    border-radius: 12px;
+
+    background:
+            rgba(20,0,43,.8);
+
+    border: 2px solid #8c48b5;
+
+    transition: .2s;
+}
+
+.register-input:focus-within {
+    border-color: var(--gold);
+
+    box-shadow:
+            0 0 0 3px
+            rgba(255,201,40,.13);
+}
+
+.register-input > i {
+    margin-right: 10px;
+
+    color: #bb72e8;
+
+    font-size: 17px;
+}
+
+.register-input input {
+    width: 100%;
+    height: 100%;
+
+    border: 0;
+    outline: 0;
+
+    color: white;
+
+    background: transparent;
+
+    font-size: 13px;
+}
+
+.register-input input::placeholder {
+    color: #9674a7;
+}
+
+.password-toggle {
+    padding: 4px;
+
+    border: 0;
+
+    color: #bd75e8;
+
+    background: transparent;
+
+    cursor: pointer;
+}
+
+.password-toggle:hover {
+    color: var(--gold);
+}
+
+.field-hint {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #836393;
+
+    font-size: 9px;
+}
+
+
+/* =========================================
+   FORÇA DA SENHA
+========================================= */
+
+.password-strength {
+    margin-top: 7px;
+}
+
+.strength-bar {
+    height: 4px;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background:
+            rgba(255,255,255,.08);
+}
+
+.strength-bar span {
+    display: block;
+
+    width: 0;
+    height: 100%;
+
+    border-radius: 10px;
+
+    transition: .3s;
+}
+
+#strengthText {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #8e719e;
+
+    font-size: 9px;
+}
+
+
+/* =========================================
+   TERMOS
+========================================= */
+
+.terms {
+    margin: 6px 0 17px;
+
+    position: relative;
+    z-index: 2;
+}
+
+.terms label {
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 9px;
+
+    cursor: pointer;
+}
+
+.terms input {
+    display: none;
+}
+
+.custom-check {
+    width: 17px;
+    height: 17px;
+
+    flex-shrink: 0;
+
+    margin-top: 1px;
+
+    border: 2px solid #9c5dc0;
+
+    border-radius: 5px;
+}
+
+.terms input:checked + .custom-check {
+    background: var(--gold);
+
+    border-color: var(--gold);
+
+    box-shadow:
+            inset 0 0 0 3px #5a1684;
+}
+
+.terms-text {
+    color: #a88bb5;
+
+    font-size: 9px;
+
+    line-height: 1.5;
+}
+
+.terms-text a {
+    color: var(--gold);
+
+    text-decoration: none;
+}
+
+.terms-text a:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================
+   MENSAGEM
+========================================= */
+
+.register-message {
+    margin-bottom: 15px;
+
+    padding: 10px;
+
+    border-radius: 9px;
+
+    text-align: center;
+
+    font-size: 11px;
+}
+
+.register-message.error {
+    color: #ffb4b4;
+
+    border: 1px solid #ec5c68;
+
+    background:
+            rgba(190,35,60,.18);
+}
+
+.register-message.success {
+    color: #a8ffca;
+
+    border: 1px solid #44dc83;
+
+    background:
+            rgba(30,180,90,.15);
+}
+
+
+/* =========================================
+   BOTÃO
+========================================= */
+
+.create-account-button {
+    width: 100%;
+    height: 55px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    border: 2px solid #ffe68b;
+
+    border-radius: 14px;
+
+    color: #5d2900;
+
+    background:
+            linear-gradient(
+                    180deg,
+                    #ffe760,
+                    #ffb500
+            );
+
+    box-shadow:
+            inset 0 2px
+            rgba(255,255,255,.65),
+
+            inset 0 -4px
+            rgba(130,58,0,.3),
+
+            0 5px 0 #713400,
+
+            0 8px 17px
+            rgba(0,0,0,.35);
+
+    font-size: 14px;
+
+    font-weight: 1000;
+
+    cursor: pointer;
+
+    transition: .15s;
+}
+
+.create-account-button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+            inset 0 2px
+            rgba(255,255,255,.65),
+
+            inset 0 -4px
+            rgba(130,58,0,.3),
+
+            0 7px 0 #713400,
+
+            0 11px 20px
+            rgba(0,0,0,.4);
+}
+
+.create-account-button:active {
+    transform: translateY(3px);
+
+    box-shadow:
+            0 2px 0 #713400;
+}
+
+
+/* =========================================
+   LOGIN
+========================================= */
+
+.already-account {
+    margin-top: 22px;
+
+    text-align: center;
+
+    color: #a88bb5;
+
+    font-size: 11px;
+}
+
+.already-account a {
+    display: block;
+
+    margin-top: 5px;
+
+    color: var(--gold);
+
+    font-weight: 900;
+
+    text-decoration: none;
+}
+
+.already-account a:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media (max-width: 900px) {
+
+    .register-container {
+        max-width: 500px;
+
+        grid-template-columns: 1fr;
+    }
+
+    .register-promo {
+        padding-bottom: 0;
+    }
+
+    .benefits {
+        display: none;
+    }
+
+    .promo-content {
+        margin-top: 25px;
+    }
+}
+
+
+@media (max-width: 576px) {
+
+    .register-page {
+        padding: 25px 15px;
+    }
+
+    .floating-coin {
+        display: none;
+    }
+
+    .promo-ludo {
+        font-size: 52px;
+    }
+
+    .promo-star {
+        font-size: 46px;
+    }
+
+    .promo-content h2 {
+        font-size: 24px;
+    }
+
+    .promo-content h2 strong {
+        font-size: 34px;
+    }
+
+    .register-card {
+        padding: 23px 18px;
+
+        border-radius: 22px;
+    }
+
+    .register-card-top h1 {
+        font-size: 24px;
+    }
+}

@@ -1,0 +1,1356 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --purple-dark: #170035;
+    --purple: #43008c;
+    --purple-light: #8d2cff;
+
+    --gold-dark: #9c5800;
+    --gold: #ffb900;
+    --gold-light: #ffe66d;
+
+    --white: #ffffff;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+    color: white;
+
+    overflow-x: hidden;
+
+    background:
+            radial-gradient(
+                    circle at 50% 20%,
+                    rgba(152, 48, 255, 0.65),
+                    transparent 35%
+            ),
+            radial-gradient(
+                    circle at 15% 80%,
+                    rgba(255, 188, 0, 0.15),
+                    transparent 25%
+            ),
+            linear-gradient(
+                    135deg,
+                    #100025,
+                    #260052 45%,
+                    #12002b
+            );
+}
+
+
+/* =========================================
+   ESTRELAS
+========================================= */
+
+.stars,
+.stars::before,
+.stars::after {
+    position: fixed;
+
+    content: "";
+
+    width: 3px;
+    height: 3px;
+
+    background: white;
+
+    border-radius: 50%;
+
+    box-shadow:
+            80px 60px white,
+            160px 130px #ffd84d,
+            240px 40px white,
+            320px 180px #fff,
+            400px 90px #ffd84d,
+            480px 250px white,
+            560px 70px white,
+            640px 160px #ffd84d,
+            720px 30px white,
+            800px 210px white,
+            880px 100px #fff,
+            960px 300px #ffd84d,
+            1040px 80px white,
+            1120px 180px white,
+            1200px 50px #ffd84d;
+}
+
+.stars {
+    top: 0;
+    left: 0;
+
+    opacity: 0.6;
+
+    animation: starsMove 15s linear infinite;
+}
+
+.stars-2 {
+    transform: scale(0.6);
+
+    opacity: 0.35;
+
+    animation-duration: 25s;
+}
+
+@keyframes starsMove {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(100px);
+    }
+}
+
+
+/* =========================================
+   MOEDAS / DECORAÇÕES
+========================================= */
+
+.coin {
+    position: fixed;
+
+    font-size: 55px;
+
+    filter:
+            drop-shadow(0 5px 8px rgba(0, 0, 0, 0.5));
+
+    z-index: 1;
+
+    animation: floating 3s ease-in-out infinite;
+}
+
+.coin-1 {
+    top: 12%;
+    left: 8%;
+}
+
+.coin-2 {
+    bottom: 12%;
+    right: 8%;
+
+    animation-delay: 1s;
+}
+
+.coin-3 {
+    top: 22%;
+    right: 12%;
+
+    font-size: 40px;
+
+    animation-delay: 0.5s;
+}
+
+@keyframes floating {
+    0%,
+    100% {
+        transform: translateY(0) rotate(-8deg);
+    }
+
+    50% {
+        transform: translateY(-15px) rotate(8deg);
+    }
+}
+
+
+/* =========================================
+   PÁGINA
+========================================= */
+
+.login-page {
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px 20px;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+.login-wrapper {
+    width: 100%;
+    max-width: 450px;
+}
+
+
+/* =========================================
+   LOGO
+========================================= */
+
+.game-logo {
+    text-align: center;
+
+    margin-bottom: 25px;
+
+    transform: rotate(-2deg);
+
+    filter:
+            drop-shadow(
+                    0 8px 5px rgba(0, 0, 0, 0.5)
+            );
+}
+
+.logo-ludo,
+.logo-star {
+    font-family:
+            Impact,
+            "Arial Black",
+            sans-serif;
+
+    font-weight: 900;
+
+    line-height: 0.85;
+
+    -webkit-text-stroke: 2px #7b3600;
+
+    text-shadow:
+            0 3px 0 #8c4700,
+            0 6px 0 #542300,
+            0 9px 12px rgba(0, 0, 0, 0.5);
+}
+
+.logo-ludo {
+    font-size: 64px;
+
+    color: #ffd329;
+}
+
+.logo-star {
+    font-size: 57px;
+
+    color: #ff6d16;
+}
+
+.logo-decoration {
+    display: inline-block;
+
+    margin-top: 12px;
+
+    padding: 5px 20px;
+
+    color: #ffe889;
+
+    background:
+            linear-gradient(
+                    180deg,
+                    #8f1ce4,
+                    #4a057d
+            );
+
+    border: 2px solid #ffca28;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+
+    font-weight: 900;
+
+    letter-spacing: 1px;
+
+    box-shadow:
+            0 3px 0 #562100;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+
+.login-card {
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 32px;
+
+    border-radius: 28px;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    rgba(86, 16, 151, 0.98),
+                    rgba(38, 4, 76, 0.98)
+            );
+
+    border: 3px solid #ffca28;
+
+    box-shadow:
+            0 0 0 4px rgba(91, 20, 135, 0.8),
+            0 15px 40px rgba(0, 0, 0, 0.65),
+            0 0 35px rgba(190, 75, 255, 0.3);
+}
+
+.card-shine {
+    position: absolute;
+
+    top: -100px;
+    right: -100px;
+
+    width: 220px;
+    height: 220px;
+
+    border-radius: 50%;
+
+    background:
+            radial-gradient(
+                    circle,
+                    rgba(255, 255, 255, 0.15),
+                    transparent 65%
+            );
+
+    pointer-events: none;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.login-header {
+    text-align: center;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+.avatar-icon {
+    width: 70px;
+    height: 70px;
+
+    margin: 0 auto 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: #fff;
+
+    font-size: 32px;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    #a62cff,
+                    #5600a8
+            );
+
+    border: 3px solid #ffd34d;
+
+    box-shadow:
+            inset 0 2px 5px rgba(255, 255, 255, 0.3),
+            0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+.login-header h1 {
+    margin: 0;
+
+    font-size: 30px;
+
+    font-weight: 900;
+
+    color: #fff;
+
+    text-shadow:
+            0 3px 0 #30005e;
+}
+
+.login-header p {
+    margin-top: 6px;
+
+    color: #d9b9ed;
+
+    font-size: 14px;
+}
+
+
+/* =========================================
+   INPUTS
+========================================= */
+
+.input-box {
+    position: relative;
+
+    z-index: 2;
+}
+
+.input-box label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #ffe27b;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+}
+
+.input-box label i {
+    margin-right: 5px;
+}
+
+.game-input {
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 15px;
+
+    background:
+            rgba(24, 0, 51, 0.8);
+
+    border: 2px solid #8c46b8;
+
+    border-radius: 13px;
+
+    transition: 0.2s;
+}
+
+.game-input:focus-within {
+    border-color: #ffca28;
+
+    box-shadow:
+            0 0 0 3px rgba(255, 202, 40, 0.15),
+            0 0 15px rgba(255, 193, 7, 0.2);
+}
+
+.game-input > i {
+    color: #c07bff;
+
+    font-size: 18px;
+
+    margin-right: 10px;
+}
+
+.game-input input {
+    width: 100%;
+
+    height: 100%;
+
+    border: 0;
+    outline: 0;
+
+    color: white;
+
+    background: transparent;
+
+    font-size: 14px;
+}
+
+.game-input input::placeholder {
+    color: #9d7daf;
+}
+
+.password-button {
+    border: 0;
+
+    color: #c98cff;
+
+    background: transparent;
+
+    font-size: 18px;
+
+    cursor: pointer;
+}
+
+.password-button:hover {
+    color: #ffd34d;
+}
+
+
+/* =========================================
+   OPÇÕES
+========================================= */
+
+.login-options {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    margin: 15px 0 20px;
+
+    font-size: 12px;
+}
+
+.remember {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    color: #d8c3e6;
+
+    cursor: pointer;
+}
+
+.remember input {
+    display: none;
+}
+
+.remember span {
+    width: 17px;
+    height: 17px;
+
+    display: inline-block;
+
+    border: 2px solid #a15dc6;
+
+    border-radius: 5px;
+}
+
+.remember input:checked + span {
+    background: #ffbf00;
+
+    border-color: #ffcf42;
+
+    box-shadow:
+            inset 0 0 0 3px #5b138a;
+}
+
+.login-options a {
+    color: #ffd34d;
+
+    text-decoration: none;
+
+    font-weight: 700;
+}
+
+.login-options a:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================
+   MENSAGEM
+========================================= */
+
+.game-message {
+    padding: 10px 12px;
+
+    margin-bottom: 15px;
+
+    border-radius: 10px;
+
+    font-size: 13px;
+
+    text-align: center;
+}
+
+.game-message.success {
+    background: rgba(25, 180, 80, 0.2);
+
+    border: 1px solid #43df7b;
+
+    color: #9dffbd;
+}
+
+.game-message.error {
+    background: rgba(230, 50, 50, 0.2);
+
+    border: 1px solid #ff6262;
+
+    color: #ffb2b2;
+}
+
+
+/* =========================================
+   BOTÃO PRINCIPAL
+========================================= */
+
+.play-button {
+    width: 100%;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    position: relative;
+
+    border: 2px solid #ffe17a;
+
+    border-radius: 16px;
+
+    color: #5c2800;
+
+    background:
+            linear-gradient(
+                    180deg,
+                    #ffe45d 0%,
+                    #ffb300 50%,
+                    #e88a00 100%
+            );
+
+    box-shadow:
+            inset 0 2px 0 rgba(255, 255, 255, 0.7),
+            inset 0 -4px 0 rgba(135, 65, 0, 0.35),
+            0 5px 0 #733400,
+            0 8px 18px rgba(0, 0, 0, 0.35);
+
+    font-weight: 1000;
+
+    font-size: 16px;
+
+    cursor: pointer;
+
+    transition:
+            transform 0.15s,
+            box-shadow 0.15s;
+}
+
+.play-button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+            inset 0 2px 0 rgba(255, 255, 255, 0.7),
+            inset 0 -4px 0 rgba(135, 65, 0, 0.35),
+            0 7px 0 #733400,
+            0 12px 22px rgba(0, 0, 0, 0.4);
+}
+
+.play-button:active {
+    transform: translateY(3px);
+
+    box-shadow:
+            inset 0 2px 0 rgba(255, 255, 255, 0.5),
+            0 2px 0 #733400;
+}
+
+.button-icon {
+    font-size: 22px;
+}
+
+
+/* =========================================
+   SEPARADOR
+========================================= */
+
+.separator {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin: 24px 0;
+
+    color: #9f79b7;
+
+    font-size: 11px;
+
+    font-weight: bold;
+}
+
+.separator::before,
+.separator::after {
+    content: "";
+
+    flex: 1;
+
+    height: 1px;
+
+    background:
+            linear-gradient(
+                    90deg,
+                    transparent,
+                    #754a8d
+            );
+}
+
+.separator::after {
+    background:
+            linear-gradient(
+                    90deg,
+                    #754a8d,
+                    transparent
+            );
+}
+
+
+/* =========================================
+   GOOGLE
+========================================= */
+
+.google-button {
+    width: 100%;
+
+    height: 48px;
+
+    border: 1px solid #87649c;
+
+    border-radius: 12px;
+
+    color: #eee;
+
+    background: rgba(255, 255, 255, 0.07);
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.google-button i {
+    margin-right: 8px;
+}
+
+.google-button:hover {
+    background: rgba(255, 255, 255, 0.13);
+
+    border-color: #caa4dc;
+}
+
+
+/* =========================================
+   REGISTRO
+========================================= */
+
+.register-area {
+    text-align: center;
+
+    margin-top: 23px;
+
+    color: #bda4c9;
+
+    font-size: 13px;
+}
+
+.register-area a {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #ffd33d;
+
+    font-weight: 900;
+
+    text-decoration: none;
+}
+
+.register-area a:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================
+   FOOTER
+========================================= */
+
+.footer-text {
+    text-align: center;
+
+    margin-top: 18px;
+
+    color: #9c75b4;
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media (max-width: 950px) {
+
+    .game-layout {
+        max-width: 700px;
+
+        grid-template-columns: 1fr;
+
+        align-items: stretch;
+    }
+
+    .login-wrapper {
+        max-width: 450px;
+
+        width: 100%;
+
+        margin: auto;
+    }
+
+    .tournaments-card {
+        width: 100%;
+    }
+}
+
+
+@media (max-width: 576px) {
+
+    .login-page {
+        padding: 25px 15px;
+    }
+
+    .game-layout {
+        gap: 22px;
+    }
+
+    .login-card {
+        padding: 25px 20px;
+
+        border-radius: 22px;
+    }
+
+    .logo-ludo {
+        font-size: 52px;
+    }
+
+    .logo-star {
+        font-size: 47px;
+    }
+
+    .coin {
+        display: none;
+    }
+
+    .login-options {
+        font-size: 11px;
+    }
+
+    .tournaments-card {
+        padding: 18px 12px;
+    }
+
+    .tournament-table-header {
+        grid-template-columns:
+            minmax(120px, 1fr)
+            45px
+            60px
+            72px;
+
+        font-size: 8px;
+    }
+
+    .tournament-item {
+        grid-template-columns:
+            minmax(120px, 1fr)
+            45px
+            60px
+            72px;
+
+        gap: 5px;
+
+        padding: 11px 5px;
+    }
+
+    .tournament-badge {
+        width: 32px;
+        height: 32px;
+
+        font-size: 13px;
+    }
+
+    .tournament-name {
+        gap: 6px;
+    }
+
+    .tournament-name strong {
+        font-size: 10px;
+    }
+
+    .tournament-name small {
+        font-size: 8px;
+    }
+
+    .tournament-value,
+    .tournament-date {
+        font-size: 9px;
+    }
+
+    .entry-fee {
+        font-size: 8px;
+
+        padding: 2px 4px;
+    }
+}
+
+/* =========================================
+   LAYOUT LOGIN + TORNEIOS
+========================================= */
+
+.game-layout {
+    width: 100%;
+    max-width: 1050px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(380px, 450px)
+        minmax(450px, 1fr);
+
+    gap: 28px;
+
+    align-items: center;
+}
+
+
+/* =========================================
+   TORNEIOS
+========================================= */
+
+.tournaments-card {
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 24px;
+
+    border-radius: 25px;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    rgba(75, 11, 125, 0.98),
+                    rgba(30, 3, 61, 0.98)
+            );
+
+    border: 3px solid #d99516;
+
+    box-shadow:
+            0 0 0 4px rgba(72, 17, 106, 0.8),
+            0 15px 40px rgba(0, 0, 0, 0.6);
+
+    min-width: 0;
+}
+
+
+/* Brilho no canto */
+
+.tournaments-card::before {
+    content: "";
+
+    position: absolute;
+
+    width: 250px;
+    height: 250px;
+
+    top: -150px;
+    right: -100px;
+
+    border-radius: 50%;
+
+    background:
+            radial-gradient(
+                    circle,
+                    rgba(255, 210, 50, 0.18),
+                    transparent 70%
+            );
+
+    pointer-events: none;
+}
+
+
+/* =========================================
+   CABEÇALHO
+========================================= */
+
+.tournaments-header {
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    margin-bottom: 22px;
+
+    position: relative;
+    z-index: 2;
+}
+
+.trophy-icon {
+    width: 55px;
+    height: 55px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 16px;
+
+    color: #6c3300;
+
+    font-size: 26px;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    #ffe66a,
+                    #e99a00
+            );
+
+    border: 2px solid #fff0a4;
+
+    box-shadow:
+            inset 0 2px 0 rgba(255,255,255,.6),
+            0 5px 10px rgba(0,0,0,.35);
+}
+
+.tournaments-header h2 {
+    margin: 0;
+
+    color: #ffd343;
+
+    font-size: 22px;
+
+    font-weight: 1000;
+
+    letter-spacing: 1px;
+
+    text-shadow:
+            0 2px 0 #5b2600;
+}
+
+.tournaments-header p {
+    margin: 3px 0 0;
+
+    color: #c8a6d6;
+
+    font-size: 12px;
+}
+
+
+/* =========================================
+   CABEÇALHO DA TABELA
+========================================= */
+
+.tournament-table-header {
+    display: grid;
+
+    grid-template-columns:
+        minmax(150px, 1.8fr)
+        55px
+        70px
+        85px;
+
+    gap: 8px;
+
+    padding: 0 10px 9px;
+
+    color: #a985b8;
+
+    border-bottom: 1px solid
+    rgba(204, 137, 232, 0.3);
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    position: relative;
+    z-index: 2;
+}
+
+
+/* =========================================
+   ITEM TORNEIO
+========================================= */
+
+.tournament-item {
+    display: grid;
+
+    grid-template-columns:
+        minmax(150px, 1.8fr)
+        55px
+        70px
+        85px;
+
+    gap: 8px;
+
+    align-items: center;
+
+    padding: 13px 10px;
+
+    border-bottom: 1px solid
+    rgba(198, 130, 225, 0.16);
+
+    transition: 0.2s;
+
+    position: relative;
+    z-index: 2;
+}
+
+.tournament-item:last-of-type {
+    border-bottom: none;
+}
+
+.tournament-item:hover {
+    background:
+            rgba(255, 193, 7, 0.07);
+
+    transform: translateX(3px);
+
+    border-radius: 10px;
+}
+
+
+/* =========================================
+   NOME DO TORNEIO
+========================================= */
+
+.tournament-name {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    min-width: 0;
+}
+
+.tournament-name > div:last-child {
+    min-width: 0;
+}
+
+.tournament-name strong {
+    display: block;
+
+    color: #fff;
+
+    font-size: 12px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+.tournament-name small {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #a98ab8;
+
+    font-size: 9px;
+}
+
+
+/* =========================================
+   ÍCONE DO TORNEIO
+========================================= */
+
+.tournament-badge {
+    width: 38px;
+    height: 38px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    color: #fff;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    #ff5c33,
+                    #a71940
+            );
+
+    border: 1px solid
+    rgba(255, 255, 255, 0.25);
+
+    box-shadow:
+            0 4px 8px rgba(0,0,0,.3);
+}
+
+.tournament-badge.gold {
+    color: #6d3b00;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    #ffe66d,
+                    #e89b00
+            );
+}
+
+.tournament-badge.red {
+    background:
+            linear-gradient(
+                    145deg,
+                    #ff4c67,
+                    #a90039
+            );
+}
+
+.tournament-badge.blue {
+    background:
+            linear-gradient(
+                    145deg,
+                    #38bfff,
+                    #1755c7
+            );
+}
+
+.tournament-badge.purple {
+    background:
+            linear-gradient(
+                    145deg,
+                    #c85cff,
+                    #6322c5
+            );
+}
+
+
+/* =========================================
+   VAGAS
+========================================= */
+
+.tournament-value {
+    color: #e4ccea;
+
+    font-size: 11px;
+
+    white-space: nowrap;
+}
+
+.tournament-value i {
+    color: #b86bff;
+
+    margin-right: 3px;
+}
+
+
+/* =========================================
+   DATA
+========================================= */
+
+.tournament-date {
+    color: #f0d9f7;
+
+    font-size: 10px;
+
+    line-height: 1.3;
+
+    white-space: nowrap;
+}
+
+.tournament-date small {
+    color: #a887b7;
+}
+
+
+/* =========================================
+   PREÇO
+========================================= */
+
+.entry-fee {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 27px;
+
+    padding: 3px 7px;
+
+    border-radius: 7px;
+
+    color: #ffe46d;
+
+    background:
+            rgba(255, 184, 0, 0.1);
+
+    border: 1px solid
+    rgba(255, 196, 0, 0.25);
+
+    font-size: 10px;
+
+    font-weight: 900;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================
+   BOTÃO
+========================================= */
+
+.view-tournaments-button {
+    width: 100%;
+
+    margin-top: 17px;
+
+    padding: 11px;
+
+    border: 1px solid #a76ac4;
+
+    border-radius: 11px;
+
+    color: #ffd84d;
+
+    background:
+            rgba(255,255,255,.05);
+
+    font-size: 11px;
+
+    font-weight: 900;
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+.view-tournaments-button i {
+    margin-left: 5px;
+}
+
+.view-tournaments-button:hover {
+    color: #5d2800;
+
+    background: #ffc928;
+
+    border-color: #ffe58a;
+}
+
+
+/* =========================================
+   FOOTER TORNEIOS
+========================================= */
+
+.tournament-footer {
+    margin-top: 15px;
+
+    text-align: center;
+
+    color: #9c7bab;
+
+    font-size: 10px;
+
+    font-weight: bold;
+}
