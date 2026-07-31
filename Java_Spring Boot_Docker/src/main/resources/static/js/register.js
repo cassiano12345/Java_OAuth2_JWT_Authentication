@@ -209,7 +209,7 @@ function updatePasswordStrength(password) {
 
 registerForm.addEventListener(
     "submit",
-    function (event) {
+    async function (event) {
 
         event.preventDefault();
 
@@ -328,24 +328,58 @@ registerForm.addEventListener(
          * });
          */
 
-
-        // Simulação
-
-        setTimeout(function () {
-
-            setLoading(false);
-
-            showMessage(
-                "Conta criada com sucesso! Bem-vindo à arena! 🏆",
-                "success"
-            );
-
-            console.log({
+        const response = await fetch("/users", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
                 username: username,
-                email: email
-            });
+                email: email,
+                password: password
+            })
+        });
 
-        }, 1500);
+        let dados = {};
+
+        try {
+            dados = await response.json();
+        } catch (error) {
+            console.log("Resposta não contém JSON");
+        }
+
+        console.log("Dados:", dados);
+
+
+
+
+        if (response.ok) {
+            setTimeout(function () {
+
+                setLoading(false);
+
+                showMessage(
+                    "Conta criada com sucesso! Bem-vindo à arena! 🏆",
+                    "success"
+                );
+
+            }, 1500);
+
+        } else {
+            setTimeout(function () {
+
+                setLoading(false);
+
+                showMessage(
+                    "Ocorreu um erro ao criar a sua conta, tente novamente!",
+                    "error"
+                );
+
+            }, 1500);
+
+        }
+
+
 
     }
 );
