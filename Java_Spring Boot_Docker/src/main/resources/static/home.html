@@ -1,1665 +1,341 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Ludo Star - Home</title>
-
-    <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-    >
-
-    <link
-            rel="stylesheet"
-            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-    >
-
-    <link
-            rel="stylesheet"
-            href="css/home.css"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ludo Star — Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/home.css">
 </head>
-
-
 <body>
+<div class="app-shell">
 
-<div class="app">
+    <!-- MOBILE TOPBAR -->
+    <header class="mobile-topbar">
+        <button class="icon-btn" id="mobileMenuButton" aria-label="Abrir menu"><i class="bi bi-list"></i></button>
+        <div class="brand-mini"><span>LUDO</span> <b>STAR</b></div>
+        <button class="icon-btn" id="mobileChatButton" aria-label="Abrir mensagens"><i class="bi bi-chat-dots-fill"></i></button>
+    </header>
 
-
-    <!-- =====================================================
-         SIDEBAR
-    ====================================================== -->
-
-    <aside class="sidebar">
-
-
-        <!-- LOGO -->
-
-        <div class="sidebar-logo">
-
-            <div class="mini-logo">
-                LUDO
-            </div>
-
-            <div class="mini-star">
-                STAR
-            </div>
-
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="brand-ludo">LUDO</div>
+            <div class="brand-star">STAR</div>
         </div>
-
-
-        <!-- MENU -->
 
         <nav class="main-menu">
-
-            <a
-                    href="#"
-                    class="menu-item active"
-                    id="homeMenu"
-            >
-                <i class="bi bi-house-fill"></i>
-                <span>Início</span>
-            </a>
-
-            <a
-                    href="#"
-                    class="menu-item"
-                    id="messagesMenu"
-            >
-                <i class="bi bi-chat-fill"></i>
-                <span>Mensagens</span>
-
-                <span class="notification-badge">
-                    3
-                </span>
-
-            </a>
-
+            <button class="menu-item active" id="homeMenu"><i class="bi bi-house-fill"></i><span>Início</span></button>
+            <button class="menu-item" id="messagesMenu"><i class="bi bi-chat-fill"></i><span>Mensagens</span><em>3</em></button>
         </nav>
 
+        <div class="side-divider"></div>
 
-        <div class="sidebar-divider"></div>
-
-
-        <!-- GRUPOS -->
-
-        <div class="sidebar-section-title">
-
-            <span>
-                GRUPOS DE MENSAGENS
-            </span>
-
-            <button
-                    id="createGroupButton"
-                    title="Criar grupo"
-            >
-                <i class="bi bi-plus-lg"></i>
-            </button>
-
+        <div class="side-heading">
+            <span>GRUPOS DE MENSAGENS</span>
+            <button class="plain-icon" id="createGroupButton" title="Criar grupo"><i class="bi bi-plus-lg"></i></button>
         </div>
 
-
-        <div
-                class="groups-list"
-                id="groupsList"
-        >
-
-            <button
-                    class="group-item active"
-                    data-group="geral"
-            >
-                <span class="group-icon">
-                    🎮
-                </span>
-
-                <span>
-                    Ludo Friends
-                </span>
-
-                <span class="group-notification">
-                    5
-                </span>
+        <div class="groups-list" id="groupsList">
+            <button class="group-item active" data-group="Ludo Friends">
+                <span class="group-icon">🎮</span><span>Ludo Friends</span><em>5</em>
             </button>
-
-
-            <button
-                    class="group-item"
-                    data-group="torneios"
-            >
-                <span class="group-icon">
-                    🏆
-                </span>
-
-                <span>
-                    Torneios
-                </span>
+            <button class="group-item" data-group="Torneios">
+                <span class="group-icon">🏆</span><span>Torneios</span>
             </button>
-
-
-            <button
-                    class="group-item"
-                    data-group="amigos"
-            >
-                <span class="group-icon">
-                    🎲
-                </span>
-
-                <span>
-                    Amigos do Ludo
-                </span>
+            <button class="group-item" data-group="Amigos do Ludo">
+                <span class="group-icon">🎲</span><span>Amigos do Ludo</span>
             </button>
-
         </div>
 
+        <div class="side-divider"></div>
 
-        <div class="sidebar-divider"></div>
-
-
-        <!-- AMIGOS ONLINE -->
-
-        <div class="friends-header">
-
-            <span>
-                ONLINE — <strong>4</strong>
-            </span>
-
-        </div>
-
-
-        <div
-                class="friends-list"
-                id="onlineFriends"
-        >
-
-            <button
-                    class="friend-item"
-                    data-user="ana"
-            >
-
-                <div class="avatar online">
-                    A
-                </div>
-
-                <div class="friend-info">
-
-                    <strong>
-                        AnaLudo
-                    </strong>
-
-                    <small>
-                        Jogando agora
-                    </small>
-
-                </div>
-
-            </button>
-
-
-            <button
-                    class="friend-item"
-                    data-user="joao"
-            >
-
-                <div class="avatar online">
-                    J
-                </div>
-
-                <div class="friend-info">
-
-                    <strong>
-                        JoãoKing
-                    </strong>
-
-                    <small>
-                        No lobby
-                    </small>
-
-                </div>
-
-            </button>
-
-
-            <button
-                    class="friend-item"
-                    data-user="pedro"
-            >
-
-                <div class="avatar online">
-                    P
-                </div>
-
-                <div class="friend-info">
-
-                    <strong>
-                        PedroLudo
-                    </strong>
-
-                    <small>
-                        Jogando agora
-                    </small>
-
-                </div>
-
-            </button>
-
-
-            <button
-                    class="friend-item"
-                    data-user="lucas"
-            >
-
-                <div class="avatar online">
-                    L
-                </div>
-
-                <div class="friend-info">
-
-                    <strong>
-                        LucasStar
-                    </strong>
-
-                    <small>
-                        Online
-                    </small>
-
-                </div>
-
-            </button>
-
-        </div>
-
-
-        <!-- OFFLINE -->
-
-        <div class="friends-header offline-title">
-
-            <span>
-                OFFLINE — <strong>3</strong>
-            </span>
-
-        </div>
-
-
+        <div class="friends-title">ONLINE — <b>4</b></div>
         <div class="friends-list">
-
-            <button class="friend-item offline">
-
-                <div class="avatar">
-                    M
-                </div>
-
-                <div class="friend-info">
-
-                    <strong>
-                        Maria
-                    </strong>
-
-                    <small>
-                        Offline
-                    </small>
-
-                </div>
-
-            </button>
-
-
-            <button class="friend-item offline">
-
-                <div class="avatar">
-                    C
-                </div>
-
-                <div class="friend-info">
-
-                    <strong>
-                        CarlosLudo
-                    </strong>
-
-                    <small>
-                        Offline
-                    </small>
-
-                </div>
-
-            </button>
-
-
-            <button class="friend-item offline">
-
-                <div class="avatar">
-                    R
-                </div>
-
-                <div class="friend-info">
-
-                    <strong>
-                        ReiDoLudo
-                    </strong>
-
-                    <small>
-                        Offline
-                    </small>
-
-                </div>
-
-            </button>
-
+            <button class="friend-item"><span class="avatar online">A</span><span><b>AnaLudo</b><small>Jogando agora</small></span></button>
+            <button class="friend-item"><span class="avatar online">J</span><span><b>JoãoKing</b><small>No lobby</small></span></button>
+            <button class="friend-item"><span class="avatar online">P</span><span><b>PedroLudo</b><small>Jogando agora</small></span></button>
+            <button class="friend-item"><span class="avatar online">L</span><span><b>LucasStar</b><small>Online</small></span></button>
         </div>
 
-
-        <!-- USUÁRIO -->
+        <div class="friends-title offline-title">OFFLINE — <b>3</b></div>
+        <div class="friends-list">
+            <button class="friend-item offline"><span class="avatar">M</span><span><b>Maria</b><small>Offline</small></span></button>
+            <button class="friend-item offline"><span class="avatar">C</span><span><b>CarlosLudo</b><small>Offline</small></span></button>
+            <button class="friend-item offline"><span class="avatar">R</span><span><b>ReiDoLudo</b><small>Offline</small></span></button>
+        </div>
 
         <div class="current-user">
-
-            <div class="avatar current">
-                S
-            </div>
-
-            <div class="current-user-info">
-
-                <strong>
-                    ShadowKing
-                </strong>
-
-                <small>
-                    🟢 Online
-                </small>
-
-            </div>
-
-            <button
-                    id="settingsButton"
-                    title="Configurações"
-            >
-                <i class="bi bi-gear-fill"></i>
-            </button>
-
+            <span class="avatar current">S</span>
+            <span class="user-info"><b>ShadowKing</b><small>● Online</small></span>
+            <button class="plain-icon" id="settingsButton"><i class="bi bi-gear-fill"></i></button>
         </div>
-
     </aside>
 
-
-
-    <!-- =====================================================
-         ÁREA DE CONVERSAS
-    ====================================================== -->
-
-    <section class="chat-sidebar">
-
-
+    <!-- CHAT -->
+    <section class="chat-panel" id="chatPanel">
         <div class="chat-header">
-
-            <div>
-
-                <span class="chat-title">
-                    Ludo Friends
-                </span>
-
-                <span class="chat-subtitle">
-                    8 membros
-                </span>
-
-            </div>
-
-            <button
-                    id="chatSearchButton"
-                    title="Pesquisar"
-            >
-                <i class="bi bi-search"></i>
-            </button>
-
+            <div><b id="chatTitle">Ludo Friends</b><small id="chatSubtitle">8 membros</small></div>
+            <button class="plain-icon" id="chatSearchButton"><i class="bi bi-search"></i></button>
         </div>
 
-
-        <!-- PESQUISA -->
-
-        <div
-                class="chat-search d-none"
-                id="chatSearch"
-        >
-
+        <div class="chat-search d-none" id="chatSearch">
             <i class="bi bi-search"></i>
-
-            <input
-                    type="text"
-                    id="chatSearchInput"
-                    placeholder="Pesquisar mensagens..."
-            >
-
+            <input id="chatSearchInput" type="search" placeholder="Pesquisar mensagens...">
         </div>
 
-
-        <!-- MENSAGENS -->
-
-        <div
-                class="messages"
-                id="messages"
-        >
-
+        <div class="messages" id="messages">
             <div class="chat-welcome">
-
-                <div class="chat-welcome-icon">
-                    🎮
-                </div>
-
-                <h2>
-                    Bem-vindo ao Ludo Friends!
-                </h2>
-
-                <p>
-                    Este é o começo da sua conversa.
-                </p>
-
+                <div class="welcome-icon">🎮</div>
+                <h2>Bem-vindo ao Ludo Friends!</h2>
+                <p>Este é o começo da sua conversa.</p>
             </div>
-
-
-            <!-- MENSAGEM -->
 
             <div class="message">
-
-                <div class="avatar message-avatar">
-                    A
-                </div>
-
-                <div class="message-content">
-
-                    <div class="message-author">
-
-                        AnaLudo
-
-                        <span>
-                            Hoje às 14:21
-                        </span>
-
-                    </div>
-
-                    <p>
-                        Alguém vai participar do
-                        torneio das 20h? 🏆
-                    </p>
-
-                </div>
-
+                <span class="avatar message-avatar">A</span>
+                <div><div class="message-author">AnaLudo <time>Hoje às 14:21</time></div><p>Alguém vai participar do torneio das 20h? 🏆</p></div>
             </div>
-
-
             <div class="message">
-
-                <div class="avatar message-avatar">
-                    J
-                </div>
-
-                <div class="message-content">
-
-                    <div class="message-author">
-
-                        JoãoKing
-
-                        <span>
-                            Hoje às 14:23
-                        </span>
-
-                    </div>
-
-                    <p>
-                        Eu vou! Já fiz minha inscrição.
-                    </p>
-
-                </div>
-
+                <span class="avatar message-avatar">J</span>
+                <div><div class="message-author">JoãoKing <time>Hoje às 14:23</time></div><p>Eu vou! Já fiz minha inscrição.</p></div>
             </div>
-
-
             <div class="message">
-
-                <div class="avatar message-avatar">
-                    P
-                </div>
-
-                <div class="message-content">
-
-                    <div class="message-author">
-
-                        PedroLudo
-
-                        <span>
-                            Hoje às 14:24
-                        </span>
-
-                    </div>
-
-                    <p>
-                        Bora formar um grupo para
-                        jogar antes? 🎲🔥
-                    </p>
-
-                </div>
-
+                <span class="avatar message-avatar">P</span>
+                <div><div class="message-author">PedroLudo <time>Hoje às 14:24</time></div><p>Bora formar um grupo para jogar antes? 🎲🔥</p></div>
             </div>
-
         </div>
 
-
-        <!-- DIGITAR -->
-
-        <form
-                class="message-input-area"
-                id="messageForm"
-        >
-
-            <button
-                    type="button"
-                    id="attachButton"
-            >
-                <i class="bi bi-plus-circle-fill"></i>
-            </button>
-
-            <input
-                    type="text"
-                    id="messageInput"
-                    placeholder="Enviar mensagem para #ludo-friends"
-                    autocomplete="off"
-            >
-
-            <button type="submit">
-
-                <i class="bi bi-send-fill"></i>
-
-            </button>
-
+        <form class="message-form" id="messageForm">
+            <button type="button" class="plain-icon" id="attachButton"><i class="bi bi-plus-circle-fill"></i></button>
+            <input id="messageInput" type="text" placeholder="Enviar mensagem para #ludo-friends" autocomplete="off">
+            <button type="submit" class="plain-icon"><i class="bi bi-send-fill"></i></button>
         </form>
-
     </section>
 
-
-
-    <!-- =====================================================
-         CONTEÚDO PRINCIPAL
-    ====================================================== -->
-
+    <!-- MAIN -->
     <main class="main-content">
-
-
-        <!-- HEADER -->
-
         <header class="content-header">
-
             <div>
-
-                <h1>
-                    Olá, <strong>Vanessa!</strong> 👑
-                </h1>
-
-                <p>
-                    Pronto para jogar e conquistar o ranking?
-                </p>
-
+                <h1>Olá, <strong>Vanessa!</strong> 👑</h1>
+                <p>Pronto para jogar e conquistar o ranking?</p>
             </div>
-
-
             <div class="header-actions">
-
-                <div class="coin-balance">
-
-                    <span>
-                        🪙
-                    </span>
-
-                    <strong>
-                        12.500
-                    </strong>
-
-                    <button
-                            id="buyCoinsButton"
-                            title="Comprar moedas"
-                    >
-                        +
-                    </button>
-
-                </div>
-
-
-                <button
-                        class="profile-button"
-                        id="profileButton"
-                >
-
-                    <div class="avatar current">
-                        S
-                    </div>
-
-                    <i class="bi bi-chevron-down"></i>
-
-                </button>
-
+                <div class="coin-balance"><span>🪙</span><b id="coinBalance">12.500</b><button id="buyCoinsButton">+</button></div>
+                <button class="profile-button" id="profileButton"><span class="avatar current">S</span><i class="bi bi-chevron-down"></i></button>
             </div>
-
         </header>
 
-
-
-        <!-- =================================================
-             MEUS TORNEIOS
-        ================================================== -->
-
+        <!-- MY TOURNAMENTS -->
         <section class="dashboard-section">
-
             <div class="section-heading">
-
-                <div>
-
-                    <span class="section-kicker">
-                        🏆 COMPETIÇÃO
-                    </span>
-
-                    <h2>
-                        Meus torneios
-                    </h2>
-
-                </div>
-
-                <button
-                        id="viewMyTournamentsButton"
-                        class="text-button"
-                >
-                    Ver todos
-                    <i class="bi bi-arrow-right"></i>
-                </button>
-
+                <div><span class="section-kicker">🏆 COMPETIÇÃO</span><h2>Meus torneios</h2></div>
+                <button class="text-button" id="viewMyTournamentsButton">Ver todos <i class="bi bi-arrow-right"></i></button>
             </div>
 
-
-            <div class="my-tournaments-table">
-
-
-                <div class="table-head">
-
-                    <span>
-                        TORNEIO
-                    </span>
-
-                    <span>
-                        POSIÇÃO
-                    </span>
-
-                    <span>
-                        RODADA
-                    </span>
-
-                    <span>
-                        PRÓXIMA PARTIDA
-                    </span>
-
-                    <span>
-                        STATUS
-                    </span>
-
+            <div class="data-card table-scroll">
+                <div class="table-grid my-head">
+                    <span>TORNEIO</span><span>POSIÇÃO</span><span>RODADA</span><span>PRÓXIMA PARTIDA</span><span>STATUS</span>
                 </div>
-
-
-                <!-- TORNEIO -->
-
-                <button
-                        class="my-tournament-row"
-                        data-tournament="copa-reis"
-                >
-
-                    <div class="tournament-cell">
-
-                        <div class="tournament-small-icon gold">
-                            ⭐
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                Copa dos Reis
-                            </strong>
-
-                            <small>
-                                32 jogadores
-                            </small>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="position-cell">
-
-                        <strong>
-                            #3
-                        </strong>
-
-                        <small>
-                            24 pts
-                        </small>
-
-                    </div>
-
-
-                    <div>
-                        3 / 8
-                    </div>
-
-
-                    <div>
-
-                        <strong>
-                            Hoje
-                        </strong>
-
-                        <small>
-                            21:00
-                        </small>
-
-                    </div>
-
-
-                    <span class="status live">
-                        EM ANDAMENTO
-                    </span>
-
+                <button class="table-grid tournament-row my-tournament-row" data-tournament="copa-reis">
+                    <span class="tournament-cell"><i class="tournament-icon gold">⭐</i><span><b>Copa dos Reis</b><small>32 jogadores</small></span></span>
+                    <span class="position"><b>#3</b><small>24 pts</small></span><span>3 / 8</span>
+                    <span><b>Hoje</b><small>21:00</small></span><span class="status live">EM ANDAMENTO</span>
                 </button>
-
-
-                <!-- TORNEIO -->
-
-                <button
-                        class="my-tournament-row"
-                        data-tournament="mega-ludo"
-                >
-
-                    <div class="tournament-cell">
-
-                        <div class="tournament-small-icon red">
-                            🔥
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                Mega Ludo
-                            </strong>
-
-                            <small>
-                                64 jogadores
-                            </small>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="position-cell">
-
-                        <strong>
-                            #8
-                        </strong>
-
-                        <small>
-                            16 pts
-                        </small>
-
-                    </div>
-
-
-                    <div>
-                        1 / 6
-                    </div>
-
-
-                    <div>
-
-                        <strong>
-                            Amanhã
-                        </strong>
-
-                        <small>
-                            19:30
-                        </small>
-
-                    </div>
-
-
-                    <span class="status live">
-                        EM ANDAMENTO
-                    </span>
-
+                <button class="table-grid tournament-row my-tournament-row" data-tournament="mega-ludo">
+                    <span class="tournament-cell"><i class="tournament-icon red">🔥</i><span><b>Mega Ludo</b><small>64 jogadores</small></span></span>
+                    <span class="position"><b>#8</b><small>16 pts</small></span><span>1 / 6</span>
+                    <span><b>Amanhã</b><small>19:30</small></span><span class="status live">EM ANDAMENTO</span>
                 </button>
-
-
-                <!-- TORNEIO -->
-
-                <button
-                        class="my-tournament-row"
-                        data-tournament="masters"
-                >
-
-                    <div class="tournament-cell">
-
-                        <div class="tournament-small-icon blue">
-                            💎
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                Ludo Masters
-                            </strong>
-
-                            <small>
-                                128 jogadores
-                            </small>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="position-cell">
-
-                        <strong>
-                            #17
-                        </strong>
-
-                        <small>
-                            8 pts
-                        </small>
-
-                    </div>
-
-
-                    <div>
-                        1 / 10
-                    </div>
-
-
-                    <div>
-
-                        <strong>
-                            03/08
-                        </strong>
-
-                        <small>
-                            22:00
-                        </small>
-
-                    </div>
-
-
-                    <span class="status upcoming">
-                        AGUARDANDO
-                    </span>
-
+                <button class="table-grid tournament-row my-tournament-row" data-tournament="masters">
+                    <span class="tournament-cell"><i class="tournament-icon blue">💎</i><span><b>Ludo Masters</b><small>128 jogadores</small></span></span>
+                    <span class="position"><b>#17</b><small>8 pts</small></span><span>1 / 10</span>
+                    <span><b>03/08</b><small>22:00</small></span><span class="status upcoming">AGUARDANDO</span>
                 </button>
-
             </div>
-
         </section>
 
-
-
-        <!-- =================================================
-             TORNEIOS DISPONÍVEIS
-        ================================================== -->
-
-        <section class="dashboard-section available-section">
-
+        <!-- CREATED BY USER -->
+        <section class="dashboard-section">
             <div class="section-heading">
-
-                <div>
-
-                    <span class="section-kicker">
-                        🎲 ENTRE NA ARENA
-                    </span>
-
-                    <h2>
-                        Torneios disponíveis
-                    </h2>
-
-                </div>
-
-
-                <button
-                        class="create-tournament-button"
-                        id="createTournamentButton"
-                >
-
-                    <i class="bi bi-plus-lg"></i>
-
-                    CRIAR TORNEIO
-
-                </button>
-
+                <div><span class="section-kicker">🛠️ ORGANIZAÇÃO</span><h2>Meus torneios criados</h2></div>
+                <button class="text-button" id="viewCreatedTournamentsButton">Ver todos <i class="bi bi-arrow-right"></i></button>
             </div>
 
-
-            <div class="available-tournaments">
-
-                <div class="available-table-head">
-
-                    <span>
-                        TORNEIO
-                    </span>
-
-                    <span>
-                        VAGAS
-                    </span>
-
-                    <span>
-                        INÍCIO
-                    </span>
-
-                    <span>
-                        ENTRADA
-                    </span>
-
-                    <span>
-                        AÇÃO
-                    </span>
-
+            <div class="data-card table-scroll">
+                <div class="table-grid created-head">
+                    <span>TORNEIO</span><span>MODO</span><span>FORMATO</span><span>VAGAS</span><span>ESTADO</span>
                 </div>
 
-
-                <!-- 1 -->
-
-                <div class="available-row">
-
-                    <div class="available-name">
-
-                        <div class="tournament-small-icon">
-                            ⚡
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                Torneio Relâmpago
-                            </strong>
-
-                            <small>
-                                Partida rápida
-                            </small>
-
-                        </div>
-
-                    </div>
-
-
-                    <div>
-                        <i class="bi bi-people-fill"></i>
-                        16
-                    </div>
-
-
-                    <div>
-                        30/07
-                        <small>20:00</small>
-                    </div>
-
-
-                    <div class="entry">
-                        🪙 500
-                    </div>
-
-
-                    <button
-                            class="join-button"
-                            data-tournament="relampago"
-                    >
-                        ENTRAR
-                    </button>
-
+                <div class="table-grid created-row">
+                    <span class="tournament-cell"><i class="tournament-icon gold">🏆</i><span><b>Copa dos Amigos</b><small>Criado por você</small></span></span>
+                    <span><b>Liga</b></span><span>Ida e volta</span><span>16</span><span class="status accepted">ACEITE</span>
                 </div>
 
-
-                <!-- 2 -->
-
-                <div class="available-row">
-
-                    <div class="available-name">
-
-                        <div class="tournament-small-icon gold">
-                            ⭐
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                Copa dos Reis
-                            </strong>
-
-                            <small>
-                                Torneio clássico
-                            </small>
-
-                        </div>
-
-                    </div>
-
-
-                    <div>
-                        <i class="bi bi-people-fill"></i>
-                        32
-                    </div>
-
-
-                    <div>
-                        31/07
-                        <small>21:00</small>
-                    </div>
-
-
-                    <div class="entry">
-                        🪙 1.000
-                    </div>
-
-
-                    <button
-                            class="join-button"
-                            data-tournament="copa-reis"
-                    >
-                        ENTRAR
-                    </button>
-
+                <div class="table-grid created-row">
+                    <span class="tournament-cell"><i class="tournament-icon blue">💎</i><span><b>Mega League</b><small>Aguardando análise</small></span></span>
+                    <span><b>Liga</b></span><span>Só ida</span><span>32</span><span class="status pending">AGUARDANDO ACEITAÇÃO</span>
                 </div>
 
-
-                <!-- 3 -->
-
-                <div class="available-row">
-
-                    <div class="available-name">
-
-                        <div class="tournament-small-icon red">
-                            🔥
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                Mega Ludo
-                            </strong>
-
-                            <small>
-                                Grande prêmio
-                            </small>
-
-                        </div>
-
-                    </div>
-
-
-                    <div>
-                        <i class="bi bi-people-fill"></i>
-                        64
-                    </div>
-
-
-                    <div>
-                        02/08
-                        <small>19:30</small>
-                    </div>
-
-
-                    <div class="entry">
-                        🪙 2.500
-                    </div>
-
-
-                    <button
-                            class="join-button"
-                            data-tournament="mega-ludo"
-                    >
-                        ENTRAR
-                    </button>
-
+                <div class="table-grid created-row">
+                    <span class="tournament-cell"><i class="tournament-icon red">🔥</i><span><b>Battle Star</b><small>Pedido analisado</small></span></span>
+                    <span><b>Eliminatórias</b></span><span>Ida e volta</span><span>64</span><span class="status rejected">REJEITADO</span>
                 </div>
 
-
-                <!-- 4 -->
-
-                <div class="available-row">
-
-                    <div class="available-name">
-
-                        <div class="tournament-small-icon blue">
-                            💎
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                Ludo Masters
-                            </strong>
-
-                            <small>
-                                Para especialistas
-                            </small>
-
-                        </div>
-
-                    </div>
-
-
-                    <div>
-                        <i class="bi bi-people-fill"></i>
-                        128
-                    </div>
-
-
-                    <div>
-                        03/08
-                        <small>22:00</small>
-                    </div>
-
-
-                    <div class="entry">
-                        🪙 5.000
-                    </div>
-
-
-                    <button
-                            class="join-button"
-                            data-tournament="masters"
-                    >
-                        ENTRAR
-                    </button>
-
+                <div class="table-grid created-row">
+                    <span class="tournament-cell"><i class="tournament-icon purple">🎲</i><span><b>Ludo Classic</b><small>Torneio finalizado</small></span></span>
+                    <span><b>Liga</b></span><span>Só ida</span><span>8</span><span class="status closed">ENCERRADO</span>
                 </div>
-
             </div>
-
         </section>
 
+        <!-- AVAILABLE -->
+        <section class="dashboard-section">
+            <div class="section-heading">
+                <div><span class="section-kicker">🎲 ENTRE NA ARENA</span><h2>Torneios disponíveis</h2></div>
+                <button class="create-tournament-button" id="createTournamentButton"><i class="bi bi-plus-lg"></i> CRIAR TORNEIO</button>
+            </div>
+
+            <div class="data-card table-scroll">
+                <div class="table-grid available-head">
+                    <span>TORNEIO</span><span>MODO</span><span>VAGAS</span><span>INÍCIO</span><span>ENTRADA</span><span>AÇÃO</span>
+                </div>
+
+                <div class="table-grid available-row">
+                    <span class="tournament-cell"><i class="tournament-icon purple">⚡</i><span><b>Torneio Relâmpago</b><small>Partida rápida</small></span></span>
+                    <span>Liga</span><span><i class="bi bi-people-fill"></i> 16</span><span>30/07 <small>20:00</small></span><span class="entry">🪙 500</span><button class="join-button" data-fee="500">ENTRAR</button>
+                </div>
+                <div class="table-grid available-row">
+                    <span class="tournament-cell"><i class="tournament-icon gold">⭐</i><span><b>Copa dos Reis</b><small>Torneio clássico</small></span></span>
+                    <span>Liga</span><span><i class="bi bi-people-fill"></i> 32</span><span>31/07 <small>21:00</small></span><span class="entry">🪙 1.000</span><button class="join-button" data-fee="1000">ENTRAR</button>
+                </div>
+                <div class="table-grid available-row">
+                    <span class="tournament-cell"><i class="tournament-icon red">🔥</i><span><b>Mega Ludo</b><small>Grande prêmio</small></span></span>
+                    <span>Eliminatórias</span><span><i class="bi bi-people-fill"></i> 64</span><span>02/08 <small>19:30</small></span><span class="entry">🪙 2.500</span><button class="join-button" data-fee="2500">ENTRAR</button>
+                </div>
+                <div class="table-grid available-row">
+                    <span class="tournament-cell"><i class="tournament-icon blue">💎</i><span><b>Ludo Masters</b><small>Para especialistas</small></span></span>
+                    <span>Liga</span><span><i class="bi bi-people-fill"></i> 128</span><span>03/08 <small>22:00</small></span><span class="entry">🪙 5.000</span><button class="join-button" data-fee="5000">ENTRAR</button>
+                </div>
+            </div>
+        </section>
     </main>
-
 </div>
 
+<!-- OVERLAY -->
+<div class="modal-overlay d-none" id="modalOverlay"></div>
 
-
-<!-- =====================================================
-     MODAL CLASSIFICAÇÃO
-====================================================== -->
-
-<div
-        class="modal-overlay d-none"
-        id="rankingModal"
->
-
-    <div class="ranking-modal">
-
-        <button
-                class="close-modal"
-                id="closeRankingButton"
-        >
-            <i class="bi bi-x-lg"></i>
-        </button>
-
-
+<!-- RANKING MODAL -->
+<div class="modal-overlay d-none" id="rankingModal">
+    <div class="app-modal ranking-modal">
+        <button class="close-modal" id="closeRankingButton"><i class="bi bi-x-lg"></i></button>
         <div class="ranking-header">
-
-            <div
-                    class="ranking-trophy"
-                    id="rankingTrophy"
-            >
-                🏆
-            </div>
-
-            <div>
-
-                <span>
-                    CLASSIFICAÇÃO
-                </span>
-
-                <h2 id="rankingTitle">
-                    Copa dos Reis
-                </h2>
-
-                <small>
-                    Rodada 3 de 8
-                </small>
-
-            </div>
-
+            <div class="ranking-trophy" id="rankingTrophy">🏆</div>
+            <div><span>CLASSIFICAÇÃO</span><h2 id="rankingTitle">Copa dos Reis</h2><small id="rankingFormat">Liga • Ida e volta</small></div>
         </div>
-
-
-        <!-- PODIUM -->
-
         <div class="podium">
-
-            <div class="podium-player second">
-
-                <div class="podium-avatar">
-                    2
-                </div>
-
-                <strong>
-                    LudoMaster
-                </strong>
-
-                <span>
-                    27 pts
-                </span>
-
-                <div class="podium-block">
-                    2
-                </div>
-
-            </div>
-
-
-            <div class="podium-player first">
-
-                <div class="crown">
-                    👑
-                </div>
-
-                <div class="podium-avatar">
-                    1
-                </div>
-
-                <strong>
-                    ReiDoLudo
-                </strong>
-
-                <span>
-                    31 pts
-                </span>
-
-                <div class="podium-block">
-                    1
-                </div>
-
-            </div>
-
-
-            <div class="podium-player third">
-
-                <div class="podium-avatar">
-                    3
-                </div>
-
-                <strong>
-                    ShadowKing
-                </strong>
-
-                <span>
-                    24 pts
-                </span>
-
-                <div class="podium-block">
-                    3
-                </div>
-
-            </div>
-
+            <div class="podium-player second"><div class="podium-avatar">2</div><b>LudoMaster</b><span>27 pts</span><div class="podium-block">2</div></div>
+            <div class="podium-player first"><div class="crown">👑</div><div class="podium-avatar">1</div><b>ReiDoLudo</b><span>31 pts</span><div class="podium-block">1</div></div>
+            <div class="podium-player third"><div class="podium-avatar">3</div><b>ShadowKing</b><span>24 pts</span><div class="podium-block">3</div></div>
         </div>
-
-
-        <!-- CLASSIFICAÇÃO -->
-
         <div class="ranking-table">
-
-            <div class="ranking-table-head">
-
-                <span>
-                    #
-                </span>
-
-                <span>
-                    JOGADOR
-                </span>
-
-                <span>
-                    J
-                </span>
-
-                <span>
-                    V
-                </span>
-
-                <span>
-                    D
-                </span>
-
-                <span>
-                    PTS
-                </span>
-
-            </div>
-
-
-            <div class="ranking-row highlight">
-
-                <strong>3</strong>
-
-                <div class="ranking-player">
-                    <div class="avatar small">
-                        S
-                    </div>
-
-                    ShadowKing
-                </div>
-
-                <span>8</span>
-                <span>6</span>
-                <span>2</span>
-
-                <strong>
-                    24
-                </strong>
-
-            </div>
-
-
-            <div class="ranking-row">
-
-                <strong>1</strong>
-
-                <div class="ranking-player">
-                    <div class="avatar small">
-                        R
-                    </div>
-
-                    ReiDoLudo
-                </div>
-
-                <span>8</span>
-                <span>7</span>
-                <span>1</span>
-
-                <strong>
-                    31
-                </strong>
-
-            </div>
-
-
-            <div class="ranking-row">
-
-                <strong>2</strong>
-
-                <div class="ranking-player">
-                    <div class="avatar small">
-                        L
-                    </div>
-
-                    LudoMaster
-                </div>
-
-                <span>8</span>
-                <span>6</span>
-                <span>2</span>
-
-                <strong>
-                    27
-                </strong>
-
-            </div>
-
-
-            <div class="ranking-row">
-
-                <strong>4</strong>
-
-                <div class="ranking-player">
-                    <div class="avatar small">
-                        A
-                    </div>
-
-                    AnaLudo
-                </div>
-
-                <span>8</span>
-                <span>5</span>
-                <span>3</span>
-
-                <strong>
-                    21
-                </strong>
-
-            </div>
-
-
-            <div class="ranking-row">
-
-                <strong>5</strong>
-
-                <div class="ranking-player">
-                    <div class="avatar small">
-                        P
-                    </div>
-
-                    PedroLudo
-                </div>
-
-                <span>8</span>
-                <span>4</span>
-                <span>4</span>
-
-                <strong>
-                    18
-                </strong>
-
-            </div>
-
+            <div class="ranking-grid ranking-head"><span>#</span><span>EQUIPE / JOGADOR</span><span>J</span><span>V</span><span>D</span><span>DK</span><span>PTS</span></div>
+            <div class="ranking-grid ranking-row highlight"><b>3</b><span class="rank-player"><i class="avatar small">S</i>ShadowKing</span><span>8</span><span>6</span><span>2</span><b class="dk-positive">+14</b><b>24</b></div>
+            <div class="ranking-grid ranking-row"><b>1</b><span class="rank-player"><i class="avatar small">R</i>ReiDoLudo</span><span>8</span><span>7</span><span>1</span><b class="dk-positive">+22</b><b>31</b></div>
+            <div class="ranking-grid ranking-row"><b>2</b><span class="rank-player"><i class="avatar small">L</i>LudoMaster</span><span>8</span><span>6</span><span>2</span><b class="dk-positive">+17</b><b>27</b></div>
+            <div class="ranking-grid ranking-row"><b>4</b><span class="rank-player"><i class="avatar small">A</i>AnaLudo</span><span>8</span><span>5</span><span>3</span><b class="dk-negative">-2</b><b>21</b></div>
+            <div class="ranking-grid ranking-row"><b>5</b><span class="rank-player"><i class="avatar small">P</i>PedroLudo</span><span>8</span><span>4</span><span>4</span><b class="dk-negative">-11</b><b>18</b></div>
         </div>
-
+        <p class="ranking-note"><i class="bi bi-info-circle"></i> DK = kills feitas menos kills sofridas.</p>
     </div>
-
 </div>
 
-
-
-<!-- =====================================================
-     MODAL CRIAR TORNEIO
-====================================================== -->
-
-<div
-        class="modal-overlay d-none"
-        id="createTournamentModal"
->
-
-    <div class="create-modal">
-
-        <button
-                class="close-modal"
-                id="closeCreateTournamentButton"
-        >
-            <i class="bi bi-x-lg"></i>
-        </button>
-
-
-        <div class="create-modal-header">
-
-            <div class="create-icon">
-                🏆
-            </div>
-
-            <div>
-
-                <h2>
-                    Criar torneio
-                </h2>
-
-                <p>
-                    Monte sua própria competição
-                </p>
-
-            </div>
-
+<!-- CREATE TOURNAMENT MODAL -->
+<div class="modal-overlay d-none" id="createTournamentModal">
+    <div class="app-modal create-modal">
+        <button class="close-modal" id="closeCreateTournamentButton"><i class="bi bi-x-lg"></i></button>
+        <div class="create-header">
+            <div class="create-icon">🏆</div>
+            <div><h2>Criar torneio</h2><p>Monte sua própria competição.</p></div>
         </div>
-
 
         <form id="createTournamentForm">
-
-
             <div class="form-group">
-
-                <label for="tournamentNameInput">
-                    Nome do torneio
-                </label>
-
-                <input
-                        type="text"
-                        id="tournamentNameInput"
-                        placeholder="Ex: Copa dos Amigos"
-                        required
-                >
-
+                <label for="tournamentNameInput">Nome do torneio</label>
+                <input id="tournamentNameInput" required maxlength="50" placeholder="Ex: Copa dos Amigos">
             </div>
 
-
-            <div class="form-row">
-
-                <div class="form-group">
-
-                    <label for="tournamentSlotsInput">
-                        Número de vagas
-                    </label>
-
-                    <select
-                            id="tournamentSlotsInput"
-                    >
-
-                        <option value="8">
-                            8 jogadores
-                        </option>
-
-                        <option value="16">
-                            16 jogadores
-                        </option>
-
-                        <option value="32">
-                            32 jogadores
-                        </option>
-
-                        <option value="64">
-                            64 jogadores
-                        </option>
-
-                        <option value="128">
-                            128 jogadores
-                        </option>
-
-                    </select>
-
+            <div class="form-group">
+                <label>Modo do campeonato</label>
+                <div class="choice-grid">
+                    <label class="choice-card selected"><input type="radio" name="championshipMode" value="Liga" checked><span>🏟️</span><b>Liga</b><small>Todos enfrentam todos</small></label>
+                    <label class="choice-card"><input type="radio" name="championshipMode" value="Eliminatórias"><span>🏆</span><b>Eliminatórias</b><small>Chave e avanço por vitórias</small></label>
                 </div>
+            </div>
 
-
-                <div class="form-group">
-
-                    <label for="tournamentFeeInput">
-                        Entrada
-                    </label>
-
-                    <select
-                            id="tournamentFeeInput"
-                    >
-
-                        <option value="0">
-                            Grátis
-                        </option>
-
-                        <option value="500">
-                            🪙 500
-                        </option>
-
-                        <option value="1000">
-                            🪙 1.000
-                        </option>
-
-                        <option value="2500">
-                            🪙 2.500
-                        </option>
-
-                        <option value="5000">
-                            🪙 5.000
-                        </option>
-
-                    </select>
-
+            <div class="form-group">
+                <label>Formato dos jogos</label>
+                <div class="choice-grid two">
+                    <label class="choice-card selected"><input type="radio" name="matchFormat" value="Só ida" checked><span>1️⃣</span><b>Só ida</b><small>Uma partida por confronto</small></label>
+                    <label class="choice-card"><input type="radio" name="matchFormat" value="Ida e volta"><span>🔁</span><b>Ida e volta</b><small>Duas partidas por confronto</small></label>
                 </div>
-
             </div>
 
+            <div class="form-group d-none" id="knockoutOptions">
+                <label for="knockoutTypeInput">Tipo de eliminatórias</label>
+                <select id="knockoutTypeInput">
+                    <option value="Chave simples">Chave simples</option>
+                    <option value="Melhor de 3">Melhor de 3</option>
+                    <option value="Melhor de 5">Melhor de 5</option>
+                </select>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="tournamentSlotsInput">Número de vagas</label>
+                    <select id="tournamentSlotsInput">
+                        <option value="8">8 jogadores</option>
+                        <option value="16" selected>16 jogadores</option>
+                        <option value="32">32 jogadores</option>
+                        <option value="64">64 jogadores</option>
+                        <option value="128">128 jogadores</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tournamentFeeInput">Entrada</label>
+                    <select id="tournamentFeeInput">
+                        <option value="0">Grátis</option>
+                        <option value="500">🪙 500</option>
+                        <option value="1000" selected>🪙 1.000</option>
+                        <option value="2500">🪙 2.500</option>
+                        <option value="5000">🪙 5.000</option>
+                    </select>
+                </div>
+            </div>
 
             <div class="form-group">
-
-                <label for="tournamentDateInput">
-                    Data de início
-                </label>
-
-                <input
-                        type="datetime-local"
-                        id="tournamentDateInput"
-                        required
-                >
-
+                <label for="tournamentDateInput">Data e hora de início</label>
+                <input type="datetime-local" id="tournamentDateInput" required>
             </div>
-
 
             <div class="form-group">
-
-                <label for="tournamentDescriptionInput">
-                    Descrição
-                </label>
-
-                <textarea
-                        id="tournamentDescriptionInput"
-                        rows="3"
-                        placeholder="Descreva seu torneio..."
-                ></textarea>
-
+                <label for="tournamentDescriptionInput">Descrição</label>
+                <textarea id="tournamentDescriptionInput" rows="3" maxlength="250" placeholder="Descreva seu torneio..."></textarea>
             </div>
-
 
             <div class="create-summary">
-
-                <span>
-                    🏆 Prêmio estimado
-                </span>
-
-                <strong id="prizePreview">
-                    🪙 0
-                </strong>
-
+                <span>🪙 Prêmio estimado <small>(80% da arrecadação)</small></span>
+                <b id="prizePreview">🪙 12.800</b>
             </div>
 
-
-            <button
-                    type="submit"
-                    class="create-submit"
-                    id="createTournamentSubmit"
-            >
-
-                <i class="bi bi-trophy-fill"></i>
-
-                CRIAR TORNEIO
-
-            </button>
-
+            <button class="create-submit" id="createTournamentSubmit" type="submit"><i class="bi bi-trophy-fill"></i> CRIAR TORNEIO</button>
         </form>
-
     </div>
-
 </div>
 
+<!-- SIMPLE TOAST -->
+<div class="toast-message" id="toastMessage"></div>
 
 <script src="js/home.js"></script>
-
 </body>
-
 </html>

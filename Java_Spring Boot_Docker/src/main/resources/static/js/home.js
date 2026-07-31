@@ -1,75 +1,107 @@
-// =====================================================
-// ELEMENTOS
-// =====================================================
+// ============================================================
+// LUDO STAR - HOME
+// JavaScript da página principal
+// ============================================================
 
-const messages =
-    document.getElementById("messages");
-
-const messageForm =
-    document.getElementById("messageForm");
-
-const messageInput =
-    document.getElementById("messageInput");
-
-const chatSearchButton =
-    document.getElementById("chatSearchButton");
-
-const chatSearch =
-    document.getElementById("chatSearch");
-
-const chatSearchInput =
-    document.getElementById("chatSearchInput");
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
 
-// =====================================================
-// TROCAR GRUPO
-// =====================================================
+// ============================================================
+// SIDEBAR / MENU MOBILE
+// ============================================================
 
-const groupItems =
-    document.querySelectorAll(".group-item");
+const sidebar = $("#sidebar");
+const chatPanel = $("#chatPanel");
+const mobileMenuButton = $("#mobileMenuButton");
+const mobileChatButton = $("#mobileChatButton");
 
+if (mobileMenuButton) {
+    mobileMenuButton.addEventListener("click", () => {
+        sidebar.classList.toggle("open");
+    });
+}
 
-groupItems.forEach(function (group) {
+if (mobileChatButton) {
+    mobileChatButton.addEventListener("click", () => {
 
-    group.addEventListener(
-        "click",
-        function () {
+        if (window.innerWidth <= 1000) {
+            sidebar.classList.remove("open");
 
-            groupItems.forEach(function (item) {
-                item.classList.remove("active");
-            });
-
-            group.classList.add("active");
-
-            const groupName =
-                group.querySelector("span:nth-child(2)")
-                    ?.textContent
-                    .trim();
-
-            document.querySelector(
-                ".chat-title"
-            ).textContent =
-                groupName || "Conversa";
-
-
-            document.querySelector(
-                ".chat-subtitle"
-            ).textContent =
-                "Grupo de mensagens";
-
+            chatPanel.classList.toggle("mobile-chat-open");
         }
-    );
+    });
+}
+
+
+// Fecha a sidebar quando clicar fora dela no celular
+
+document.addEventListener("click", (event) => {
+
+    if (
+        window.innerWidth <= 720 &&
+        sidebar &&
+        sidebar.classList.contains("open") &&
+        !sidebar.contains(event.target) &&
+        !mobileMenuButton.contains(event.target)
+    ) {
+        sidebar.classList.remove("open");
+    }
 
 });
 
 
-// =====================================================
-// PESQUISA
-// =====================================================
+// ============================================================
+// GRUPOS DE MENSAGENS
+// ============================================================
 
-chatSearchButton.addEventListener(
-    "click",
-    function () {
+const groups = $$(".group-item");
+
+groups.forEach(group => {
+
+    group.addEventListener("click", () => {
+
+        // Remove active dos outros grupos
+        groups.forEach(item => {
+            item.classList.remove("active");
+        });
+
+        // Ativa o grupo selecionado
+        group.classList.add("active");
+
+        // Atualiza cabeçalho do chat
+        const chatTitle = $("#chatTitle");
+        const chatSubtitle = $("#chatSubtitle");
+
+        if (chatTitle) {
+            chatTitle.textContent = group.dataset.group;
+        }
+
+        if (chatSubtitle) {
+            chatSubtitle.textContent = "Grupo de mensagens";
+        }
+
+        // Fecha menu no celular
+        if (window.innerWidth <= 720) {
+            sidebar.classList.remove("open");
+        }
+
+    });
+
+});
+
+
+// ============================================================
+// PESQUISA DE MENSAGENS
+// ============================================================
+
+const chatSearchButton = $("#chatSearchButton");
+const chatSearch = $("#chatSearch");
+const chatSearchInput = $("#chatSearchInput");
+
+if (chatSearchButton) {
+
+    chatSearchButton.addEventListener("click", () => {
 
         chatSearch.classList.toggle("d-none");
 
@@ -77,51 +109,48 @@ chatSearchButton.addEventListener(
             chatSearchInput.focus();
         }
 
-    }
-);
+    });
+
+}
 
 
-// =====================================================
-// ENVIAR MENSAGEM
-// =====================================================
+// ============================================================
+// ENVIO DE MENSAGENS
+// ============================================================
 
-messageForm.addEventListener(
-    "submit",
-    function (event) {
+const messageForm = $("#messageForm");
+const messageInput = $("#messageInput");
+const messagesContainer = $("#messages");
+
+if (messageForm) {
+
+    messageForm.addEventListener("submit", (event) => {
 
         event.preventDefault();
 
-        const text =
-            messageInput.value.trim();
+        const text = messageInput.value.trim();
 
         if (!text) {
             return;
         }
 
+        const message = document.createElement("div");
 
-        const message =
-            document.createElement("div");
-
-        message.className =
-            "message";
-
+        message.className = "message";
 
         message.innerHTML = `
-
-            <div class="avatar message-avatar">
+            <span class="avatar message-avatar">
                 S
-            </div>
+            </span>
 
-            <div class="message-content">
+            <div>
 
                 <div class="message-author">
-
                     ShadowKing
 
-                    <span>
+                    <time>
                         agora
-                    </span>
-
+                    </time>
                 </div>
 
                 <p>
@@ -129,351 +158,407 @@ messageForm.addEventListener(
                 </p>
 
             </div>
-
         `;
 
+        messagesContainer.appendChild(message);
 
-        messages.appendChild(message);
-
+        // Limpa campo
         messageInput.value = "";
 
-        messages.scrollTop =
-            messages.scrollHeight;
+        // Scroll para última mensagem
+        messagesContainer.scrollTop =
+            messagesContainer.scrollHeight;
 
-    }
-);
-
-
-// =====================================================
-// ESCAPAR HTML
-// =====================================================
-
-function escapeHtml(text) {
-
-    const div =
-        document.createElement("div");
-
-    div.textContent =
-        text;
-
-    return div.innerHTML;
+    });
 
 }
 
 
-// =====================================================
-// CLASSIFICAÇÃO
-// =====================================================
+// ============================================================
+// BOTÃO DE ANEXO
+// ============================================================
 
-const rankingModal =
-    document.getElementById(
-        "rankingModal"
-    );
+const attachButton = $("#attachButton");
 
-const rankingTitle =
-    document.getElementById(
-        "rankingTitle"
-    );
+if (attachButton) {
 
-const closeRankingButton =
-    document.getElementById(
-        "closeRankingButton"
-    );
+    attachButton.addEventListener("click", () => {
 
-
-const tournamentRows =
-    document.querySelectorAll(
-        ".my-tournament-row"
-    );
-
-
-tournamentRows.forEach(function (row) {
-
-    row.addEventListener(
-        "click",
-        function () {
-
-            const tournament =
-                row.dataset.tournament;
-
-            openRanking(tournament);
-
-        }
-    );
-
-});
-
-
-function openRanking(tournament) {
-
-    const tournamentNames = {
-
-        "copa-reis":
-            "Copa dos Reis",
-
-        "mega-ludo":
-            "Mega Ludo",
-
-        "masters":
-            "Ludo Masters"
-
-    };
-
-
-    rankingTitle.textContent =
-        tournamentNames[tournament]
-        || "Torneio";
-
-
-    rankingModal.classList.remove(
-        "d-none"
-    );
-
-}
-
-
-closeRankingButton.addEventListener(
-    "click",
-    function () {
-
-        rankingModal.classList.add(
-            "d-none"
+        showToast(
+            "O sistema de anexos será conectado ao backend futuramente."
         );
 
-    }
-);
+    });
+
+}
 
 
-// Fechar clicando fora
+// ============================================================
+// PROTEÇÃO CONTRA HTML INJETADO
+// ============================================================
 
-rankingModal.addEventListener(
-    "click",
-    function (event) {
+function escapeHtml(value) {
 
-        if (
-            event.target ===
-            rankingModal
-        ) {
+    const element = document.createElement("div");
 
-            rankingModal.classList.add(
-                "d-none"
-            );
+    element.textContent = value;
 
-        }
+    return element.innerHTML;
 
-    }
-);
+}
 
 
-// =====================================================
-// ENTRAR EM TORNEIO
-// =====================================================
-
-const joinButtons =
-    document.querySelectorAll(
-        ".join-button"
-    );
-
-
-joinButtons.forEach(function (button) {
-
-    button.addEventListener(
-        "click",
-        function () {
-
-            const tournament =
-                button.dataset.tournament;
-
-
-            button.disabled = true;
-
-            button.textContent =
-                "INSCRITO ✓";
-
-
-            button.style.color =
-                "#64e894";
-
-            button.style.borderColor =
-                "#3dbb6c";
-
-
-            console.log(
-                "Usuário inscrito:",
-                tournament
-            );
-
-        }
-    );
-
-});
-
-
-// =====================================================
+// ============================================================
 // CRIAR GRUPO
-// =====================================================
+// ============================================================
 
-const createGroupButton =
-    document.getElementById(
-        "createGroupButton"
-    );
+const createGroupButton = $("#createGroupButton");
 
+if (createGroupButton) {
 
-createGroupButton.addEventListener(
-    "click",
-    function () {
+    createGroupButton.addEventListener("click", () => {
 
-        const groupName =
-            prompt(
-                "Nome do novo grupo:"
-            );
+        const groupName = prompt(
+            "Digite o nome do novo grupo:"
+        );
 
-
-        if (!groupName) {
+        if (!groupName || !groupName.trim()) {
             return;
         }
 
+        const name = groupName.trim();
 
-        const groupsList =
-            document.getElementById(
-                "groupsList"
-            );
+        const group = document.createElement("button");
 
+        group.className = "group-item";
 
-        const group =
-            document.createElement("button");
-
-
-        group.className =
-            "group-item";
-
-
-        group.dataset.group =
-            groupName;
-
+        group.dataset.group = name;
 
         group.innerHTML = `
-
             <span class="group-icon">
                 💬
             </span>
 
             <span>
-                ${escapeHtml(groupName)}
+                ${escapeHtml(name)}
             </span>
-
         `;
 
+        $("#groupsList").appendChild(group);
 
-        groupsList.appendChild(group);
+
+        // Evento do novo grupo
+
+        group.addEventListener("click", () => {
+
+            $$(".group-item").forEach(item => {
+                item.classList.remove("active");
+            });
+
+            group.classList.add("active");
+
+            $("#chatTitle").textContent = name;
+
+            $("#chatSubtitle").textContent =
+                "Novo grupo";
+
+        });
 
 
-        group.addEventListener(
-            "click",
-            function () {
-
-                groupItems.forEach(
-                    function (item) {
-                        item.classList.remove(
-                            "active"
-                        );
-                    }
-                );
-
-                group.classList.add(
-                    "active"
-                );
-
-                document.querySelector(
-                    ".chat-title"
-                ).textContent =
-                    groupName;
-
-            }
+        showToast(
+            `Grupo "${name}" criado com sucesso!`
         );
 
-    }
-);
+    });
+
+}
 
 
-// =====================================================
-// CRIAR TORNEIO
-// =====================================================
+// ============================================================
+// DADOS DOS TORNEIOS
+// ============================================================
 
-const createTournamentButton =
-    document.getElementById(
-        "createTournamentButton"
-    );
+const rankingData = {
 
-const createTournamentModal =
-    document.getElementById(
-        "createTournamentModal"
-    );
+    "copa-reis": {
 
-const closeCreateTournamentButton =
-    document.getElementById(
-        "closeCreateTournamentButton"
-    );
+        title: "Copa dos Reis",
 
+        format: "Liga • Ida e volta",
 
-createTournamentButton.addEventListener(
-    "click",
-    function () {
+        trophy: "🏆"
 
-        createTournamentModal.classList
-            .remove("d-none");
+    },
 
-    }
-);
+    "mega-ludo": {
 
+        title: "Mega Ludo",
 
-closeCreateTournamentButton.addEventListener(
-    "click",
-    function () {
+        format: "Eliminatórias • Só ida",
 
-        createTournamentModal.classList
-            .add("d-none");
+        trophy: "🔥"
+
+    },
+
+    "masters": {
+
+        title: "Ludo Masters",
+
+        format: "Liga • Só ida",
+
+        trophy: "💎"
 
     }
-);
+
+};
 
 
-createTournamentModal.addEventListener(
-    "click",
-    function (event) {
+// ============================================================
+// MODAL DE CLASSIFICAÇÃO
+// ============================================================
 
-        if (
-            event.target ===
-            createTournamentModal
-        ) {
+const rankingModal = $("#rankingModal");
 
-            createTournamentModal.classList
-                .add("d-none");
+const closeRankingButton =
+    $("#closeRankingButton");
+
+
+$$(".my-tournament-row").forEach(row => {
+
+    row.addEventListener("click", () => {
+
+        const tournamentId =
+            row.dataset.tournament;
+
+        const tournament =
+            rankingData[tournamentId];
+
+        if (!tournament) {
+            return;
+        }
+
+        $("#rankingTitle").textContent =
+            tournament.title;
+
+        $("#rankingFormat").textContent =
+            tournament.format;
+
+        $("#rankingTrophy").textContent =
+            tournament.trophy;
+
+        rankingModal.classList.remove("d-none");
+
+    });
+
+});
+
+
+if (closeRankingButton) {
+
+    closeRankingButton.addEventListener("click", () => {
+
+        rankingModal.classList.add("d-none");
+
+    });
+
+}
+
+
+// Fechar modal clicando no fundo
+
+if (rankingModal) {
+
+    rankingModal.addEventListener("click", event => {
+
+        if (event.target === rankingModal) {
+
+            rankingModal.classList.add("d-none");
 
         }
 
+    });
+
+}
+
+
+// ============================================================
+// INSCRIÇÃO EM TORNEIOS
+// ============================================================
+
+const joinButtons = $$(".join-button");
+
+joinButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const fee =
+            Number(button.dataset.fee || 0);
+
+        button.disabled = true;
+
+        button.textContent =
+            "INSCRITO ✓";
+
+        button.style.color =
+            "#64e894";
+
+        button.style.borderColor =
+            "#3dbb6c";
+
+
+        showToast(
+            `Inscrição simulada com sucesso! Entrada: 🪙 ${fee.toLocaleString("pt-BR")}`
+        );
+
+    });
+
+});
+
+
+// ============================================================
+// MODAL DE CRIAÇÃO DE TORNEIO
+// ============================================================
+
+const createTournamentModal =
+    $("#createTournamentModal");
+
+const createTournamentButton =
+    $("#createTournamentButton");
+
+const closeCreateTournamentButton =
+    $("#closeCreateTournamentButton");
+
+
+if (createTournamentButton) {
+
+    createTournamentButton.addEventListener("click", () => {
+
+        createTournamentModal.classList.remove("d-none");
+
+    });
+
+}
+
+
+if (closeCreateTournamentButton) {
+
+    closeCreateTournamentButton.addEventListener("click", () => {
+
+        createTournamentModal.classList.add("d-none");
+
+    });
+
+}
+
+
+// Fechar clicando fora
+
+if (createTournamentModal) {
+
+    createTournamentModal.addEventListener("click", event => {
+
+        if (event.target === createTournamentModal) {
+
+            createTournamentModal.classList.add("d-none");
+
+        }
+
+    });
+
+}
+
+
+// ============================================================
+// SELEÇÃO DE LIGA / ELIMINATÓRIAS
+// ============================================================
+
+const choiceInputs =
+    $$(".choice-card input");
+
+
+choiceInputs.forEach(input => {
+
+    input.addEventListener("change", () => {
+
+        const groupName =
+            input.name;
+
+        const groupInputs =
+            $$(`.choice-card input[name="${groupName}"]`);
+
+        groupInputs.forEach(item => {
+
+            item
+                .closest(".choice-card")
+                .classList.remove("selected");
+
+        });
+
+        input
+            .closest(".choice-card")
+            .classList.add("selected");
+
+
+        updateCreateForm();
+
+    });
+
+});
+
+
+// Retorna radio selecionado
+
+function getValue(name) {
+
+    const input =
+        $(`input[name="${name}"]:checked`);
+
+    return input ? input.value : null;
+
+}
+
+
+// Atualiza formulário
+
+function updateCreateForm() {
+
+    const mode =
+        getValue("championshipMode");
+
+    const knockoutOptions =
+        $("#knockoutOptions");
+
+
+    // Mostra opções de eliminatórias
+
+    if (mode === "Eliminatórias") {
+
+        knockoutOptions.classList.remove("d-none");
+
+    } else {
+
+        knockoutOptions.classList.add("d-none");
+
     }
-);
 
 
-// =====================================================
-// PREÇO / PRÊMIO
-// =====================================================
+    updatePrize();
+
+}
+
+
+// ============================================================
+// CÁLCULO DO PRÊMIO
+// ============================================================
 
 const slotsInput =
-    document.getElementById(
-        "tournamentSlotsInput"
-    );
+    $("#tournamentSlotsInput");
 
 const feeInput =
-    document.getElementById(
-        "tournamentFeeInput"
-    );
+    $("#tournamentFeeInput");
 
 const prizePreview =
-    document.getElementById(
-        "prizePreview"
-    );
+    $("#prizePreview");
 
 
 function updatePrize() {
@@ -486,10 +571,18 @@ function updatePrize() {
 
 
     /*
-     * Exemplo:
-     * 80% do valor arrecadado
-     * vai para o prêmio.
-     */
+        80% da arrecadação será
+        destinada ao prêmio.
+
+        Exemplo:
+
+        16 jogadores
+        x 1000 moedas
+        = 16.000
+
+        80%
+        = 12.800
+    */
 
     const prize =
         Math.floor(
@@ -504,86 +597,565 @@ function updatePrize() {
 }
 
 
-slotsInput.addEventListener(
-    "change",
-    updatePrize
-);
+if (slotsInput) {
 
-feeInput.addEventListener(
-    "change",
-    updatePrize
-);
+    slotsInput.addEventListener(
+        "change",
+        updatePrize
+    );
+
+}
+
+if (feeInput) {
+
+    feeInput.addEventListener(
+        "change",
+        updatePrize
+    );
+}
+
+
+// Calcula inicialmente
 
 updatePrize();
 
 
-// =====================================================
-// FORM CRIAR TORNEIO
-// =====================================================
+// ============================================================
+// DATA MÍNIMA DO TORNEIO
+// ============================================================
 
-const createTournamentForm =
-    document.getElementById(
-        "createTournamentForm"
+const tournamentDateInput =
+    $("#tournamentDateInput");
+
+
+if (tournamentDateInput) {
+
+    const now = new Date();
+
+    now.setMinutes(
+        now.getMinutes() -
+        now.getTimezoneOffset()
     );
 
+    tournamentDateInput.min =
+        now.toISOString().slice(0, 16);
 
-createTournamentForm.addEventListener(
-    "submit",
-    function (event) {
-
-        event.preventDefault();
+}
 
 
-        const name =
-            document.getElementById(
-                "tournamentNameInput"
-            ).value.trim();
+// ============================================================
+// CRIAR TORNEIO
+// ============================================================
+
+const createTournamentForm =
+    $("#createTournamentForm");
 
 
-        const slots =
-            slotsInput.value;
+if (createTournamentForm) {
+
+    createTournamentForm.addEventListener(
+        "submit",
+        event => {
+
+            event.preventDefault();
 
 
-        const fee =
-            feeInput.value;
+            // Dados do formulário
+
+            const name =
+                $("#tournamentNameInput")
+                    .value
+                    .trim();
 
 
-        const date =
-            document.getElementById(
-                "tournamentDateInput"
-            ).value;
+            const mode =
+                getValue("championshipMode");
 
 
-        if (!name || !date) {
+            const format =
+                getValue("matchFormat");
 
-            alert(
-                "Preencha os campos obrigatórios."
+
+            const slots =
+                $("#tournamentSlotsInput")
+                    .value;
+
+
+            const fee =
+                Number(
+                    $("#tournamentFeeInput")
+                        .value
+                );
+
+
+            const date =
+                $("#tournamentDateInput")
+                    .value;
+
+
+            const description =
+                $("#tournamentDescriptionInput")
+                    .value
+                    .trim();
+
+
+            let knockout = null;
+
+
+            if (mode === "Eliminatórias") {
+
+                knockout =
+                    $("#knockoutTypeInput")
+                        .value;
+
+            }
+
+
+            // Objeto do torneio
+
+            const tournament = {
+
+                name: name,
+
+                mode: mode,
+
+                format: format,
+
+                slots: slots,
+
+                fee: fee,
+
+                date: date,
+
+                description: description,
+
+                knockout: knockout,
+
+                state: "Aguardando aceitação"
+
+            };
+
+
+            // Neste momento estamos simulando.
+            // Futuramente isso irá para o backend.
+
+            console.log(
+                "Novo torneio:",
+                tournament
             );
 
+
+            // Adiciona na tabela
+
+            addCreatedTournament(
+                tournament
+            );
+
+
+            // Fecha modal
+
+            createTournamentModal
+                .classList
+                .add("d-none");
+
+
+            // Limpa formulário
+
+            createTournamentForm.reset();
+
+
+            // Volta para as opções padrão
+
+            $$(".choice-card")
+                .forEach(card => {
+
+                    card.classList.remove(
+                        "selected"
+                    );
+
+                });
+
+
+            const defaultMode =
+                $('input[name="championshipMode"]');
+
+
+            const defaultFormat =
+                $('input[name="matchFormat"]');
+
+
+            defaultMode.checked = true;
+
+            defaultFormat.checked = true;
+
+
+            defaultMode
+                .closest(".choice-card")
+                .classList
+                .add("selected");
+
+
+            defaultFormat
+                .closest(".choice-card")
+                .classList
+                .add("selected");
+
+
+            updateCreateForm();
+
+
+            showToast(
+                `"${name}" criado e enviado para análise!`
+            );
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// ADICIONAR TORNEIO NA TABELA
+// ============================================================
+
+function addCreatedTournament(tournament) {
+
+    const table =
+        document.querySelector(
+            ".created-row"
+        ).parentElement;
+
+
+    const row =
+        document.createElement("div");
+
+
+    row.className =
+        "table-grid created-row";
+
+
+    const icon =
+        tournament.mode === "Liga"
+            ? "🏟️"
+            : "🏆";
+
+
+    const feeText =
+        tournament.fee > 0
+            ? `🪙 ${tournament.fee.toLocaleString("pt-BR")}`
+            : "Grátis";
+
+
+    row.innerHTML = `
+
+        <span class="tournament-cell">
+
+            <i class="tournament-icon purple">
+                ${icon}
+            </i>
+
+            <span>
+
+                <b>
+                    ${escapeHtml(tournament.name)}
+                </b>
+
+                <small>
+                    ${escapeHtml(feeText)}
+                </small>
+
+            </span>
+
+        </span>
+
+
+        <span>
+
+            <b>
+                ${escapeHtml(tournament.mode)}
+            </b>
+
+        </span>
+
+
+        <span>
+
+            ${escapeHtml(tournament.format)}
+
+        </span>
+
+
+        <span>
+
+            ${escapeHtml(tournament.slots)}
+
+        </span>
+
+
+        <span class="status pending">
+
+            AGUARDANDO ACEITAÇÃO
+
+        </span>
+
+    `;
+
+
+    table.appendChild(row);
+
+}
+
+
+// ============================================================
+// BOTÃO DE MOEDAS
+// ============================================================
+
+const buyCoinsButton =
+    $("#buyCoinsButton");
+
+
+if (buyCoinsButton) {
+
+    buyCoinsButton.addEventListener(
+        "click",
+        () => {
+
+            showToast(
+                "A loja de moedas será integrada futuramente."
+            );
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// PERFIL
+// ============================================================
+
+const profileButton =
+    $("#profileButton");
+
+
+if (profileButton) {
+
+    profileButton.addEventListener(
+        "click",
+        () => {
+
+            showToast(
+                "Menu de perfil pronto para receber suas opções."
+            );
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// CONFIGURAÇÕES
+// ============================================================
+
+const settingsButton =
+    $("#settingsButton");
+
+
+if (settingsButton) {
+
+    settingsButton.addEventListener(
+        "click",
+        () => {
+
+            showToast(
+                "Configurações do usuário."
+            );
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// BOTÃO "VER TODOS"
+// ============================================================
+
+const viewMyTournamentsButton =
+    $("#viewMyTournamentsButton");
+
+
+if (viewMyTournamentsButton) {
+
+    viewMyTournamentsButton.addEventListener(
+        "click",
+        () => {
+
+            showToast(
+                "Aqui será aberta a página com todos os torneios."
+            );
+
+        }
+    );
+
+}
+
+
+const viewCreatedTournamentsButton =
+    $("#viewCreatedTournamentsButton");
+
+
+if (viewCreatedTournamentsButton) {
+
+    viewCreatedTournamentsButton.addEventListener(
+        "click",
+        () => {
+
+            showToast(
+                "Aqui será aberta a gestão completa dos seus torneios."
+            );
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// MENU INÍCIO
+// ============================================================
+
+const homeMenu =
+    $("#homeMenu");
+
+
+if (homeMenu) {
+
+    homeMenu.addEventListener(
+        "click",
+        () => {
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// MENU MENSAGENS
+// ============================================================
+
+const messagesMenu =
+    $("#messagesMenu");
+
+
+if (messagesMenu) {
+
+    messagesMenu.addEventListener(
+        "click",
+        () => {
+
+            if (window.innerWidth <= 1000) {
+
+                chatPanel.classList.add(
+                    "mobile-chat-open"
+                );
+
+            } else {
+
+                $("#messageInput").focus();
+
+            }
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// ESC FECHA MODAIS
+// ============================================================
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key !== "Escape") {
             return;
         }
 
 
-        console.log({
-            name: name,
-            slots: slots,
-            fee: fee,
-            date: date
-        });
+        // Fecha todos os modais
+
+        $$(".modal-overlay")
+            .forEach(modal => {
+
+                modal.classList.add(
+                    "d-none"
+                );
+
+            });
 
 
-        alert(
-            "Torneio criado com sucesso! 🏆"
+        // Fecha sidebar
+
+        sidebar.classList.remove(
+            "open"
         );
-
-
-        createTournamentModal.classList
-            .add("d-none");
-
-
-        createTournamentForm.reset();
-
-        updatePrize();
 
     }
 );
+
+
+// ============================================================
+// TOAST / NOTIFICAÇÃO
+// ============================================================
+
+let toastTimer;
+
+
+function showToast(message) {
+
+    const toast =
+        $("#toastMessage");
+
+
+    if (!toast) {
+        return;
+    }
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            () => {
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            3000
+        );
+
+}
