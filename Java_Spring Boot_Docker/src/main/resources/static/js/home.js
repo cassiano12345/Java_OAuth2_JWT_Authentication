@@ -2,9 +2,41 @@
 // LUDO STAR - HOME
 // JavaScript da página principal
 // ============================================================
+window.onload = function () {
 
+    console.log("PeerBox iniciado.");
+    verificarUtilizador();
+
+}
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+
+
+
+
+
+async function verificarUtilizador() {
+
+    const token = localStorage.getItem("accessToken");
+    console.log(token);
+
+
+    const response = await fetch("/me", {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+
+    if (!response.ok) {
+        console.log("Não esta feito");
+        window.location = "/index.html";
+        return;
+
+    }
+
+}
 
 
 // ============================================================

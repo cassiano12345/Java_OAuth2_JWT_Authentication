@@ -51,7 +51,7 @@ public class TokenController {
 
         var claims = JwtClaimsSet.builder()
                 .issuer("mybackend")
-                .subject(user.get().getUserId().toString())
+                .subject(user.get().getUsername())
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expiresIn))
                 .claim("scope", scopes)
