@@ -50,7 +50,26 @@
         </div>
 
         <div class="side-divider"></div>
+        <div class="friend-search-box">
 
+            <div class="friend-search-input">
+
+                <i class="bi bi-search"></i>
+
+                <input
+                        id="friendSearchInput"
+                        type="text"
+                        placeholder="Pesquisar jogador..."
+                        autocomplete="off">
+
+            </div>
+
+            <div
+                    id="friendSearchResults"
+                    class="friend-search-results">
+            </div>
+
+        </div>
         <div class="friends-title">ONLINE — <b>4</b></div>
         <div class="friends-list">
             <button class="friend-item"><span class="avatar online">A</span><span><b>AnaLudo</b><small>Jogando agora</small></span></button>
@@ -68,7 +87,7 @@
 
         <div class="current-user">
             <span class="avatar current">S</span>
-            <span class="user-info"><b>ShadowKing</b><small>● Online</small></span>
+            <span class="user-info"><b id="online"></b><small>● Online</small></span>
             <button class="plain-icon" id="settingsButton"><i class="bi bi-gear-fill"></i></button>
         </div>
     </aside>
@@ -117,7 +136,7 @@
     <main class="main-content">
         <header class="content-header">
             <div>
-                <h1>Olá, <strong>Vanessa!</strong> 👑</h1>
+                <h1>Olá, <strong id="username"></strong> 👑</h1>
                 <p>Pronto para jogar e conquistar o ranking?</p>
             </div>
             <div class="header-actions">

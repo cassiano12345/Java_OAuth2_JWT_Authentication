@@ -15,6 +15,9 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
 
 
+// ============================================================
+// Verificar se o User fez Login!
+// ============================================================
 
 async function verificarUtilizador() {
 
@@ -33,6 +36,142 @@ async function verificarUtilizador() {
         console.log("Não esta feito");
         window.location = "/index.html";
         return;
+
+    }
+    var dados =await response.json();
+
+    document.getElementById("username").textContent = dados.nome;
+    document.getElementById("online").textContent = dados.nome;
+}
+
+// ============================================================
+// ADICIONAR NOVOS AMIGOS!
+// ============================================================
+const friendSearchInput = document.getElementById("friendSearchInput");
+const friendSearchResults = document.getElementById("friendSearchResults");
+
+friendSearchInput.addEventListener("input", async function () {
+
+    const username = this.value.trim();
+
+    if (username.length < 2) {
+        friendSearchResults.innerHTML = "";
+        return;
+    }
+
+    await searchUsers(username);
+
+});
+async function searchUsers(username) {
+
+    try {
+
+        const response = await fetch(
+            `/search?username=${encodeURIComponent(username)}`,
+            {
+                headers: {
+                    Authorization: "Bearer " + localStorage.getItem("accessToken")
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Erro ao pesquisar usuários.");
+        }
+
+        const users = await response.json();
+
+        renderSearchResults(users);
+
+    } catch (e) {
+
+        console.error(e);
+
+    }
+
+}
+function renderSearchResults(users) {
+
+    friendSearchResults.innerHTML = "";
+
+    if (users.length === 0) {
+
+        friendSearchResults.innerHTML =
+            "<div class='friend-search-empty'>Nenhum jogador encontrado.</div>";
+
+        return;
+    }
+
+    users.forEach(user => {
+
+        const div = document.createElement("div");
+
+        div.className = "friend-search-user";
+
+        div.innerHTML = `
+            <div class="friend-search-left">
+                <div class="avatar">
+                    ${user.username.charAt(0).toUpperCase()}
+                </div>
+
+                <span>${user.username}</span>
+            </div>
+
+            <button
+                class="add-friend-button"
+                data-user-id="${user.userId}">
+                Adicionar
+            </button>
+        `;
+
+        friendSearchResults.appendChild(div);
+
+    });
+
+}
+document.addEventListener("click", async function (e) {
+
+    if (!e.target.classList.contains("add-friend-button"))
+        return;
+
+    const addresseeId = e.target.dataset.userId;
+
+    await sendFriendRequest(addresseeId);
+
+});
+async function sendFriendRequest(addresseeId) {
+
+    try {
+
+        const me = JSON.parse(localStorage.getItem("me"));
+
+        const response = await fetch("/api/friendships/send", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + localStorage.getItem("accessToken")
+            },
+
+            body: JSON.stringify({
+
+                requesterId: me.userId,
+                addresseeId: addresseeId
+
+            })
+
+        });
+
+        if (!response.ok)
+            throw new Error();
+
+        alert("Pedido enviado!");
+
+    }
+    catch {
+
+        alert("Não foi possível enviar o pedido.");
 
     }
 
