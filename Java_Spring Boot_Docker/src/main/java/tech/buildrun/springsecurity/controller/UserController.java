@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import tech.buildrun.springsecurity.controller.dto.CreateUserDto;
 import tech.buildrun.springsecurity.controller.dto.MEDTO_user;
+import tech.buildrun.springsecurity.dtos.Chat.UserSearchResponseDTO;
 import tech.buildrun.springsecurity.entities.Role;
 import tech.buildrun.springsecurity.entities.User;
 import tech.buildrun.springsecurity.repository.RoleRepository;
 import tech.buildrun.springsecurity.repository.UserRepository;
+import tech.buildrun.springsecurity.services.AuthenticatedUserService;
 import tech.buildrun.springsecurity.services.UserService;
 
 import java.util.List;
@@ -27,14 +29,16 @@ public class UserController {
     private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final UserService userService;
+    private final AuthenticatedUserService authenticatedUserService;
 
     public UserController(UserRepository userRepository,
                           RoleRepository roleRepository,
-                          BCryptPasswordEncoder passwordEncoder, UserService userService) {
+                          BCryptPasswordEncoder passwordEncoder, UserService userService, AuthenticatedUserService authenticatedUserService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @Transactional
@@ -79,10 +83,20 @@ public class UserController {
         return new MEDTO_user(user.getUsername(),roles);
     }
 
+    // =========================================================
+    // PESQUISAR UTILIZADORES
+    // =========================================================
+
     @GetMapping("/search")
-    public ResponseEntity<List<User>> searchUsers(
+    public ResponseEntity<List<UserSearchResponseDTO>> searchUsers(
             @RequestParam String username
     ) {
-        return ResponseEntity.ok(userService.searchByUsername(username));
+
+        List<UserSearchResponseDTO> users =
+                userService.searchByUsername(username);
+
+        return ResponseEntity.ok(users);
     }
+
+
 }

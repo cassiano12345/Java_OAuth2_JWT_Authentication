@@ -50,16 +50,26 @@ async function verificarUtilizador() {
 const friendSearchInput = document.getElementById("friendSearchInput");
 const friendSearchResults = document.getElementById("friendSearchResults");
 
-friendSearchInput.addEventListener("input", async function () {
+let searchTimeout;
+
+friendSearchInput.addEventListener("input", function () {
+
+    clearTimeout(searchTimeout);
 
     const username = this.value.trim();
 
     if (username.length < 2) {
+
         friendSearchResults.innerHTML = "";
         return;
+
     }
 
-    await searchUsers(username);
+    searchTimeout = setTimeout(() => {
+
+        searchUsers(username);
+
+    }, 300);
 
 });
 async function searchUsers(username) {
@@ -76,14 +86,15 @@ async function searchUsers(username) {
         );
 
         if (!response.ok) {
-            throw new Error("Erro ao pesquisar usuários.");
+            throw new Error("Erro ao pesquisar utilizadores.");
         }
 
         const users = await response.json();
 
         renderSearchResults(users);
 
-    } catch (e) {
+    }
+    catch (e) {
 
         console.error(e);
 
@@ -100,28 +111,80 @@ function renderSearchResults(users) {
             "<div class='friend-search-empty'>Nenhum jogador encontrado.</div>";
 
         return;
+
     }
 
     users.forEach(user => {
+
+        let buttonText = "Adicionar";
+        let buttonIcon = "fa-user-plus";
+        let buttonClass = "add-friend-button";
+        let disabled = "";
+
+        switch (user.friendshipStatus) {
+
+            case "PENDING_SENT":
+
+                buttonText = "Enviado";
+                buttonIcon = "fa-clock";
+                buttonClass += " pending";
+                disabled = "disabled";
+                break;
+
+            case "PENDING_RECEIVED":
+
+                buttonText = "Responder";
+                buttonIcon = "fa-envelope";
+                buttonClass += " received";
+                break;
+
+            case "ACCEPTED":
+
+                buttonText = "Amigo";
+                buttonIcon = "fa-check";
+                buttonClass += " friend";
+                disabled = "disabled";
+                break;
+
+            case "BLOCKED":
+
+                buttonText = "Bloqueado";
+                buttonIcon = "fa-ban";
+                buttonClass += " blocked";
+                disabled = "disabled";
+                break;
+
+        }
 
         const div = document.createElement("div");
 
         div.className = "friend-search-user";
 
         div.innerHTML = `
+
             <div class="friend-search-left">
+
                 <div class="avatar">
+
                     ${user.username.charAt(0).toUpperCase()}
+
                 </div>
 
                 <span>${user.username}</span>
+
             </div>
 
             <button
-                class="add-friend-button"
-                data-user-id="${user.userId}">
-                Adicionar
+                class="${buttonClass}"
+                data-user-id="${user.userId}"
+                ${disabled}>
+
+                <i class="fa-solid ${buttonIcon}"></i>
+
+                ${buttonText}
+
             </button>
+
         `;
 
         friendSearchResults.appendChild(div);
@@ -131,47 +194,63 @@ function renderSearchResults(users) {
 }
 document.addEventListener("click", async function (e) {
 
-    if (!e.target.classList.contains("add-friend-button"))
+    if (!e.target.closest(".add-friend-button"))
         return;
 
-    const addresseeId = e.target.dataset.userId;
+    const button = e.target.closest(".add-friend-button");
 
-    await sendFriendRequest(addresseeId);
+    if (button.disabled)
+        return;
+
+    const addresseeId = button.dataset.userId;
+
+    try {
+
+        await sendFriendRequest(addresseeId);
+
+        button.disabled = true;
+        button.classList.add("pending");
+
+        button.innerHTML = `
+
+            <i class="fa-solid fa-clock"></i>
+
+            Enviado
+
+        `;
+
+    }
+    catch (error) {
+
+        alert(error.message);
+
+    }
 
 });
 async function sendFriendRequest(addresseeId) {
 
-    try {
+    const response = await fetch("/api/friendships/send", {
 
-        const me = JSON.parse(localStorage.getItem("me"));
+        method: "POST",
 
-        const response = await fetch("/api/friendships/send", {
+        headers: {
 
-            method: "POST",
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("accessToken")
 
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + localStorage.getItem("accessToken")
-            },
+        },
 
-            body: JSON.stringify({
+        body: JSON.stringify({
 
-                requesterId: me.userId,
-                addresseeId: addresseeId
+            addresseeId: addresseeId
 
-            })
+        })
 
-        });
+    });
 
-        if (!response.ok)
-            throw new Error();
+    if (!response.ok) {
 
-        alert("Pedido enviado!");
-
-    }
-    catch {
-
-        alert("Não foi possível enviar o pedido.");
+        throw new Error("Não foi possível enviar o pedido.");
 
     }
 

@@ -3,14 +3,13 @@ package tech.buildrun.springsecurity.controller.Chat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.buildrun.springsecurity.dtos.Chat.FriendshipActionDTO;
+import tech.buildrun.springsecurity.dtos.Chat.FriendshipFindDTO;
 import tech.buildrun.springsecurity.dtos.Chat.FriendshipRequestDTO;
 import tech.buildrun.springsecurity.dtos.Chat.FriendshipResponseDTO;
-import tech.buildrun.springsecurity.dtos.Chat.UserIdDTO;
 import tech.buildrun.springsecurity.entities.Chat.FRIENDSHIP;
 import tech.buildrun.springsecurity.services.Chat.FriendshipService;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/friendships")
@@ -23,7 +22,7 @@ public class FriendshipController {
     }
 
     // =========================================================
-    // ENVIAR PEDIDO
+    // ENVIAR PEDIDO DE AMIZADE
     // =========================================================
 
     @PostMapping("/send")
@@ -32,7 +31,6 @@ public class FriendshipController {
     ) {
 
         FRIENDSHIP friendship = friendshipService.sendFriendRequest(
-                dto.requesterId(),
                 dto.addresseeId()
         );
 
@@ -70,7 +68,7 @@ public class FriendshipController {
     }
 
     // =========================================================
-    // BLOQUEAR
+    // BLOQUEAR UTILIZADOR
     // =========================================================
 
     @PutMapping("/block")
@@ -85,76 +83,64 @@ public class FriendshipController {
     }
 
     // =========================================================
-    // PEDIDOS RECEBIDOS
+    // LISTAR PEDIDOS RECEBIDOS
     // =========================================================
 
-    @PostMapping("/received")
-    public ResponseEntity<List<FriendshipResponseDTO>> getReceivedRequests(
-            @RequestBody UserIdDTO dto
-    ) {
+    @GetMapping("/received")
+    public ResponseEntity<List<FriendshipResponseDTO>> getReceivedRequests() {
 
-        List<FRIENDSHIP> friendships =
-                friendshipService.getReceivedRequests(dto.userId());
+        List<FriendshipResponseDTO> response = friendshipService
+                .getReceivedRequests()
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
 
-        return ResponseEntity.ok(
-                friendships.stream()
-                        .map(this::toResponseDTO)
-                        .toList()
-        );
+        return ResponseEntity.ok(response);
     }
 
     // =========================================================
-    // PEDIDOS ENVIADOS
+    // LISTAR PEDIDOS ENVIADOS
     // =========================================================
 
-    @PostMapping("/sent")
-    public ResponseEntity<List<FriendshipResponseDTO>> getSentRequests(
-            @RequestBody UserIdDTO dto
-    ) {
+    @GetMapping("/sent")
+    public ResponseEntity<List<FriendshipResponseDTO>> getSentRequests() {
 
-        List<FRIENDSHIP> friendships =
-                friendshipService.getSentRequests(dto.userId());
+        List<FriendshipResponseDTO> response = friendshipService
+                .getSentRequests()
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
 
-        return ResponseEntity.ok(
-                friendships.stream()
-                        .map(this::toResponseDTO)
-                        .toList()
-        );
+        return ResponseEntity.ok(response);
     }
 
     // =========================================================
-    // AMIGOS ACEITOS
+    // LISTAR AMIGOS
     // =========================================================
 
-    @PostMapping("/friends")
-    public ResponseEntity<List<FriendshipResponseDTO>> getFriends(
-            @RequestBody UserIdDTO dto
-    ) {
+    @GetMapping("/friends")
+    public ResponseEntity<List<FriendshipResponseDTO>> getFriends() {
 
-        List<FRIENDSHIP> friendships =
-                friendshipService.getAcceptedFriendships(dto.userId());
+        List<FriendshipResponseDTO> response = friendshipService
+                .getAcceptedFriendships()
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
 
-        return ResponseEntity.ok(
-                friendships.stream()
-                        .map(this::toResponseDTO)
-                        .toList()
-        );
+        return ResponseEntity.ok(response);
     }
 
     // =========================================================
-    // BUSCAR RELAÇÃO
+    // PROCURAR AMIZADE COM UM UTILIZADOR
     // =========================================================
 
     @PostMapping("/find")
     public ResponseEntity<FriendshipResponseDTO> findFriendship(
-            @RequestBody FriendshipRequestDTO dto
+            @RequestBody FriendshipFindDTO dto
     ) {
 
         FRIENDSHIP friendship =
-                friendshipService.findFriendship(
-                        dto.requesterId(),
-                        dto.addresseeId()
-                );
+                friendshipService.findFriendship(dto.addresseeId());
 
         return ResponseEntity.ok(toResponseDTO(friendship));
     }
@@ -174,18 +160,22 @@ public class FriendshipController {
     }
 
     // =========================================================
-    // CONVERTER ENTITY → DTO
+    // ENTITY -> DTO
     // =========================================================
 
     private FriendshipResponseDTO toResponseDTO(FRIENDSHIP friendship) {
 
         return new FriendshipResponseDTO(
                 friendship.getFriendshipId(),
+
                 friendship.getRequester().getUserId(),
                 friendship.getRequester().getUsername(),
+
                 friendship.getAddressee().getUserId(),
                 friendship.getAddressee().getUsername(),
+
                 friendship.getStatus(),
+
                 friendship.getCreatedAt()
         );
     }

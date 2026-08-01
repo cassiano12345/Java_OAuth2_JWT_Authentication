@@ -1,6 +1,8 @@
 package tech.buildrun.springsecurity.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import tech.buildrun.springsecurity.entities.Chat.FRIENDSHIP;
 import tech.buildrun.springsecurity.entities.Chat.FriendshipStatus;
 import tech.buildrun.springsecurity.entities.User;
@@ -11,6 +13,18 @@ import java.util.UUID;
 
 public interface FriendshipRepository extends JpaRepository<FRIENDSHIP, UUID> {
 
+    @Query("""
+SELECT f
+FROM FRIENDSHIP f
+WHERE
+    (f.requester = :user1 AND f.addressee = :user2)
+OR
+    (f.requester = :user2 AND f.addressee = :user1)
+""")
+    Optional<FRIENDSHIP> findFriendshipBetweenUsers(
+            @Param("user1") User user1,
+            @Param("user2") User user2
+    );
     // Pedidos enviados por um usuário
     List<FRIENDSHIP> findByRequesterAndStatus(
             User requester,
