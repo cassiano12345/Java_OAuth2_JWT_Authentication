@@ -6,6 +6,7 @@ window.onload = function () {
 
     console.log("PeerBox iniciado.");
     verificarUtilizador();
+    loadFriendRequestCount();
 
 }
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -255,7 +256,49 @@ async function sendFriendRequest(addresseeId) {
     }
 
 }
+async function loadFriendRequestCount() {
 
+    try {
+
+        const response = await fetch("/api/friendships/received", {
+
+            headers: {
+                Authorization: "Bearer " + localStorage.getItem("accessToken")
+            }
+
+        });
+
+        if (!response.ok)
+            throw new Error();
+
+        const requests = await response.json();
+
+        updateFriendRequestBadge(requests.length);
+
+    }
+    catch (e) {
+
+        console.error(e);
+
+    }
+
+}
+function updateFriendRequestBadge(count) {
+
+    const badge = document.getElementById("friendRequestBadge");
+
+    if (count <= 0) {
+
+        badge.style.display = "none";
+        return;
+
+    }
+
+    badge.style.display = "flex";
+
+    badge.textContent = count > 99 ? "99+" : count;
+
+}
 
 // ============================================================
 // SIDEBAR / MENU MOBILE
