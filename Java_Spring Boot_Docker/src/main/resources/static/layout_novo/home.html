@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ludo Star — Layout</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link rel="stylesheet" href="home.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="mobile-bar">
+        <button class="icon-button" id="openSidebar" aria-label="Abrir menu">
+          <i class="bi bi-list"></i>
+        </button>
+        <span class="mobile-brand"><span>LUDO</span> <b>STAR</b></span>
+        <button class="icon-button" id="openChat" aria-label="Abrir chat">
+          <i class="bi bi-chat-dots-fill"></i>
+        </button>
+      </header>
+
+      <aside class="sidebar" id="sidebar" aria-label="Navegação lateral">
+        <div class="brand"><span>LUDO</span><b>STAR</b></div>
+        <button
+          class="close-drawer"
+          data-close="sidebar"
+          aria-label="Fechar menu"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+        <div class="sidebar-content">
+          <nav class="menu">
+            <a class="menu-item active" href="#"
+              ><i class="bi bi-house-fill"></i><span>Início</span></a
+            >
+            <button class="menu-item" data-chat-view="messages">
+              <i class="bi bi-chat-fill"></i><span>Mensagens</span
+              ><em id="messageBadge">3</em>
+            </button>
+            <button class="menu-item" data-chat-view="requests">
+              <i class="bi bi-person-plus-fill"></i
+              ><span>Pedidos de amizade</span><em id="requestBadge"></em>
+            </button>
+          </nav>
+          <div class="divider"></div>
+          <div class="sidebar-label">
+            <span>GRUPOS DE MENSAGENS</span
+            ><button class="plain-icon" id="createGroupButton" aria-label="Criar grupo">
+              <i class="bi bi-plus-lg"></i>
+            </button>
+          </div>
+          <div class="groups" id="groupsList">
+            <button class="group active" data-conversation="ludo-friends">
+              <span class="group-icon">🎮</span><span>Ludo Friends</span
+              ><em>5</em>
+            </button>
+            <button class="group" data-conversation="torneios">
+              <span class="group-icon">🏆</span><span>Torneios</span>
+            </button>
+            <button class="group" data-conversation="amigos">
+              <span class="group-icon">🎲</span><span>Amigos do Ludo</span>
+            </button>
+          </div>
+          <div class="divider friends-divider"></div>
+          <div class="friends-title">ONLINE — <b>4</b></div>
+          <div class="friends-list">
+            <button class="friend-item">
+              <span class="avatar online">A</span
+              ><span><b>AnaLudo</b><small>Jogando agora</small></span>
+            </button>
+            <button class="friend-item">
+              <span class="avatar online">J</span
+              ><span><b>JoãoKing</b><small>No lobby</small></span>
+            </button>
+            <button class="friend-item">
+              <span class="avatar online">P</span
+              ><span><b>PedroLudo</b><small>Jogando agora</small></span>
+            </button>
+            <button class="friend-item">
+              <span class="avatar online">L</span
+              ><span><b>LucasStar</b><small>Online</small></span>
+            </button>
+          </div>
+          <div class="friends-title offline-title">OFFLINE — <b>3</b></div>
+          <div class="friends-list offline-friends">
+            <button class="friend-item offline">
+              <span class="avatar">M</span
+              ><span><b>Maria</b><small>Offline</small></span>
+            </button>
+            <button class="friend-item offline">
+              <span class="avatar">C</span
+              ><span><b>CarlosLudo</b><small>Offline</small></span>
+            </button>
+            <button class="friend-item offline">
+              <span class="avatar">R</span
+              ><span><b>ReiDoLudo</b><small>Offline</small></span>
+            </button>
+          </div>
+        </div>
+        <footer class="sidebar-footer">
+          <span class="avatar current">S</span>
+          <span><b id="onlineName">Você</b><small>● Online</small></span>
+          <div class="account-menu-wrap">
+            <button
+              class="plain-icon account-menu-trigger"
+              id="sidebarSettingsButton"
+              aria-label="Opções da conta"
+              aria-expanded="false"
+            >
+              <i class="bi bi-gear-fill"></i>
+            </button>
+            <div class="account-menu hidden" id="sidebarAccountMenu">
+              <button data-account-action="profile">
+                <i class="bi bi-person-circle"></i> Meu perfil
+              </button>
+              <button data-account-action="settings">
+                <i class="bi bi-gear"></i> Definições
+              </button>
+              <button data-account-action="theme">
+                <i class="bi bi-moon-stars"></i> <span>Modo escuro</span>
+              </button>
+              <button class="danger" data-account-action="logout">
+                <i class="bi bi-box-arrow-right"></i> Logout
+              </button>
+            </div>
+          </div>
+        </footer>
+      </aside>
+
+      <aside class="chat-panel" id="chatPanel" aria-label="Chat">
+        <header class="chat-header">
+          <button
+            class="icon-button only-small"
+            data-close="chatPanel"
+            aria-label="Fechar chat"
+          >
+            <i class="bi bi-arrow-left"></i>
+          </button>
+          <div>
+            <b id="chatTitle">Mensagens</b
+            ><small id="chatSubtitle">Escolha uma conversa</small>
+          </div>
+          <button
+            class="plain-icon"
+            id="chatSearchButton"
+            aria-label="Pesquisar"
+          >
+            <i class="bi bi-search"></i>
+          </button>
+        </header>
+        <div class="chat-search hidden" id="chatSearch">
+          <i class="bi bi-search"></i
+          ><input id="chatSearchInput" placeholder="Pesquisar conversas..." />
+        </div>
+        <div class="chat-body" id="chatBody"></div>
+      </aside>
+
+      <main class="main-content">
+        <header class="content-header">
+          <div>
+            <h1>Olá, <strong id="username">jogador</strong> 👑</h1>
+            <p>Pronto para criar a sua próxima página?</p>
+          </div>
+          <div class="header-actions">
+            <div class="notifications">
+              <button
+                class="notification-button"
+                id="notificationButton"
+                aria-label="Notificações"
+              >
+                <i class="bi bi-bell-fill"></i><span>2</span>
+              </button>
+              <div class="notifications-menu hidden" id="notificationsMenu">
+                <b>Notificações</b
+                ><button>🎲 AnaLudo convidou você para jogar</button
+                ><button>🏆 Novo torneio disponível</button>
+              </div>
+            </div>
+            <div class="coins">🪙 <b>12.500</b><button>+</button></div>
+            <div class="account-menu-wrap profile-menu-wrap">
+              <button
+                class="profile account-menu-trigger"
+                id="profileMenuButton"
+                aria-label="Opções da conta"
+                aria-expanded="false"
+              >
+                <span class="avatar current">S</span
+                ><i class="bi bi-chevron-down"></i>
+              </button>
+              <div class="account-menu hidden" id="profileAccountMenu">
+                <button data-account-action="profile">
+                  <i class="bi bi-person-circle"></i> Meu perfil
+                </button>
+                <button data-account-action="settings">
+                  <i class="bi bi-gear"></i> Definições
+                </button>
+                <button data-account-action="theme">
+                  <i class="bi bi-moon-stars"></i> <span>Modo escuro</span>
+                </button>
+                <button class="danger" data-account-action="logout">
+                  <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+        <section class="layout-placeholder">
+          <div class="placeholder-icon">🎲</div>
+          <p class="eyebrow">LAYOUT BASE</p>
+          <h2>Conteúdo da página</h2>
+          <p>
+            Use esta área para inserir o conteúdo de cada nova página. As barras
+            lateral e de chat ficam prontas e reutilizáveis.
+          </p>
+        </section>
+      </main>
+    </div>
+    <div class="backdrop" id="backdrop"></div>
+
+    <!-- Modal de criação de grupo (demonstração local, sem backend) -->
+    <div class="group-modal hidden" id="groupModal" role="dialog" aria-modal="true" aria-labelledby="groupModalTitle">
+      <form class="group-modal-card" id="createGroupForm">
+        <header>
+          <div>
+            <p class="eyebrow">NOVO GRUPO</p>
+            <h2 id="groupModalTitle">Criar grupo de mensagens</h2>
+          </div>
+          <button type="button" class="plain-icon" id="closeGroupModal" aria-label="Fechar"><i class="bi bi-x-lg"></i></button>
+        </header>
+        <label class="group-avatar-picker" for="groupAvatarInput">
+          <span class="group-avatar-preview" id="groupAvatarPreview">👥</span>
+          <span><b>Avatar do grupo</b><small>Escolha uma imagem (opcional)</small></span>
+          <input id="groupAvatarInput" type="file" accept="image/*" hidden>
+        </label>
+        <label class="modal-field">Nome do grupo
+          <input id="groupNameInput" maxlength="32" required placeholder="Ex.: Equipa campeã">
+        </label>
+        <section class="group-members-builder">
+          <label class="modal-field">Adicionar jogadores
+            <div class="friend-search-input"><i class="bi bi-search"></i><input id="groupPlayerSearch" type="search" autocomplete="off" placeholder="Pesquisar jogador..."></div>
+          </label>
+          <div class="group-search-results" id="groupSearchResults"></div>
+          <div class="selected-members" id="selectedGroupMembers"></div>
+        </section>
+        <footer>
+          <button type="button" class="modal-cancel" id="cancelGroupModal">Cancelar</button>
+          <button class="modal-submit" type="submit"><i class="bi bi-plus-lg"></i> Criar grupo</button>
+        </footer>
+      </form>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script src="home.js"></script>
+  </body>
+</html>
