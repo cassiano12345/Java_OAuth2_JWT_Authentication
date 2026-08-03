@@ -1,375 +1,265 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Star — Home</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/home.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ludo Star — Layout</title>
+    <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/home.css" />
 </head>
 <body>
 <div class="app-shell">
-
-    <!-- MOBILE TOPBAR -->
-    <header class="mobile-topbar">
-        <button class="icon-btn" id="mobileMenuButton" aria-label="Abrir menu"><i class="bi bi-list"></i></button>
-        <div class="brand-mini"><span>LUDO</span> <b>STAR</b></div>
-        <button class="icon-btn" id="mobileChatButton" aria-label="Abrir mensagens"><i class="bi bi-chat-dots-fill"></i></button>
+    <header class="mobile-bar">
+        <button class="icon-button" id="openSidebar" aria-label="Abrir menu">
+            <i class="bi bi-list"></i>
+        </button>
+        <span class="mobile-brand"><span>LUDO</span> <b>STAR</b></span>
+        <button class="icon-button" id="openChat" aria-label="Abrir chat">
+            <i class="bi bi-chat-dots-fill"></i>
+        </button>
     </header>
 
-    <!-- LEFT SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-        <div class="brand">
-            <div class="brand-ludo">LUDO</div>
-            <div class="brand-star">STAR</div>
-        </div>
-
-        <nav class="main-menu">
-            <button class="menu-item active" id="homeMenu">
-                <i class="bi bi-house-fill"></i>
-                <span>Início</span>
+    <aside class="sidebar" id="sidebar" aria-label="Navegação lateral">
+        <div class="brand"><span>LUDO</span><b>STAR</b></div>
+        <button
+                class="close-drawer"
+                data-close="sidebar"
+                aria-label="Fechar menu"
+        >
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <div class="sidebar-content">
+            <nav class="menu">
+                <a class="menu-item active" href="#"
+                ><i class="bi bi-house-fill"></i><span>Início</span></a
+                >
+                <button class="menu-item" data-chat-view="messages">
+                    <i class="bi bi-chat-fill"></i><span>Mensagens</span
+                ><em id="messageBadge">3</em>
+                </button>
+                <button class="menu-item" data-chat-view="requests">
+                    <i class="bi bi-person-plus-fill"></i
+                    ><span>Pedidos de amizade</span><em id="requestBadge"></em>
+                </button>
+            </nav>
+            <div class="divider"></div>
+            <div class="sidebar-label">
+            <span>GRUPOS DE MENSAGENS</span
+            ><button class="plain-icon" id="createGroupButton" aria-label="Criar grupo">
+                <i class="bi bi-plus-lg"></i>
             </button>
-
-            <button class="menu-item" id="messagesMenu">
-                <i class="bi bi-chat-fill"></i>
-                <span>Mensagens</span>
-                <em>3</em>
-            </button>
-
-            <button class="menu-item" id="friendRequestsMenu">
-                <i class="bi bi-person-plus-fill"></i>
-                <span>Pedidos de amizade</span>
-                <em id="friendRequestBadge" style="display:none;"></em>
-            </button>
-        </nav>
-
-        <div class="side-divider"></div>
-
-        <div class="side-heading">
-            <span>GRUPOS DE MENSAGENS</span>
-            <button class="plain-icon" id="createGroupButton" title="Criar grupo"><i class="bi bi-plus-lg"></i></button>
-        </div>
-
-        <div class="groups-list" id="groupsList">
-            <button class="group-item active" data-group="Ludo Friends">
-                <span class="group-icon">🎮</span><span>Ludo Friends</span><em>5</em>
-            </button>
-            <button class="group-item" data-group="Torneios">
-                <span class="group-icon">🏆</span><span>Torneios</span>
-            </button>
-            <button class="group-item" data-group="Amigos do Ludo">
-                <span class="group-icon">🎲</span><span>Amigos do Ludo</span>
-            </button>
-        </div>
-
-        <div class="side-divider"></div>
-        <div class="friend-search-box">
-
-            <div class="friend-search-input">
-
-                <i class="bi bi-search"></i>
-
-                <input
-                        id="friendSearchInput"
-                        type="text"
-                        placeholder="Pesquisar jogador..."
-                        autocomplete="off">
-
             </div>
-
-            <div
-                    id="friendSearchResults"
-                    class="friend-search-results">
+            <div class="groups" id="groupsList">
+                <button class="group active" data-conversation="ludo-friends">
+                    <span class="group-icon">🎮</span><span>Ludo Friends</span
+                ><em>5</em>
+                </button>
+                <button class="group" data-conversation="torneios">
+                    <span class="group-icon">🏆</span><span>Torneios</span>
+                </button>
+                <button class="group" data-conversation="amigos">
+                    <span class="group-icon">🎲</span><span>Amigos do Ludo</span>
+                </button>
             </div>
-
+            <div class="divider friends-divider"></div>
+            <div class="friends-title">ONLINE — <b>4</b></div>
+            <div class="sidebar-friend-search">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input id="sidebarFriendSearch" type="search" autocomplete="off" aria-label="Pesquisar amigos" placeholder="Pesquisar amigos..." />
+            </div>
+            <div class="friends-list">
+                <button class="friend-item">
+              <span class="avatar online">A</span
+              ><span><b>AnaLudo</b><small>Jogando agora</small></span>
+                </button>
+                <button class="friend-item">
+              <span class="avatar online">J</span
+              ><span><b>JoãoKing</b><small>No lobby</small></span>
+                </button>
+                <button class="friend-item">
+              <span class="avatar online">P</span
+              ><span><b>PedroLudo</b><small>Jogando agora</small></span>
+                </button>
+                <button class="friend-item">
+              <span class="avatar online">L</span
+              ><span><b>LucasStar</b><small>Online</small></span>
+                </button>
+            </div>
+            <div class="friends-title offline-title">OFFLINE — <b>3</b></div>
+            <div class="friends-list offline-friends">
+                <button class="friend-item offline">
+              <span class="avatar">M</span
+              ><span><b>Maria</b><small>Offline</small></span>
+                </button>
+                <button class="friend-item offline">
+              <span class="avatar">C</span
+              ><span><b>CarlosLudo</b><small>Offline</small></span>
+                </button>
+                <button class="friend-item offline">
+              <span class="avatar">R</span
+              ><span><b>ReiDoLudo</b><small>Offline</small></span>
+                </button>
+            </div>
         </div>
-        <div class="friends-title">ONLINE — <b>4</b></div>
-        <div class="friends-list">
-            <button class="friend-item"><span class="avatar online">A</span><span><b>AnaLudo</b><small>Jogando agora</small></span></button>
-            <button class="friend-item"><span class="avatar online">J</span><span><b>JoãoKing</b><small>No lobby</small></span></button>
-            <button class="friend-item"><span class="avatar online">P</span><span><b>PedroLudo</b><small>Jogando agora</small></span></button>
-            <button class="friend-item"><span class="avatar online">L</span><span><b>LucasStar</b><small>Online</small></span></button>
-        </div>
-
-        <div class="friends-title offline-title">OFFLINE — <b>3</b></div>
-        <div class="friends-list">
-            <button class="friend-item offline"><span class="avatar">M</span><span><b>Maria</b><small>Offline</small></span></button>
-            <button class="friend-item offline"><span class="avatar">C</span><span><b>CarlosLudo</b><small>Offline</small></span></button>
-            <button class="friend-item offline"><span class="avatar">R</span><span><b>ReiDoLudo</b><small>Offline</small></span></button>
-        </div>
-
-        <div class="current-user">
+        <footer class="sidebar-footer">
             <span class="avatar current">S</span>
-            <span class="user-info"><b id="online"></b><small>● Online</small></span>
-            <button class="plain-icon" id="settingsButton"><i class="bi bi-gear-fill"></i></button>
-        </div>
+            <span><b id="onlineName">Você</b><small>● Online</small></span>
+            <div class="account-menu-wrap">
+                <button
+                        class="plain-icon account-menu-trigger"
+                        id="sidebarSettingsButton"
+                        aria-label="Opções da conta"
+                        aria-expanded="false"
+                >
+                    <i class="bi bi-gear-fill"></i>
+                </button>
+                <div class="account-menu hidden" id="sidebarAccountMenu">
+                    <button data-account-action="profile">
+                        <i class="bi bi-person-circle"></i> Meu perfil
+                    </button>
+                    <button data-account-action="settings">
+                        <i class="bi bi-gear"></i> Definições
+                    </button>
+                    <button data-account-action="theme">
+                        <i class="bi bi-moon-stars"></i> <span>Modo escuro</span>
+                    </button>
+                    <button class="danger" data-account-action="logout">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </footer>
     </aside>
 
-    <!-- CHAT -->
-    <section class="chat-panel" id="chatPanel">
-        <div class="chat-header">
-            <div><b id="chatTitle">Ludo Friends</b><small id="chatSubtitle">8 membros</small></div>
-            <button class="plain-icon" id="chatSearchButton"><i class="bi bi-search"></i></button>
+    <aside class="chat-panel" id="chatPanel" aria-label="Chat">
+        <header class="chat-header">
+            <button
+                    class="icon-button only-small"
+                    data-close="chatPanel"
+                    aria-label="Fechar chat"
+            >
+                <i class="bi bi-arrow-left"></i>
+            </button>
+            <div>
+                <b id="chatTitle">Mensagens</b
+                ><small id="chatSubtitle">Escolha uma conversa</small>
+            </div>
+            <button
+                    class="plain-icon"
+                    id="chatSearchButton"
+                    aria-label="Pesquisar"
+            >
+                <i class="bi bi-search"></i>
+            </button>
+        </header>
+        <div class="chat-search hidden" id="chatSearch">
+            <i class="bi bi-search"></i
+            ><input id="chatSearchInput" placeholder="Pesquisar conversas..." />
         </div>
+        <div class="chat-body" id="chatBody"></div>
+    </aside>
 
-        <div class="chat-search d-none" id="chatSearch">
-            <i class="bi bi-search"></i>
-            <input id="chatSearchInput" type="search" placeholder="Pesquisar mensagens...">
-        </div>
-
-        <div class="messages" id="messages">
-            <div class="chat-welcome">
-                <div class="welcome-icon">🎮</div>
-                <h2>Bem-vindo ao Ludo Friends!</h2>
-                <p>Este é o começo da sua conversa.</p>
-            </div>
-
-            <div class="message">
-                <span class="avatar message-avatar">A</span>
-                <div><div class="message-author">AnaLudo <time>Hoje às 14:21</time></div><p>Alguém vai participar do torneio das 20h? 🏆</p></div>
-            </div>
-            <div class="message">
-                <span class="avatar message-avatar">J</span>
-                <div><div class="message-author">JoãoKing <time>Hoje às 14:23</time></div><p>Eu vou! Já fiz minha inscrição.</p></div>
-            </div>
-            <div class="message">
-                <span class="avatar message-avatar">P</span>
-                <div><div class="message-author">PedroLudo <time>Hoje às 14:24</time></div><p>Bora formar um grupo para jogar antes? 🎲🔥</p></div>
-            </div>
-        </div>
-
-        <form class="message-form" id="messageForm">
-            <button type="button" class="plain-icon" id="attachButton"><i class="bi bi-plus-circle-fill"></i></button>
-            <input id="messageInput" type="text" placeholder="Enviar mensagem para #ludo-friends" autocomplete="off">
-            <button type="submit" class="plain-icon"><i class="bi bi-send-fill"></i></button>
-        </form>
-    </section>
-
-    <!-- MAIN -->
     <main class="main-content">
         <header class="content-header">
             <div>
-                <h1>Olá, <strong id="username"></strong> 👑</h1>
-                <p>Pronto para jogar e conquistar o ranking?</p>
+                <h1>Olá, <strong id="username">jogador</strong> 👑</h1>
+                <p>Pronto para criar a sua próxima página?</p>
             </div>
             <div class="header-actions">
-                <div class="coin-balance"><span>🪙</span><b id="coinBalance">12.500</b><button id="buyCoinsButton">+</button></div>
-                <button class="profile-button" id="profileButton"><span class="avatar current">S</span><i class="bi bi-chevron-down"></i></button>
+                <div class="notifications">
+                    <button
+                            class="notification-button"
+                            id="notificationButton"
+                            aria-label="Notificações"
+                    >
+                        <i class="bi bi-bell-fill"></i><span>2</span>
+                    </button>
+                    <div class="notifications-menu hidden" id="notificationsMenu">
+                        <b>Notificações</b
+                        ><button>🎲 AnaLudo convidou você para jogar</button
+                    ><button>🏆 Novo torneio disponível</button>
+                    </div>
+                </div>
+                <div class="coins">🪙 <b>12.500</b><button>+</button></div>
+                <div class="account-menu-wrap profile-menu-wrap">
+                    <button
+                            class="profile account-menu-trigger"
+                            id="profileMenuButton"
+                            aria-label="Opções da conta"
+                            aria-expanded="false"
+                    >
+                <span class="avatar current">S</span
+                ><i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="account-menu hidden" id="profileAccountMenu">
+                        <button data-account-action="profile">
+                            <i class="bi bi-person-circle"></i> Meu perfil
+                        </button>
+                        <button data-account-action="settings">
+                            <i class="bi bi-gear"></i> Definições
+                        </button>
+                        <button data-account-action="theme">
+                            <i class="bi bi-moon-stars"></i> <span>Modo escuro</span>
+                        </button>
+                        <button class="danger" data-account-action="logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    </div>
+                </div>
             </div>
         </header>
-
-        <!-- MY TOURNAMENTS -->
-        <section class="dashboard-section">
-            <div class="section-heading">
-                <div><span class="section-kicker">🏆 COMPETIÇÃO</span><h2>Meus torneios</h2></div>
-                <button class="text-button" id="viewMyTournamentsButton">Ver todos <i class="bi bi-arrow-right"></i></button>
-            </div>
-
-            <div class="data-card table-scroll">
-                <div class="table-grid my-head">
-                    <span>TORNEIO</span><span>POSIÇÃO</span><span>RODADA</span><span>PRÓXIMA PARTIDA</span><span>STATUS</span>
-                </div>
-                <button class="table-grid tournament-row my-tournament-row" data-tournament="copa-reis">
-                    <span class="tournament-cell"><i class="tournament-icon gold">⭐</i><span><b>Copa dos Reis</b><small>32 jogadores</small></span></span>
-                    <span class="position"><b>#3</b><small>24 pts</small></span><span>3 / 8</span>
-                    <span><b>Hoje</b><small>21:00</small></span><span class="status live">EM ANDAMENTO</span>
-                </button>
-                <button class="table-grid tournament-row my-tournament-row" data-tournament="mega-ludo">
-                    <span class="tournament-cell"><i class="tournament-icon red">🔥</i><span><b>Mega Ludo</b><small>64 jogadores</small></span></span>
-                    <span class="position"><b>#8</b><small>16 pts</small></span><span>1 / 6</span>
-                    <span><b>Amanhã</b><small>19:30</small></span><span class="status live">EM ANDAMENTO</span>
-                </button>
-                <button class="table-grid tournament-row my-tournament-row" data-tournament="masters">
-                    <span class="tournament-cell"><i class="tournament-icon blue">💎</i><span><b>Ludo Masters</b><small>128 jogadores</small></span></span>
-                    <span class="position"><b>#17</b><small>8 pts</small></span><span>1 / 10</span>
-                    <span><b>03/08</b><small>22:00</small></span><span class="status upcoming">AGUARDANDO</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- CREATED BY USER -->
-        <section class="dashboard-section">
-            <div class="section-heading">
-                <div><span class="section-kicker">🛠️ ORGANIZAÇÃO</span><h2>Meus torneios criados</h2></div>
-                <button class="text-button" id="viewCreatedTournamentsButton">Ver todos <i class="bi bi-arrow-right"></i></button>
-            </div>
-
-            <div class="data-card table-scroll">
-                <div class="table-grid created-head">
-                    <span>TORNEIO</span><span>MODO</span><span>FORMATO</span><span>VAGAS</span><span>ESTADO</span>
-                </div>
-
-                <div class="table-grid created-row">
-                    <span class="tournament-cell"><i class="tournament-icon gold">🏆</i><span><b>Copa dos Amigos</b><small>Criado por você</small></span></span>
-                    <span><b>Liga</b></span><span>Ida e volta</span><span>16</span><span class="status accepted">ACEITE</span>
-                </div>
-
-                <div class="table-grid created-row">
-                    <span class="tournament-cell"><i class="tournament-icon blue">💎</i><span><b>Mega League</b><small>Aguardando análise</small></span></span>
-                    <span><b>Liga</b></span><span>Só ida</span><span>32</span><span class="status pending">AGUARDANDO ACEITAÇÃO</span>
-                </div>
-
-                <div class="table-grid created-row">
-                    <span class="tournament-cell"><i class="tournament-icon red">🔥</i><span><b>Battle Star</b><small>Pedido analisado</small></span></span>
-                    <span><b>Eliminatórias</b></span><span>Ida e volta</span><span>64</span><span class="status rejected">REJEITADO</span>
-                </div>
-
-                <div class="table-grid created-row">
-                    <span class="tournament-cell"><i class="tournament-icon purple">🎲</i><span><b>Ludo Classic</b><small>Torneio finalizado</small></span></span>
-                    <span><b>Liga</b></span><span>Só ida</span><span>8</span><span class="status closed">ENCERRADO</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- AVAILABLE -->
-        <section class="dashboard-section">
-            <div class="section-heading">
-                <div><span class="section-kicker">🎲 ENTRE NA ARENA</span><h2>Torneios disponíveis</h2></div>
-                <button class="create-tournament-button" id="createTournamentButton"><i class="bi bi-plus-lg"></i> CRIAR TORNEIO</button>
-            </div>
-
-            <div class="data-card table-scroll">
-                <div class="table-grid available-head">
-                    <span>TORNEIO</span><span>MODO</span><span>VAGAS</span><span>INÍCIO</span><span>ENTRADA</span><span>AÇÃO</span>
-                </div>
-
-                <div class="table-grid available-row">
-                    <span class="tournament-cell"><i class="tournament-icon purple">⚡</i><span><b>Torneio Relâmpago</b><small>Partida rápida</small></span></span>
-                    <span>Liga</span><span><i class="bi bi-people-fill"></i> 16</span><span>30/07 <small>20:00</small></span><span class="entry">🪙 500</span><button class="join-button" data-fee="500">ENTRAR</button>
-                </div>
-                <div class="table-grid available-row">
-                    <span class="tournament-cell"><i class="tournament-icon gold">⭐</i><span><b>Copa dos Reis</b><small>Torneio clássico</small></span></span>
-                    <span>Liga</span><span><i class="bi bi-people-fill"></i> 32</span><span>31/07 <small>21:00</small></span><span class="entry">🪙 1.000</span><button class="join-button" data-fee="1000">ENTRAR</button>
-                </div>
-                <div class="table-grid available-row">
-                    <span class="tournament-cell"><i class="tournament-icon red">🔥</i><span><b>Mega Ludo</b><small>Grande prêmio</small></span></span>
-                    <span>Eliminatórias</span><span><i class="bi bi-people-fill"></i> 64</span><span>02/08 <small>19:30</small></span><span class="entry">🪙 2.500</span><button class="join-button" data-fee="2500">ENTRAR</button>
-                </div>
-                <div class="table-grid available-row">
-                    <span class="tournament-cell"><i class="tournament-icon blue">💎</i><span><b>Ludo Masters</b><small>Para especialistas</small></span></span>
-                    <span>Liga</span><span><i class="bi bi-people-fill"></i> 128</span><span>03/08 <small>22:00</small></span><span class="entry">🪙 5.000</span><button class="join-button" data-fee="5000">ENTRAR</button>
-                </div>
-            </div>
+        <section class="layout-placeholder">
+            <div class="placeholder-icon">🎲</div>
+            <p class="eyebrow">LAYOUT BASE</p>
+            <h2>Conteúdo da página</h2>
+            <p>
+                Use esta área para inserir o conteúdo de cada nova página. As barras
+                lateral e de chat ficam prontas e reutilizáveis.
+            </p>
         </section>
     </main>
 </div>
+<div class="backdrop" id="backdrop"></div>
 
-<!-- OVERLAY -->
-<div class="modal-overlay d-none" id="modalOverlay"></div>
-
-<!-- RANKING MODAL -->
-<div class="modal-overlay d-none" id="rankingModal">
-    <div class="app-modal ranking-modal">
-        <button class="close-modal" id="closeRankingButton"><i class="bi bi-x-lg"></i></button>
-        <div class="ranking-header">
-            <div class="ranking-trophy" id="rankingTrophy">🏆</div>
-            <div><span>CLASSIFICAÇÃO</span><h2 id="rankingTitle">Copa dos Reis</h2><small id="rankingFormat">Liga • Ida e volta</small></div>
-        </div>
-        <div class="podium">
-            <div class="podium-player second"><div class="podium-avatar">2</div><b>LudoMaster</b><span>27 pts</span><div class="podium-block">2</div></div>
-            <div class="podium-player first"><div class="crown">👑</div><div class="podium-avatar">1</div><b>ReiDoLudo</b><span>31 pts</span><div class="podium-block">1</div></div>
-            <div class="podium-player third"><div class="podium-avatar">3</div><b>ShadowKing</b><span>24 pts</span><div class="podium-block">3</div></div>
-        </div>
-        <div class="ranking-table">
-            <div class="ranking-grid ranking-head"><span>#</span><span>EQUIPE / JOGADOR</span><span>J</span><span>V</span><span>D</span><span>DK</span><span>PTS</span></div>
-            <div class="ranking-grid ranking-row highlight"><b>3</b><span class="rank-player"><i class="avatar small">S</i>ShadowKing</span><span>8</span><span>6</span><span>2</span><b class="dk-positive">+14</b><b>24</b></div>
-            <div class="ranking-grid ranking-row"><b>1</b><span class="rank-player"><i class="avatar small">R</i>ReiDoLudo</span><span>8</span><span>7</span><span>1</span><b class="dk-positive">+22</b><b>31</b></div>
-            <div class="ranking-grid ranking-row"><b>2</b><span class="rank-player"><i class="avatar small">L</i>LudoMaster</span><span>8</span><span>6</span><span>2</span><b class="dk-positive">+17</b><b>27</b></div>
-            <div class="ranking-grid ranking-row"><b>4</b><span class="rank-player"><i class="avatar small">A</i>AnaLudo</span><span>8</span><span>5</span><span>3</span><b class="dk-negative">-2</b><b>21</b></div>
-            <div class="ranking-grid ranking-row"><b>5</b><span class="rank-player"><i class="avatar small">P</i>PedroLudo</span><span>8</span><span>4</span><span>4</span><b class="dk-negative">-11</b><b>18</b></div>
-        </div>
-        <p class="ranking-note"><i class="bi bi-info-circle"></i> DK = kills feitas menos kills sofridas.</p>
-    </div>
+<!-- Modal de criação de grupo (demonstração local, sem backend) -->
+<div class="group-modal hidden" id="groupModal" role="dialog" aria-modal="true" aria-labelledby="groupModalTitle">
+    <form class="group-modal-card" id="createGroupForm">
+        <header>
+            <div>
+                <p class="eyebrow">NOVO GRUPO</p>
+                <h2 id="groupModalTitle">Criar grupo de mensagens</h2>
+            </div>
+            <button type="button" class="plain-icon" id="closeGroupModal" aria-label="Fechar"><i class="bi bi-x-lg"></i></button>
+        </header>
+        <label class="group-avatar-picker" for="groupAvatarInput">
+            <span class="group-avatar-preview" id="groupAvatarPreview">👥</span>
+            <span><b>Avatar do grupo</b><small>Escolha uma imagem (opcional)</small></span>
+            <input id="groupAvatarInput" type="file" accept="image/*" hidden>
+        </label>
+        <label class="modal-field">Nome do grupo
+            <input id="groupNameInput" maxlength="32" required placeholder="Ex.: Equipa campeã">
+        </label>
+        <section class="group-members-builder">
+            <label class="modal-field">Adicionar jogadores
+                <div class="friend-search-input"><i class="bi bi-search"></i><input id="groupPlayerSearch" type="search" autocomplete="off" placeholder="Pesquisar jogador..."></div>
+            </label>
+            <div class="group-search-results" id="groupSearchResults"></div>
+            <div class="selected-members" id="selectedGroupMembers"></div>
+        </section>
+        <footer>
+            <button type="button" class="modal-cancel" id="cancelGroupModal">Cancelar</button>
+            <button class="modal-submit" type="submit"><i class="bi bi-plus-lg"></i> Criar grupo</button>
+        </footer>
+    </form>
 </div>
-
-<!-- CREATE TOURNAMENT MODAL -->
-<div class="modal-overlay d-none" id="createTournamentModal">
-    <div class="app-modal create-modal">
-        <button class="close-modal" id="closeCreateTournamentButton"><i class="bi bi-x-lg"></i></button>
-        <div class="create-header">
-            <div class="create-icon">🏆</div>
-            <div><h2>Criar torneio</h2><p>Monte sua própria competição.</p></div>
-        </div>
-
-        <form id="createTournamentForm">
-            <div class="form-group">
-                <label for="tournamentNameInput">Nome do torneio</label>
-                <input id="tournamentNameInput" required maxlength="50" placeholder="Ex: Copa dos Amigos">
-            </div>
-
-            <div class="form-group">
-                <label>Modo do campeonato</label>
-                <div class="choice-grid">
-                    <label class="choice-card selected"><input type="radio" name="championshipMode" value="Liga" checked><span>🏟️</span><b>Liga</b><small>Todos enfrentam todos</small></label>
-                    <label class="choice-card"><input type="radio" name="championshipMode" value="Eliminatórias"><span>🏆</span><b>Eliminatórias</b><small>Chave e avanço por vitórias</small></label>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Formato dos jogos</label>
-                <div class="choice-grid two">
-                    <label class="choice-card selected"><input type="radio" name="matchFormat" value="Só ida" checked><span>1️⃣</span><b>Só ida</b><small>Uma partida por confronto</small></label>
-                    <label class="choice-card"><input type="radio" name="matchFormat" value="Ida e volta"><span>🔁</span><b>Ida e volta</b><small>Duas partidas por confronto</small></label>
-                </div>
-            </div>
-
-            <div class="form-group d-none" id="knockoutOptions">
-                <label for="knockoutTypeInput">Tipo de eliminatórias</label>
-                <select id="knockoutTypeInput">
-                    <option value="Chave simples">Chave simples</option>
-                    <option value="Melhor de 3">Melhor de 3</option>
-                    <option value="Melhor de 5">Melhor de 5</option>
-                </select>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="tournamentSlotsInput">Número de vagas</label>
-                    <select id="tournamentSlotsInput">
-                        <option value="8">8 jogadores</option>
-                        <option value="16" selected>16 jogadores</option>
-                        <option value="32">32 jogadores</option>
-                        <option value="64">64 jogadores</option>
-                        <option value="128">128 jogadores</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="tournamentFeeInput">Entrada</label>
-                    <select id="tournamentFeeInput">
-                        <option value="0">Grátis</option>
-                        <option value="500">🪙 500</option>
-                        <option value="1000" selected>🪙 1.000</option>
-                        <option value="2500">🪙 2.500</option>
-                        <option value="5000">🪙 5.000</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="tournamentDateInput">Data e hora de início</label>
-                <input type="datetime-local" id="tournamentDateInput" required>
-            </div>
-
-            <div class="form-group">
-                <label for="tournamentDescriptionInput">Descrição</label>
-                <textarea id="tournamentDescriptionInput" rows="3" maxlength="250" placeholder="Descreva seu torneio..."></textarea>
-            </div>
-
-            <div class="create-summary">
-                <span>🪙 Prêmio estimado <small>(80% da arrecadação)</small></span>
-                <b id="prizePreview">🪙 12.800</b>
-            </div>
-
-            <button class="create-submit" id="createTournamentSubmit" type="submit"><i class="bi bi-trophy-fill"></i> CRIAR TORNEIO</button>
-        </form>
-    </div>
-</div>
-
-<!-- SIMPLE TOAST -->
-<div class="toast-message" id="toastMessage"></div>
-
+<div class="toast" id="toast"></div>
 <script src="js/home.js"></script>
 </body>
 </html>

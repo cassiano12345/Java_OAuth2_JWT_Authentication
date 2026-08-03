@@ -1207,3 +1207,123 @@ body.light-mode .notifications-menu button {
     touch-action: manipulation;
   }
 }
+
+/* ============================================================
+   PESQUISA DE AMIGOS, AÇÕES DE MENSAGENS E TEMA CLARO
+   ============================================================ */
+.sidebar-friend-search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 13px 7px;
+  padding: 7px 9px;
+  border: 1px solid rgba(181, 105, 221, 0.22);
+  border-radius: 8px;
+  color: #b780ff;
+  background: rgba(37, 0, 64, 0.78);
+}
+.sidebar-friend-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #fff;
+  background: transparent;
+  font-size: 10px;
+}
+.sidebar-friend-search input::placeholder { color: #8d6b9d; }
+.friend-item.is-filtered { display: none; }
+.message-content { min-width: 0; flex: 1; }
+.message-actions {
+  display: flex;
+  gap: 5px;
+  margin-top: 7px;
+}
+.message-actions button,
+.message-edit-form button {
+  border: 0;
+  border-radius: 5px;
+  padding: 4px 6px;
+  color: #d8c4df;
+  background: rgba(255, 255, 255, 0.09);
+  font-size: 9px;
+}
+.message-actions button:hover { color: var(--gold); }
+.message-edit-form {
+  display: flex;
+  gap: 5px;
+  margin-top: 6px;
+}
+.message-edit-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  outline: 0;
+  color: #fff;
+  background: #10001f;
+  font-size: 10px;
+}
+.leave-group-button {
+  margin-top: 10px;
+  border-color: rgba(230, 66, 91, 0.45);
+  color: #ff9bac;
+  background: rgba(230, 66, 91, 0.1);
+}
+.leave-group-button:hover { background: rgba(230, 66, 91, 0.2); }
+.block { background: #87364d; }
+
+/* Paleta clara aplicada a todos os painéis e componentes de leitura. */
+body.light-mode {
+  --bg: #f5f0fb;
+  --side: #482064;
+  --panel: #ffffff;
+  --purple: #7332a3;
+  --gold: #b66a00;
+  --text: #30143f;
+  --muted: #735b80;
+  --muted2: #886d92;
+  --line: rgba(93, 48, 118, 0.2);
+  --green: #198f4c;
+  color: var(--text);
+  background: radial-gradient(circle at 65% 0, #e5ccf4, transparent 34%), var(--bg);
+}
+body.light-mode .main-content { background: radial-gradient(circle at 70% 0, rgba(159, 87, 195, 0.14), transparent 34%); }
+body.light-mode .sidebar,
+body.light-mode .chat-panel,
+body.light-mode .mobile-bar { color: #fff; background: linear-gradient(180deg, #51256d, #351648); }
+body.light-mode .chat-panel { background: #fff; color: var(--text); }
+body.light-mode .chat-header,
+body.light-mode .conversation-item { border-color: var(--line); }
+body.light-mode .chat-header small,
+body.light-mode .conversation-content small,
+body.light-mode .message-content p,
+body.light-mode .request-item p,
+body.light-mode .list-empty { color: var(--muted); }
+body.light-mode .message-content time { color: var(--muted2); }
+body.light-mode .conversation-item { color: var(--text); }
+body.light-mode .conversation-item:hover { background: #f4eafa; }
+body.light-mode .message-form,
+body.light-mode .chat-search,
+body.light-mode .participants-list { background: #f4ecf8; }
+body.light-mode .message-form input,
+body.light-mode .chat-search input,
+body.light-mode .message-edit-form input { color: var(--text); background: #fff; }
+body.light-mode .request-item,
+body.light-mode .new-request { background: #faf7fc; }
+body.light-mode .layout-placeholder { background: rgba(255, 255, 255, 0.7); }
+body.light-mode .account-menu,
+body.light-mode .notifications-menu { background: #fff; }
+body.light-mode .account-menu button,
+body.light-mode .notifications-menu button { color: #50236d; }
+body.light-mode .sidebar-friend-search { background: rgba(29, 6, 47, 0.36); }
+body.light-mode .sidebar-friend-search input { color: #fff; }
+body.light-mode .group-modal-card { background: linear-gradient(180deg, #fff, #f4eafa); }
+body.light-mode .modal-field,
+body.light-mode .group-modal-card { color: var(--text); }
+body.light-mode .modal-field > input:not([type="search"]) { color: var(--text); background: #fff; }
+
+@media (max-width: 720px) {
+  .sidebar-friend-search { margin-right: 13px; }
+}

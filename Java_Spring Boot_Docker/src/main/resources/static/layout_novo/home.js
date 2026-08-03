@@ -161,7 +161,7 @@ function renderMessages() {
   showChat();
 }
 function requestCard(r, kind = "received") {
-  return `<article class="request-item" data-request-id="${r.id}" data-kind="${kind}">${avatar(r.letter)}<div><b>${escapeHtml(r.name)}</b><p>${r.text}</p>${kind === "received" ? '<div class="request-actions"><button class="accept" data-action="accept">Aceitar</button><button class="reject" data-action="reject">Rejeitar</button></div>' : '<span class="sent-status"><i class="bi bi-clock"></i> Enviado</span>'}</div></article>`;
+  return `<article class="request-item" data-request-id="${r.id}" data-kind="${kind}">${avatar(r.letter)}<div><b>${escapeHtml(r.name)}</b><p>${r.text}</p>${kind === "received" ? '<div class="request-actions"><button class="accept" data-action="accept">Aceitar</button><button class="reject" data-action="reject">Rejeitar</button><button class="block" data-action="block">Bloquear</button></div>' : '<span class="sent-status"><i class="bi bi-clock"></i> Enviado</span>'}</div></article>`;
 }
 function renderRequests() {
   state.view = "requests";
@@ -171,13 +171,16 @@ function renderRequests() {
     `<section class="new-request"><h3>Fazer pedido</h3><p>Pesquise um jogador para enviar um pedido de amizade.</p><div class="friend-search-input"><i class="bi bi-search"></i><input id="friendSearchInput" type="search" autocomplete="off" placeholder="Pesquisar jogador..."></div><div id="friendSearchResults" class="friend-search-results"></div></section><section class="request-section"><h3>Pedidos recebidos <span>${state.requests.length}</span></h3>${state.requests.map((r) => requestCard(r)).join("") || '<p class="list-empty compact">Nenhum pedido recebido.</p>'}</section><section class="request-section"><h3>Pedidos enviados <span>${state.sentRequests.length}</span></h3>${state.sentRequests.map((r) => requestCard(r, "sent")).join("") || '<p class="list-empty compact">Nenhum pedido enviado.</p>'}</section>`;
   showChat();
 }
-function messageHtml([n, l, t, time]) {
-  return `<div class="message">${avatar(l)}<div class="message-content"><b>${n}</b><time>${time}</time><p>${escapeHtml(t)}</p></div></div>`;
+function messageHtml([n, l, t, time], index) {
+  const ownActions = n === "Você"
+    ? `<div class="message-actions"><button type="button" data-message-action="edit" data-message-index="${index}" aria-label="Editar mensagem"><i class="bi bi-pencil-fill"></i> Editar</button><button type="button" data-message-action="delete" data-message-index="${index}" aria-label="Eliminar mensagem"><i class="bi bi-trash-fill"></i> Eliminar</button></div>`
+    : "";
+  return `<div class="message" data-message-index="${index}">${avatar(l)}<div class="message-content"><b>${escapeHtml(n)}</b><time>${time}</time><p>${escapeHtml(t)}</p>${ownActions}</div></div>`;
 }
 function groupParticipantsHtml(item) {
   if (!item.isGroup) return "";
   const count = item.participants.length;
-  return `<button type="button" class="group-participants-button" data-group-participants aria-expanded="false"><i class="bi bi-people-fill"></i> Participantes (${count})</button><div class="participants-list hidden" id="participantsList">${item.participants.map((member) => `<div class="participant-row">${avatar(member.letter)}<b>${escapeHtml(member.name)}</b>${member.role === "Admin" ? '<span class="participant-role">Admin</span>' : ""}</div>`).join("")}</div>`;
+  return `<button type="button" class="group-participants-button" data-group-participants aria-expanded="false"><i class="bi bi-people-fill"></i> Participantes (${count})</button><button type="button" class="group-participants-button leave-group-button" data-leave-group><i class="bi bi-box-arrow-left"></i> Sair da conversa do grupo</button><div class="participants-list hidden" id="participantsList">${item.participants.map((member) => `<div class="participant-row">${avatar(member.letter)}<b>${escapeHtml(member.name)}</b>${member.role === "Admin" ? '<span class="participant-role">Admin</span>' : ""}</div>`).join("")}</div>`;
 }
 function conversationIcon(item) {
   return item.avatarImage ? `<img src="${item.avatarImage}" alt="" class="conversation-avatar-image">` : item.letter;
@@ -220,6 +223,31 @@ $("#groupsList").addEventListener("click", (event) => {
   sidebar.classList.remove("open");
   renderConversation(state.groups[button.dataset.conversation]);
 });
+
+// Conversas privadas e filtro de amigos diretamente na barra lateral.
+function openFriendConversation(friend) {
+  const name = $("b", friend).textContent.trim();
+  const letter = $(".avatar", friend).textContent.trim() || name[0].toUpperCase();
+  const online = !friend.classList.contains("offline");
+  let conversation = state.conversations.find((item) => item.name === name);
+  if (!conversation) {
+    conversation = { id: `friend-${name.toLowerCase().replace(/[^a-z0-9]+/gi, "-")}`, name, letter, online, messages: [] };
+    state.conversations.push(conversation);
+  }
+  conversation.online = online;
+  sidebar.classList.remove("open");
+  renderConversation(conversation);
+}
+document.querySelectorAll(".friend-item").forEach((friend) => {
+  friend.addEventListener("click", () => openFriendConversation(friend));
+});
+$("#sidebarFriendSearch").addEventListener("input", (event) => {
+  const query = event.target.value.trim().toLocaleLowerCase();
+  document.querySelectorAll(".friend-item").forEach((friend) => {
+    const name = $("b", friend).textContent.toLocaleLowerCase();
+    friend.classList.toggle("is-filtered", Boolean(query) && !name.includes(query));
+  });
+});
 $("#chatBody").addEventListener("click", (e) => {
   // A conversa substitui o conteúdo do painel durante este clique.
   // Impedimos que o clique seja interpretado como um clique fora do chat.
@@ -232,6 +260,34 @@ $("#chatBody").addEventListener("click", (e) => {
     const button = e.target.closest("[data-group-participants]");
     list.classList.toggle("hidden");
     button.setAttribute("aria-expanded", String(!list.classList.contains("hidden")));
+    return;
+  }
+  if (e.target.closest("[data-leave-group]")) {
+    const groupName = state.conversation.name;
+    renderMessages();
+    toast(`Você saiu da conversa "${groupName}".`);
+    return;
+  }
+  const messageAction = e.target.closest("[data-message-action]");
+  if (messageAction) {
+    const index = Number(messageAction.dataset.messageIndex);
+    if (messageAction.dataset.messageAction === "delete") {
+      state.conversation.messages.splice(index, 1);
+      renderConversation(state.conversation);
+      toast("Mensagem eliminada.");
+      return;
+    }
+    const message = state.conversation.messages[index];
+    const row = e.target.closest(".message");
+    const paragraph = row.querySelector("p");
+    const actions = row.querySelector(".message-actions");
+    paragraph.outerHTML = `<form class="message-edit-form" data-edit-message-index="${index}"><input aria-label="Editar mensagem" value="${escapeHtml(message[2])}" maxlength="500"><button aria-label="Guardar alteração"><i class="bi bi-check-lg"></i></button><button type="button" data-cancel-edit aria-label="Cancelar edição"><i class="bi bi-x-lg"></i></button></form>`;
+    actions.remove();
+    row.querySelector("input").focus();
+    return;
+  }
+  if (e.target.closest("[data-cancel-edit]")) {
+    renderConversation(state.conversation);
     return;
   }
   const c = e.target.closest("[data-conversation-id]");
@@ -251,7 +307,9 @@ $("#chatBody").addEventListener("click", (e) => {
     toast(
       action === "accept"
         ? `Pedido de ${request.name} aceito!`
-        : `Pedido de ${request.name} rejeitado.`,
+        : action === "block"
+          ? `${request.name} foi bloqueado(a).`
+          : `Pedido de ${request.name} rejeitado.`,
     );
   }
 });
@@ -260,6 +318,16 @@ $("#chatBody").addEventListener("change", (e) => {
     toast(`${e.target.files.length} ficheiro(s) selecionado(s).`);
 });
 $("#chatBody").addEventListener("submit", (e) => {
+  if (e.target.matches("[data-edit-message-index]")) {
+    e.preventDefault();
+    const index = Number(e.target.dataset.editMessageIndex);
+    const text = $("input", e.target).value.trim();
+    if (!text) return;
+    state.conversation.messages[index][2] = text;
+    renderConversation(state.conversation);
+    toast("Mensagem editada.");
+    return;
+  }
   if (e.target.id !== "messageForm") return;
   e.preventDefault();
   const input = $("#messageInput"),
@@ -562,6 +630,16 @@ async function loadFriendRequestCount() {
 // MENU DA CONTA E MODO DE COR
 // ============================================================
 
+// O tema escolhido é mantido entre visitas e o rótulo indica a ação disponível.
+function setTheme(theme) {
+  const light = theme === "light";
+  document.body.classList.toggle("light-mode", light);
+  localStorage.setItem("ludo-theme", light ? "light" : "dark");
+  document.querySelectorAll('[data-account-action="theme"] span').forEach((label) => {
+    label.textContent = light ? "Modo escuro" : "Modo claro";
+  });
+}
+
 function closeAccountMenus() {
   document
     .querySelectorAll(".account-menu")
@@ -598,14 +676,8 @@ document.addEventListener("click", (event) => {
   if (!action) return;
 
   if (action === "theme") {
-    document.body.classList.toggle("light-mode");
-    const dark = !document.body.classList.contains("light-mode");
-    document
-      .querySelectorAll('[data-account-action="theme"] span')
-      .forEach((label) => {
-        label.textContent = dark ? "Modo escuro" : "Modo claro";
-      });
-    toast(dark ? "Modo escuro ativado." : "Modo claro ativado.");
+    setTheme(document.body.classList.contains("light-mode") ? "dark" : "light");
+    toast(document.body.classList.contains("light-mode") ? "Modo claro ativado." : "Modo escuro ativado.");
   } else if (action === "logout") {
     localStorage.removeItem("accessToken");
     location.href = "/index.html";
@@ -623,6 +695,7 @@ document.addEventListener("click", (event) => {
 // INICIALIZAÇÃO DA PÁGINA
 // ============================================================
 
+setTheme(localStorage.getItem("ludo-theme") === "light" ? "light" : "dark");
 updateBadges();
 loadUser();
 loadFriendRequestCount();
