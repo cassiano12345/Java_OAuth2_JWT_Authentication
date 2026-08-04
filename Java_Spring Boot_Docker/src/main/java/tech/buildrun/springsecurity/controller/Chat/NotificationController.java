@@ -24,7 +24,7 @@ public class NotificationController {
     | Criar notificação
     |--------------------------------------------------------------------------
     */
-
+/*
     @PostMapping("/create")
     public ResponseEntity<NotificationResponseDTO> createNotification(
             @RequestBody NotificationCreateRequestDTO dto
@@ -43,7 +43,7 @@ public class NotificationController {
         );
 
     }
-
+*/
     /*
     |--------------------------------------------------------------------------
     | As minhas notificações
