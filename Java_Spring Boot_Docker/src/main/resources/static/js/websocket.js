@@ -32,6 +32,8 @@ function onConnected() {
     stompClient.subscribe("/user/queue/notifications", function (message) {
 
         console.log("Notificação:", message.body);
+        const data = JSON.parse(message.body);
+        toast(data.content);
         fetchNotificationsFromApi();
     });
 
@@ -39,6 +41,7 @@ function onConnected() {
      * Pedidos de amizade
      */
     stompClient.subscribe("/user/queue/friendships", function (message) {
+        updateBadges();
         loadFriendRequestCount();
         updateBadges();
         console.log("Pedido de amizade:", message.body);
