@@ -686,6 +686,8 @@ document.addEventListener("click", (event) => {
         toast(document.body.classList.contains("light-mode") ? "Modo claro ativado." : "Modo escuro ativado.");
     } else if (action === "logout") {
         localStorage.removeItem("accessToken");
+        disconnectWebSocket();
+        localStorage.clear();
         location.href = "/index.html";
     } else {
         toast(
