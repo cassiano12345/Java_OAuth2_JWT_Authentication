@@ -118,7 +118,8 @@ const API_CONFIG = {
     groupMessages: "/api/groups", // GET /:groupId/messages
     createGroup: "/api/groups", // POST JSON
     acceptFriendRequest: "/api/friendships/accept", // POST JSON
-    rejectFriendRequest: "/api/friendships/remove", // POST JSON
+    rejectFriendRequest: "/api/friendships/remove", // DELETE JSON
+    blockFriendRequest: "/api/friendships/block", // POST JSON
     unfriend: "/api/friendships/remove", // DELETE JSON
     enableRemoteOnInteraction: false,
 };
@@ -212,6 +213,18 @@ async function RejectFriendRequest(id) {
     if (id == null || id === "") throw new Error("ID do utilizador indisponível.");
     const response = await fetch(API_CONFIG.rejectFriendRequest, {
         method: "DELETE",
+        headers: authHeaders(true),
+        // Exemplo: o backend pode exigir friendshipId em vez de requesterId.
+        body: JSON.stringify({ friendshipId: id }),
+    });
+    if (!response.ok) throw new Error("Não foi possível rejeitar o pedido.");
+    return response.status === 204 ? null : response.json().catch(() => null);
+}
+// Bloqueia com o mesmo ID real. Endpoint e payload são marcadores substituíveis.
+async function BlockFriendRequest(id) {
+    if (id == null || id === "") throw new Error("ID do utilizador indisponível.");
+    const response = await fetch(API_CONFIG.blockFriendRequest, {
+        method: "PUT",
         headers: authHeaders(true),
         // Exemplo: o backend pode exigir friendshipId em vez de requesterId.
         body: JSON.stringify({ friendshipId: id }),
@@ -390,6 +403,7 @@ $("#chatBody").addEventListener("click", async (e) => {
         try {
             if (action === "accept") await AcceptFriendRequest(userId);
             else if (action === "reject") await RejectFriendRequest(userId);
+            else if (action === "block") await BlockFriendRequest(userId);
             // Bloquear é demonstrativo até existir o endpoint específico no backend.
             state.requests = state.requests.filter((x) => x !== request);
             updateBadges();
