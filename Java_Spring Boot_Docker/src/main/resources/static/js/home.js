@@ -4,6 +4,12 @@
 // ============================================================
 
 // ============================================================
+// WEBSOCKETS
+// ============================================================
+
+
+
+// ============================================================
 // ELEMENTOS E ESTADO DA INTERFACE
 // ============================================================
 
@@ -698,4 +704,6 @@ document.addEventListener("click", (event) => {
 setTheme(localStorage.getItem("ludo-theme") === "light" ? "light" : "dark");
 updateBadges();
 loadUser();
+connectWebSocket();
 loadFriendRequestCount();
+

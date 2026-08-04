@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/index.html", "/css/**","js/**").permitAll()
                         .requestMatchers("/", "/register.html", "/css/**","js/**").permitAll()
                         .requestMatchers("/", "/home.html", "/css/**","js/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .anyRequest().authenticated())
