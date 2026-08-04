@@ -623,11 +623,12 @@ async function loadFriendRequestCount() {
         });
         if (!r.ok) return;
         const data = await r.json();
+        console.log(data);
         if (Array.isArray(data)) {
             state.requests = data.map((x, i) => ({
                 id: x.id || x.friendshipId || i + 1,
-                name: x.username || x.senderName || "Jogador",
-                letter: (x.username || x.senderName || "J")[0].toUpperCase(),
+                name: x.username || x.requesterUsername || "Jogador",
+                letter: (x.username || x.requesterUsername || "J")[0].toUpperCase(),
                 text: "enviou um pedido de amizade.",
             }));
             updateBadges();
