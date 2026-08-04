@@ -10,9 +10,9 @@ import tech.buildrun.springsecurity.entities.User;
 @Controller
 public class WebSocketNotificationController {
 
-    private final NotificationService_ notificationService;
+    private final WebSocketNotificationService notificationService;
 
-    public WebSocketNotificationController(NotificationService_ notificationService) {
+    public WebSocketNotificationController(WebSocketNotificationService notificationService) {
         this.notificationService = notificationService;
     }
 

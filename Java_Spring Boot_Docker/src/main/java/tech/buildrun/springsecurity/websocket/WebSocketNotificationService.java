@@ -5,11 +5,11 @@ import org.springframework.stereotype.Service;
 import tech.buildrun.springsecurity.entities.User;
 
 @Service
-public class NotificationService_ {
+public class WebSocketNotificationService {
 
     private final SimpMessagingTemplate messagingTemplate;
 
-    public NotificationService_(SimpMessagingTemplate messagingTemplate) {
+    public WebSocketNotificationService(SimpMessagingTemplate messagingTemplate) {
 
         this.messagingTemplate = messagingTemplate;
 

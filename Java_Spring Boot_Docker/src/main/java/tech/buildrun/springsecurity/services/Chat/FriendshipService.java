@@ -8,6 +8,7 @@ import tech.buildrun.springsecurity.entities.User;
 import tech.buildrun.springsecurity.repository.FriendshipRepository;
 import tech.buildrun.springsecurity.repository.UserRepository;
 import tech.buildrun.springsecurity.services.AuthenticatedUserService;
+import tech.buildrun.springsecurity.websocket.WebSocketNotificationService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,15 +20,16 @@ public class FriendshipService {
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
     private final AuthenticatedUserService authenticatedUserService;
-
+    private final WebSocketNotificationService webSocketNotificationService;
     public FriendshipService(
             FriendshipRepository friendshipRepository,
             UserRepository userRepository,
-            AuthenticatedUserService authenticatedUserService
+            AuthenticatedUserService authenticatedUserService, WebSocketNotificationService webSocketNotificationService
     ) {
         this.friendshipRepository = friendshipRepository;
         this.userRepository = userRepository;
         this.authenticatedUserService = authenticatedUserService;
+        this.webSocketNotificationService = webSocketNotificationService;
     }
 
     // =========================================================
@@ -73,7 +75,10 @@ public class FriendshipService {
         friendship.setRequester(requester);
         friendship.setAddressee(addressee);
         friendship.setStatus(FriendshipStatus.PENDING);
-
+        webSocketNotificationService.sendFriendRequest(
+                addressee,
+                friendship.getStatus()
+        );
         return friendshipRepository.save(friendship);
     }
 

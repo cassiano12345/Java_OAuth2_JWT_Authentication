@@ -4,12 +4,6 @@
 // ============================================================
 
 // ============================================================
-// WEBSOCKETS
-// ============================================================
-
-
-
-// ============================================================
 // ELEMENTOS E ESTADO DA INTERFACE
 // ============================================================
 
@@ -369,10 +363,16 @@ document.addEventListener("click", (event) => {
     // substitua o botão clicado antes de o evento chegar ao documento.
     const clickPath = event.composedPath();
     const isInsideChat = clickPath.includes(chatPanel);
+    const isInsideSidebar = clickPath.includes(sidebar);
     const isChatTrigger = event.target.closest("[data-chat-view], #openChat");
     const isGroupModal = event.target.closest(".group-modal");
 
-    if (!isInsideChat && !isChatTrigger && !isGroupModal) hidePanels();
+    // A sidebar contém controlos que podem abrir ou trocar a conversa. No
+    // desktop, renderConversation() ocorre antes deste listener no documento;
+    // sem esta verificação, o mesmo clique era tratado como clique fora e
+    // fechava imediatamente a gaveta acabada de abrir.
+    if (!isInsideChat && !isInsideSidebar && !isChatTrigger && !isGroupModal)
+        hidePanels();
 });
 document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") hidePanels();
@@ -456,7 +456,11 @@ function renderSearchResults(users) {
         results.appendChild(row);
     });
 }
-document.addEventListener("click", async (e) => {
+// Os resultados são renderizados dinamicamente dentro de #chatBody. O
+// listener deste contentor também interrompe a propagação para o documento,
+// por isso a delegação deve ficar no próprio contentor para o fetch ser
+// sempre alcançado.
+$("#chatBody").addEventListener("click", async (e) => {
     const b = e.target.closest(".add-friend-button");
     if (!b || b.disabled) return;
     try {
@@ -686,8 +690,6 @@ document.addEventListener("click", (event) => {
         toast(document.body.classList.contains("light-mode") ? "Modo claro ativado." : "Modo escuro ativado.");
     } else if (action === "logout") {
         localStorage.removeItem("accessToken");
-        disconnectWebSocket();
-        localStorage.clear();
         location.href = "/index.html";
     } else {
         toast(
@@ -706,6 +708,4 @@ document.addEventListener("click", (event) => {
 setTheme(localStorage.getItem("ludo-theme") === "light" ? "light" : "dark");
 updateBadges();
 loadUser();
-connectWebSocket();
 loadFriendRequestCount();
-
