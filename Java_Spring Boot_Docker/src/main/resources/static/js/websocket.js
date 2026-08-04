@@ -43,7 +43,6 @@ function onConnected() {
         console.log("Pedido de amizade:", message.body);
         loadFriendRequestCount();
         updateBadges();
-        loadPendingFriendRequests();
 
     });
 

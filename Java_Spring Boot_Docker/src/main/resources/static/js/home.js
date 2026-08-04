@@ -118,7 +118,7 @@ const API_CONFIG = {
     groupMessages: "/api/groups", // GET /:groupId/messages
     createGroup: "/api/groups", // POST JSON
     acceptFriendRequest: "/api/friendships/accept", // POST JSON
-    rejectFriendRequest: "/api/friendships/reject", // POST JSON
+    rejectFriendRequest: "/api/friendships/remove", // POST JSON
     unfriend: "/api/friendships/remove", // DELETE JSON
     enableRemoteOnInteraction: false,
 };
@@ -211,10 +211,10 @@ async function AcceptFriendRequest(id) {
 async function RejectFriendRequest(id) {
     if (id == null || id === "") throw new Error("ID do utilizador indisponível.");
     const response = await fetch(API_CONFIG.rejectFriendRequest, {
-        method: "POST",
+        method: "DELETE",
         headers: authHeaders(true),
         // Exemplo: o backend pode exigir friendshipId em vez de requesterId.
-        body: JSON.stringify({ requesterId: id }),
+        body: JSON.stringify({ friendshipId: id }),
     });
     if (!response.ok) throw new Error("Não foi possível rejeitar o pedido.");
     return response.status === 204 ? null : response.json().catch(() => null);
