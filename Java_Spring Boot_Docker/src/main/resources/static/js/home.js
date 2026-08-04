@@ -105,6 +105,32 @@ const state = {
         },
     },
 };
+
+// ============================================================
+// CONFIGURAÇÃO DE API (substitua os caminhos pelo backend real)
+// Nenhuma chamada é feita no carregamento: ative as integrações quando a API
+// estiver pronta ou chame as funções abaixo a partir de uma ação do utilizador.
+// ============================================================
+const API_CONFIG = {
+    notifications: "/api/notifications", // GET — substitua se necessário
+    friendsPresence: "/api/friends/presence", // GET — substitua se necessário
+    privateMessages: "/api/conversations", // GET /:friendId/messages
+    groupMessages: "/api/groups", // GET /:groupId/messages
+    createGroup: "/api/groups", // POST JSON
+    acceptFriendRequest: "/api/friendships/accept", // POST JSON
+    rejectFriendRequest: "/api/friendships/reject", // POST JSON
+    unfriend: "/api/friendships/remove", // DELETE JSON
+    enableRemoteOnInteraction: false,
+};
+
+function authHeaders(json = false) {
+    const headers = {};
+    const token = localStorage.getItem("accessToken");
+    if (token) headers.Authorization = "Bearer " + token;
+    if (json) headers["Content-Type"] = "application/json";
+    return headers;
+}
+
 // ============================================================
 // FUNÇÕES AUXILIARES
 // ============================================================
@@ -161,8 +187,39 @@ function renderMessages() {
     showChat();
 }
 function requestCard(r, kind = "received") {
-    return `<article class="request-item" data-request-id="${r.id}" data-kind="${kind}">${avatar(r.letter)}<div><b>${escapeHtml(r.name)}</b><p>${r.text}</p>${kind === "received" ? '<div class="request-actions"><button class="accept" data-action="accept">Aceitar</button><button class="reject" data-action="reject">Rejeitar</button><button class="block" data-action="block">Bloquear</button></div>' : '<span class="sent-status"><i class="bi bi-clock"></i> Enviado</span>'}</div></article>`;
+    const userId = r.userId == null ? "" : String(r.userId);
+    const escapedUserId = escapeHtml(userId);
+    const receivedActions = `<div class="request-actions"><button class="accept" data-action="accept" data-user-id="${escapedUserId}">Aceitar</button><button class="reject" data-action="reject" data-user-id="${escapedUserId}">Rejeitar</button><button class="block" data-action="block" data-user-id="${escapedUserId}">Bloquear</button></div>`;
+    return `<article class="request-item" data-request-id="${escapeHtml(String(r.id))}" data-user-id="${escapedUserId}" data-kind="${kind}">${avatar(r.letter)}<div><b>${escapeHtml(r.name)}</b><p>${escapeHtml(r.text)}</p>${kind === "received" ? receivedActions : '<span class="sent-status"><i class="bi bi-clock"></i> Enviado</span>'}</div></article>`;
 }
+
+// Aceita com o ID real recebido da API. Ajuste endpoint/payload ao contrato do backend.
+async function AcceptFriendRequest(id) {
+    console.log(id);
+    if (id == null || id === "") throw new Error("ID do utilizador indisponível.");
+    const response = await fetch(API_CONFIG.acceptFriendRequest, {
+        method: "PUT",
+        headers: authHeaders(true),
+        // Exemplo de payload; substitua requesterId pelo nome exigido pela sua API.
+        body: JSON.stringify({friendshipId: id }),
+    });
+    if (!response.ok) throw new Error("Não foi possível aceitar o pedido.");
+    return response.status === 204 ? null : response.json().catch(() => null);
+}
+
+// Rejeita com o mesmo ID real. Endpoint e payload são marcadores substituíveis.
+async function RejectFriendRequest(id) {
+    if (id == null || id === "") throw new Error("ID do utilizador indisponível.");
+    const response = await fetch(API_CONFIG.rejectFriendRequest, {
+        method: "POST",
+        headers: authHeaders(true),
+        // Exemplo: o backend pode exigir friendshipId em vez de requesterId.
+        body: JSON.stringify({ requesterId: id }),
+    });
+    if (!response.ok) throw new Error("Não foi possível rejeitar o pedido.");
+    return response.status === 204 ? null : response.json().catch(() => null);
+}
+
 function renderRequests() {
     state.view = "requests";
     state.conversation = null;
@@ -190,7 +247,7 @@ function renderConversation(item) {
     state.conversation = item;
     title(item.name, item.subtitle || (item.online ? "Online" : "Offline"));
     $("#chatBody").innerHTML =
-        `<div class="conversation"><div class="messages" id="messageList"><div class="chat-welcome"><div class="placeholder-icon">${conversationIcon(item)}</div><h2>${escapeHtml(item.name)}</h2><span>Este é o começo da conversa.</span>${groupParticipantsHtml(item)}</div>${item.messages.map(messageHtml).join("")}</div><form class="message-form" id="messageForm"><input id="attachmentInput" type="file" hidden multiple><button type="button" class="plain-icon attachment-button" id="attachmentButton" aria-label="Anexar ficheiro"><i class="bi bi-plus-circle-fill"></i></button><input id="messageInput" autocomplete="off" placeholder="Enviar mensagem..."><button class="send" aria-label="Enviar"><i class="bi bi-send-fill"></i></button></form></div>`;
+        `<div class="conversation"><div class="messages" id="messageList"><div class="chat-welcome"><div class="placeholder-icon">${conversationIcon(item)}</div><h2>${escapeHtml(item.name)}</h2><span>Este é o começo da conversa.</span>${groupParticipantsHtml(item)}${!item.isGroup ? '<button type="button" class="group-participants-button unfriend-button" data-unfriend data-friend-id="' + escapeHtml(String(item.friendId || "")) + '"><i class="bi bi-person-dash-fill"></i> Desfazer amizade</button>' : ""}</div>${item.messages.map(messageHtml).join("")}</div><form class="message-form" id="messageForm"><input id="attachmentInput" type="file" hidden multiple><button type="button" class="plain-icon attachment-button" id="attachmentButton" aria-label="Anexar ficheiro"><i class="bi bi-plus-circle-fill"></i></button><input id="messageInput" autocomplete="off" placeholder="Enviar mensagem..."><button class="send" aria-label="Enviar"><i class="bi bi-send-fill"></i></button></form></div>`;
     showChat();
     $("#messageList").scrollTop = 99999;
 }
@@ -221,7 +278,11 @@ $("#groupsList").addEventListener("click", (event) => {
     document.querySelectorAll(".group").forEach((x) => x.classList.remove("active"));
     button.classList.add("active");
     sidebar.classList.remove("open");
-    renderConversation(state.groups[button.dataset.conversation]);
+    const conversation = state.groups[button.dataset.conversation];
+    renderConversation(conversation);
+    // Chamada controlada: habilite após configurar os endpoints reais.
+    if (API_CONFIG.enableRemoteOnInteraction)
+        loadGroupMessagesFromApi(button.dataset.conversation, conversation).catch((error) => console.error("Erro ao carregar grupo.", error));
 });
 
 // Conversas privadas e filtro de amigos diretamente na barra lateral.
@@ -231,15 +292,19 @@ function openFriendConversation(friend) {
     const online = !friend.classList.contains("offline");
     let conversation = state.conversations.find((item) => item.name === name);
     if (!conversation) {
-        conversation = { id: `friend-${name.toLowerCase().replace(/[^a-z0-9]+/gi, "-")}`, name, letter, online, messages: [] };
+        conversation = { id: `friend-${name.toLowerCase().replace(/[^a-z0-9]+/gi, "-")}`, friendId: friend.dataset.friendId || friend.dataset.userId || null, name, letter, online, messages: [] };
         state.conversations.push(conversation);
     }
     conversation.online = online;
     sidebar.classList.remove("open");
     renderConversation(conversation);
+    // Busca opcional por ID real; não interrompe o chat local em caso de falha.
+    if (API_CONFIG.enableRemoteOnInteraction && conversation.friendId)
+        loadPrivateMessagesFromApi(conversation.friendId, conversation).catch((error) => console.error("Erro ao carregar conversa privada.", error));
 }
-document.querySelectorAll(".friend-item").forEach((friend) => {
-    friend.addEventListener("click", () => openFriendConversation(friend));
+$(".sidebar").addEventListener("click", (event) => {
+    const friend = event.target.closest(".friend-item");
+    if (friend) openFriendConversation(friend);
 });
 $("#sidebarFriendSearch").addEventListener("input", (event) => {
     const query = event.target.value.trim().toLocaleLowerCase();
@@ -248,7 +313,7 @@ $("#sidebarFriendSearch").addEventListener("input", (event) => {
         friend.classList.toggle("is-filtered", Boolean(query) && !name.includes(query));
     });
 });
-$("#chatBody").addEventListener("click", (e) => {
+$("#chatBody").addEventListener("click", async (e) => {
     // A conversa substitui o conteúdo do painel durante este clique.
     // Impedimos que o clique seja interpretado como um clique fora do chat.
     e.stopPropagation();
@@ -266,6 +331,22 @@ $("#chatBody").addEventListener("click", (e) => {
         const groupName = state.conversation.name;
         renderMessages();
         toast(`Você saiu da conversa "${groupName}".`);
+        return;
+    }
+    if (e.target.closest("[data-unfriend]")) {
+        const button = e.target.closest("[data-unfriend]");
+        const friendId = button.dataset.friendId || state.conversation?.friendId;
+        if (!friendId) return toast("Não foi encontrado o ID deste amigo. Atualize a lista pela API.");
+        button.disabled = true;
+        try {
+            await RemoveFriendship(friendId);
+            toast("Amizade desfeita.");
+            renderMessages();
+        } catch (error) {
+            console.error("Erro ao desfazer amizade.", error);
+            button.disabled = false;
+            toast("Não foi possível desfazer a amizade.");
+        }
         return;
     }
     const messageAction = e.target.closest("[data-message-action]");
@@ -295,22 +376,30 @@ $("#chatBody").addEventListener("click", (e) => {
         return renderConversation(
             state.conversations.find((x) => x.id === c.dataset.conversationId),
         );
-    const action = e.target.dataset.action;
-    if (action) {
-        const row = e.target.closest("[data-request-id]"),
-            request = state.requests.find(
-                (x) => x.id === Number(row.dataset.requestId),
-            );
-        state.requests = state.requests.filter((x) => x !== request);
-        updateBadges();
-        renderRequests();
-        toast(
-            action === "accept"
-                ? `Pedido de ${request.name} aceito!`
-                : action === "block"
-                    ? `${request.name} foi bloqueado(a).`
-                    : `Pedido de ${request.name} rejeitado.`,
-        );
+    const actionButton = e.target.closest("[data-action]");
+    if (actionButton) {
+        const action = actionButton.dataset.action;
+        const row = actionButton.closest("[data-request-id]");
+        const request = state.requests.find((x) => String(x.id) === row.dataset.requestId);
+
+
+        const userId = row.dataset.requestId || request?.requestId;
+        console.log("ID da amizade: " + userId);
+        if (!request || !userId) return toast("O ID real do utilizador não está disponível neste pedido.");
+        actionButton.disabled = true;
+        try {
+            if (action === "accept") await AcceptFriendRequest(userId);
+            else if (action === "reject") await RejectFriendRequest(userId);
+            // Bloquear é demonstrativo até existir o endpoint específico no backend.
+            state.requests = state.requests.filter((x) => x !== request);
+            updateBadges();
+            renderRequests();
+            toast(action === "accept" ? `Pedido de ${request.name} aceito!` : action === "reject" ? `Pedido de ${request.name} rejeitado.` : `${request.name} foi bloqueado(a).`);
+        } catch (error) {
+            console.error("Erro ao tratar pedido de amizade.", error);
+            actionButton.disabled = false;
+            toast("Não foi possível atualizar o pedido.");
+        }
     }
 });
 $("#chatBody").addEventListener("change", (e) => {
@@ -380,6 +469,7 @@ document.addEventListener("keydown", (e) => {
 $("#notificationButton").addEventListener("click", (e) => {
     e.stopPropagation();
     $("#notificationsMenu").classList.toggle("hidden");
+    if (API_CONFIG.enableRemoteOnInteraction) fetchNotificationsFromApi();
 });
 document.addEventListener("click", (e) => {
     if (!e.target.closest(".notifications"))
@@ -481,6 +571,109 @@ $("#chatBody").addEventListener("click", async (e) => {
     }
 });
 // ============================================================
+// INTEGRAÇÕES DE API OPCIONAIS
+// ============================================================
+
+// Busca notificações e renderiza texto de forma segura, sem innerHTML da API.
+async function fetchNotificationsFromApi(endpoint = API_CONFIG.notifications) {
+    const list = $("#notificationsList");
+    if (!list) return;
+    list.replaceChildren(Object.assign(document.createElement("p"), { textContent: "A carregar notificações..." }));
+    try {
+        const response = await fetch(endpoint, { headers: authHeaders() });
+        if (!response.ok) throw new Error("Falha ao buscar notificações.");
+        const items = await response.json();
+        if (!Array.isArray(items) || !items.length) {
+            list.replaceChildren(Object.assign(document.createElement("p"), { textContent: "Não há notificações." }));
+            return;
+        }
+        list.replaceChildren(...items.map((item) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = String(item.message || item.text || item.title || "Nova notificação");
+            return button;
+        }));
+    } catch (error) {
+        console.error("Erro ao buscar notificações.", error);
+        list.replaceChildren(Object.assign(document.createElement("p"), { textContent: "Não foi possível carregar as notificações." }));
+    }
+}
+
+// Atualiza a lista lateral com presença vinda da API; os botões mantêm delegação de clique.
+async function loadFriendsPresenceFromApi(endpoint = API_CONFIG.friendsPresence) {
+    const response = await fetch(endpoint, { headers: authHeaders() });
+    if (!response.ok) throw new Error("Não foi possível buscar amigos.");
+    const friends = await response.json();
+    if (!Array.isArray(friends)) throw new Error("Resposta de amigos inválida.");
+    const onlineList = $(".friends-list:not(.offline-friends)");
+    const offlineList = $(".offline-friends");
+    onlineList.replaceChildren(); offlineList.replaceChildren();
+    friends.forEach((friend) => {
+        const online = Boolean(friend.online);
+        const button = document.createElement("button");
+        button.className = "friend-item" + (online ? "" : " offline");
+        button.dataset.friendId = String(friend.id || friend.userId || "");
+        const av = document.createElement("span"); av.className = "avatar" + (online ? " online" : ""); av.textContent = String(friend.username || "?")[0].toUpperCase();
+        const text = document.createElement("span"); const name = document.createElement("b"); const status = document.createElement("small");
+        name.textContent = String(friend.username || friend.name || "Jogador"); status.textContent = String(friend.status || (online ? "Online" : "Offline"));
+        text.append(name, status); button.append(av, text); (online ? onlineList : offlineList).append(button);
+    });
+}
+
+function normalizeApiMessages(data) {
+    if (!Array.isArray(data)) return [];
+    return data.map((message) => [
+        String(message.senderName || message.sender?.username || message.sender || "Jogador"),
+        String(message.senderLetter || message.senderName?.[0] || "J")[0].toUpperCase(),
+        String(message.content || message.text || ""),
+        String(message.time || message.createdAt || "agora"),
+    ]);
+}
+
+async function loadPrivateMessagesFromApi(friendId, conversation = state.conversation) {
+    if (!friendId) throw new Error("ID do amigo indisponível.");
+    const response = await fetch(`${API_CONFIG.privateMessages}/${encodeURIComponent(friendId)}/messages`, { headers: authHeaders() });
+    if (!response.ok) throw new Error("Não foi possível buscar mensagens privadas.");
+    conversation.messages = normalizeApiMessages(await response.json());
+    if (state.conversation === conversation) renderConversation(conversation);
+    return conversation.messages;
+}
+
+async function loadGroupMessagesFromApi(groupId, conversation = state.conversation) {
+    if (!groupId) throw new Error("ID do grupo indisponível.");
+    const response = await fetch(`${API_CONFIG.groupMessages}/${encodeURIComponent(groupId)}/messages`, { headers: authHeaders() });
+    if (!response.ok) throw new Error("Não foi possível buscar mensagens do grupo.");
+    conversation.messages = normalizeApiMessages(await response.json());
+    if (state.conversation === conversation) renderConversation(conversation);
+    return conversation.messages;
+}
+
+// Demonstra POST JSON de criação. Não é chamado automaticamente.
+async function createGroupViaApi({ name, members, avatarImage = "" }, endpoint = API_CONFIG.createGroup) {
+    if (!name?.trim()) throw new Error("Indique o nome do grupo.");
+    if (!Array.isArray(members)) throw new Error("Participantes inválidos.");
+    const memberIds = members.map((member) => member.id).filter(Boolean);
+    const response = await fetch(endpoint, {
+        method: "POST", headers: authHeaders(true),
+        // Ajuste memberIds/avatarImage ao contrato efetivo da API.
+        body: JSON.stringify({ name: name.trim(), memberIds, avatarImage }),
+    });
+    if (!response.ok) throw new Error("Não foi possível criar o grupo.");
+    return response.json();
+}
+
+// Exemplo de remoção de amizade, chamado apenas pelo botão da conversa privada.
+async function RemoveFriendship(friendId) {
+    const response = await fetch(API_CONFIG.unfriend, {
+        method: "DELETE", headers: authHeaders(true),
+        // Exemplo: substitua friendId pelo campo/endpoint exigido pelo backend.
+        body: JSON.stringify({ friendId }),
+    });
+    if (!response.ok) throw new Error("Não foi possível desfazer amizade.");
+    return response.status === 204 ? null : response.json().catch(() => null);
+}
+
+// ============================================================
 // CRIAÇÃO LOCAL DE GRUPOS E PESQUISA DE PARTICIPANTES
 // ============================================================
 
@@ -573,13 +766,22 @@ $("#selectedGroupMembers").addEventListener("click", (event) => {
 $("#selectedGroupMembers").addEventListener("change", (event) => {
     if (event.target.matches("[data-member-role]")) groupDraft.members[Number(event.target.dataset.memberRole)].role = event.target.value;
 });
-$("#createGroupForm").addEventListener("submit", (event) => {
+$("#createGroupForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     const name = $("#groupNameInput").value.trim();
-    if (!name) return;
-    const id = `group-${Date.now()}`;
+    if (!name) return toast("Indique o nome do grupo.");
+    let remoteGroup = null;
+    try {
+        // Exemplo controlado: ative a configuração somente com backend disponível.
+        if (API_CONFIG.enableRemoteOnInteraction)
+            remoteGroup = await createGroupViaApi({ name, members: groupDraft.members, avatarImage: groupDraft.avatarImage });
+    } catch (error) {
+        console.error("Erro ao criar grupo pela API.", error);
+        return toast("Não foi possível criar o grupo na API.");
+    }
+    const id = remoteGroup?.id || remoteGroup?.groupId || `group-${Date.now()}`;
     const group = {
-        id, name, subtitle: `${groupDraft.members.length + 1} membro(s)`, letter: "👥", isGroup: true,
+        id, name: remoteGroup?.name || name, subtitle: `${groupDraft.members.length + 1} membro(s)`, letter: "👥", isGroup: true,
         avatarImage: groupDraft.avatarImage,
         participants: [{ name: "Você", letter: "S", role: "Admin" }, ...groupDraft.members],
         messages: [],
@@ -588,7 +790,7 @@ $("#createGroupForm").addEventListener("submit", (event) => {
     closeGroupModal();
     document.querySelectorAll(".group").forEach((button) => button.classList.toggle("active", button.dataset.conversation === id));
     renderConversation(group);
-    toast(`Grupo ${name} criado!`);
+    toast(`Grupo ${group.name} criado!`);
 });
 
 // ============================================================
@@ -623,12 +825,12 @@ async function loadFriendRequestCount() {
         });
         if (!r.ok) return;
         const data = await r.json();
-        console.log(data);
         if (Array.isArray(data)) {
             state.requests = data.map((x, i) => ({
                 id: x.id || x.friendshipId || i + 1,
-                name: x.username || x.requesterUsername || "Jogador",
-                letter: (x.username || x.requesterUsername || "J")[0].toUpperCase(),
+                userId: x.userId || x.senderId || x.sender?.id || x.requesterId || null,
+                name: x.username || x.requesterUsername  || "Jogador",
+                letter: (x.username || x.requesterUsername  || "J")[0].toUpperCase(),
                 text: "enviou um pedido de amizade.",
             }));
             updateBadges();
@@ -691,6 +893,7 @@ document.addEventListener("click", (event) => {
         toast(document.body.classList.contains("light-mode") ? "Modo claro ativado." : "Modo escuro ativado.");
     } else if (action === "logout") {
         localStorage.removeItem("accessToken");
+        disconnectWebSocket();
         location.href = "/index.html";
     } else {
         toast(

@@ -1327,3 +1327,31 @@ body.light-mode .modal-field > input:not([type="search"]) { color: var(--text); 
 @media (max-width: 720px) {
     .sidebar-friend-search { margin-right: 13px; }
 }
+
+
+/* Ações de mensagens próprias: discretas no desktop e acessíveis por teclado. */
+@media (hover: hover) and (pointer: fine) {
+    .message-actions {
+        /* Opacidade, e não display/visibility: Tab ainda alcança os botões. */
+        opacity: 0;
+        transition: opacity 0.16s ease;
+    }
+    .message:hover .message-actions,
+    .message:focus-within .message-actions,
+    .message-actions:focus-within {
+        opacity: 1;
+    }
+}
+
+/* Em toque, as ações permanecem alcançáveis sem depender de hover. */
+@media (hover: none), (pointer: coarse) {
+    .message-actions { opacity: 1; }
+}
+
+.unfriend-button {
+    margin-top: 10px;
+    border-color: rgba(230, 66, 91, 0.45);
+    color: #ffb0bd;
+    background: rgba(230, 66, 91, 0.1);
+}
+.unfriend-button:hover { background: rgba(230, 66, 91, 0.2); }

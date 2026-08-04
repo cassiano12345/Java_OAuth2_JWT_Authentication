@@ -182,9 +182,11 @@
                         <i class="bi bi-bell-fill"></i><span>2</span>
                     </button>
                     <div class="notifications-menu hidden" id="notificationsMenu">
-                        <b>Notificações</b
-                        ><button>🎲 AnaLudo convidou você para jogar</button
-                    ><button>🏆 Novo torneio disponível</button>
+                        <b>Notificações</b>
+                        <div id="notificationsList" aria-live="polite">
+                            <button>🎲 AnaLudo convidou você para jogar</button>
+                            <button>🏆 Novo torneio disponível</button>
+                        </div>
                     </div>
                 </div>
                 <div class="coins">🪙 <b>12.500</b><button>+</button></div>
@@ -260,7 +262,6 @@
     </form>
 </div>
 <div class="toast" id="toast"></div>
-
 <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 <script src="/js/websocket.js"></script>
 <script src="/js/home.js"></script>
