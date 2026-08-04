@@ -39,10 +39,10 @@ function onConnected() {
      * Pedidos de amizade
      */
     stompClient.subscribe("/user/queue/friendships", function (message) {
-
-        console.log("Pedido de amizade:", message.body);
         loadFriendRequestCount();
         updateBadges();
+        console.log("Pedido de amizade:", message.body);
+
 
     });
 

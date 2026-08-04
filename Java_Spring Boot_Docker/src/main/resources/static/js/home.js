@@ -608,6 +608,17 @@ async function fetchNotificationsFromApi() {
             button.textContent = String( item.content);
             return button;
         }));
+
+        ///// NUMERO DE NOTIFICAÇÕES
+        const badge = document.getElementById("notificationsBadge");
+        if (items.length <= 0) {
+
+            badge.style.display = "none";
+            return;
+
+        }
+        badge.textContent = items.length > 99 ? "99+" : items.length;
+        ////////////
     } catch (error) {
         console.error("Erro ao buscar notificações.", error);
         list.replaceChildren(Object.assign(document.createElement("p"), { textContent: "Não foi possível carregar as notificações." }));
