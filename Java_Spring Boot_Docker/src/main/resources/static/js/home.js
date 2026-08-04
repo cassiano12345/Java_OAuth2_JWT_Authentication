@@ -112,7 +112,7 @@ const state = {
 // estiver pronta ou chame as funções abaixo a partir de uma ação do utilizador.
 // ============================================================
 const API_CONFIG = {
-    notifications: "/api/notifications", // GET — substitua se necessário
+    notifications: "/api/notifications/my", // GET — substitua se necessário
     friendsPresence: "/api/friends/presence", // GET — substitua se necessário
     privateMessages: "/api/conversations", // GET /:friendId/messages
     groupMessages: "/api/groups", // GET /:groupId/messages
@@ -589,14 +589,15 @@ $("#chatBody").addEventListener("click", async (e) => {
 // ============================================================
 
 // Busca notificações e renderiza texto de forma segura, sem innerHTML da API.
-async function fetchNotificationsFromApi(endpoint = API_CONFIG.notifications) {
+async function fetchNotificationsFromApi() {
     const list = $("#notificationsList");
     if (!list) return;
     list.replaceChildren(Object.assign(document.createElement("p"), { textContent: "A carregar notificações..." }));
     try {
-        const response = await fetch(endpoint, { headers: authHeaders() });
+        const response = await fetch(API_CONFIG.notifications, { headers: authHeaders() });
         if (!response.ok) throw new Error("Falha ao buscar notificações.");
         const items = await response.json();
+        console.log(items);
         if (!Array.isArray(items) || !items.length) {
             list.replaceChildren(Object.assign(document.createElement("p"), { textContent: "Não há notificações." }));
             return;
@@ -604,7 +605,7 @@ async function fetchNotificationsFromApi(endpoint = API_CONFIG.notifications) {
         list.replaceChildren(...items.map((item) => {
             const button = document.createElement("button");
             button.type = "button";
-            button.textContent = String(item.message || item.text || item.title || "Nova notificação");
+            button.textContent = String( item.content);
             return button;
         }));
     } catch (error) {
@@ -927,3 +928,4 @@ setTheme(localStorage.getItem("ludo-theme") === "light" ? "light" : "dark");
 updateBadges();
 loadUser();
 loadFriendRequestCount();
+fetchNotificationsFromApi();

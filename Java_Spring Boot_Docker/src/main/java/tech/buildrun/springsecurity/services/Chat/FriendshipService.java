@@ -115,7 +115,7 @@ public class FriendshipService {
         }
         NotificationType notificationType = null;
         friendship.setStatus(FriendshipStatus.ACCEPTED);
-        notificationService.createNotification(friendship.getRequester().getUserId(), notificationType.NEW_MESSAGE,"Pedido de amizade.", "O seu pedido de amizade a "+ authenticatedUserService.getAuthenticatedUser() + "foi aceite!");
+        notificationService.createNotification(friendship.getRequester().getUserId(), notificationType.NEW_MESSAGE,"Pedido de amizade.", "🎲 O seu pedido de amizade a "+ authenticatedUser.getUsername() + " foi aceite!");
         Optional<User> user = userRepository.findById(friendship.getRequester().getUserId());
         webSocketNotificationService.sendNotifications(
                 user.get()

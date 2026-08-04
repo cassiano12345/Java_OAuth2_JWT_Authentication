@@ -32,7 +32,7 @@ function onConnected() {
     stompClient.subscribe("/user/queue/notifications", function (message) {
 
         console.log("Notificação:", message.body);
-
+        fetchNotificationsFromApi();
     });
 
     /*
