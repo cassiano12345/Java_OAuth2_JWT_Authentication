@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import tech.buildrun.springsecurity.entities.Chat.FRIENDSHIP;
 import tech.buildrun.springsecurity.entities.Chat.FriendshipStatus;
+import tech.buildrun.springsecurity.entities.Chat.NotificationType;
 import tech.buildrun.springsecurity.entities.User;
 import tech.buildrun.springsecurity.repository.FriendshipRepository;
 import tech.buildrun.springsecurity.repository.UserRepository;
@@ -12,6 +13,7 @@ import tech.buildrun.springsecurity.websocket.WebSocketNotificationService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -21,15 +23,19 @@ public class FriendshipService {
     private final UserRepository userRepository;
     private final AuthenticatedUserService authenticatedUserService;
     private final WebSocketNotificationService webSocketNotificationService;
+    private final NotificationService notificationService;
     public FriendshipService(
             FriendshipRepository friendshipRepository,
             UserRepository userRepository,
-            AuthenticatedUserService authenticatedUserService, WebSocketNotificationService webSocketNotificationService
+            AuthenticatedUserService authenticatedUserService,
+            WebSocketNotificationService webSocketNotificationService,
+            NotificationService notificationService
     ) {
         this.friendshipRepository = friendshipRepository;
         this.userRepository = userRepository;
         this.authenticatedUserService = authenticatedUserService;
         this.webSocketNotificationService = webSocketNotificationService;
+        this.notificationService = notificationService;
     }
 
     // =========================================================
@@ -107,8 +113,13 @@ public class FriendshipService {
                     "Este pedido já não está pendente."
             );
         }
-
+        NotificationType notificationType = null;
         friendship.setStatus(FriendshipStatus.ACCEPTED);
+        notificationService.createNotification(friendship.getRequester().getUserId(), notificationType.NEW_MESSAGE,"Pedido de amizade.", "O seu pedido de amizade a "+ authenticatedUserService.getAuthenticatedUser() + "foi aceite!");
+        Optional<User> user = userRepository.findById(friendship.getRequester().getUserId());
+        webSocketNotificationService.sendNotifications(
+                user.get()
+        );
 
         return friendshipRepository.save(friendship);
     }

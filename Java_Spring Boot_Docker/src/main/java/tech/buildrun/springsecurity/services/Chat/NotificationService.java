@@ -2,11 +2,14 @@ package tech.buildrun.springsecurity.services.Chat;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.buildrun.springsecurity.dtos.Chat.NotificationResponseDTO;
 import tech.buildrun.springsecurity.entities.Chat.Notification;
 import tech.buildrun.springsecurity.entities.Chat.NotificationType;
 import tech.buildrun.springsecurity.entities.User;
 import tech.buildrun.springsecurity.repository.Chat.NotificationRepository;
 import tech.buildrun.springsecurity.repository.UserRepository;
+import tech.buildrun.springsecurity.services.AuthenticatedUserService;
+import tech.buildrun.springsecurity.websocket.WebSocketNotificationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,249 +20,147 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final AuthenticatedUserService authenticatedUserService;
+    private final WebSocketNotificationService webSocketNotificationService;
 
     public NotificationService(
             NotificationRepository notificationRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            AuthenticatedUserService authenticatedUserService,
+            WebSocketNotificationService webSocketNotificationService
     ) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
+        this.authenticatedUserService = authenticatedUserService;
+        this.webSocketNotificationService = webSocketNotificationService;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Criar notificação
+    |--------------------------------------------------------------------------
+    */
 
-    // Criar uma notificação
     @Transactional
-    public Notification createNotification(
-            UUID userId,
+    public NotificationResponseDTO createNotification(
+            UUID receiverId,
             NotificationType notificationType,
             String title,
-            String content,
-            UUID referenceId
+            String content
     ) {
 
-        User user = userRepository
-                .findById(userId)
+        User receiver = userRepository.findById(receiverId)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Usuário não encontrado."
-                        )
-                );
+                        new RuntimeException("Utilizador não encontrado."));
 
         Notification notification = new Notification();
 
-        notification.setUser(user);
+        notification.setUser(receiver);
         notification.setNotificationType(notificationType);
         notification.setTitle(title);
         notification.setContent(content);
-        notification.setReferenceId(referenceId);
         notification.setRead(false);
         notification.setCreatedAt(LocalDateTime.now());
 
-        return notificationRepository.save(notification);
+        notification = notificationRepository.save(notification);
+
+        NotificationResponseDTO dto = toDTO(notification);
+
+        webSocketNotificationService.sendNotification(receiver, dto);
+
+        return dto;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Minhas notificações
+    |--------------------------------------------------------------------------
+    */
 
-    // Buscar uma notificação pelo ID
-    public Notification findById(
-            UUID notificationId
-    ) {
+    public List<NotificationResponseDTO> getMyNotifications() {
+
+        User user = authenticatedUserService.getAuthenticatedUser();
 
         return notificationRepository
-                .findById(notificationId)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Notificação não encontrada."
-                        )
-                );
+                .findByUser_UserIdOrderByCreatedAtDesc(user.getUserId())
+                .stream()
+                .map(this::toDTO)
+                .toList();
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Marcar como lida
+    |--------------------------------------------------------------------------
+    */
 
-    // Buscar todas as notificações de um usuário
-    public List<Notification> findByUser(
-            UUID userId
-    ) {
-
-        return notificationRepository
-                .findByUser_UserIdOrderByCreatedAtDesc(
-                        userId
-                );
-    }
-
-
-    // Buscar notificações não lidas
-    public List<Notification> findUnreadByUser(
-            UUID userId
-    ) {
-
-        return notificationRepository
-                .findByUser_UserIdAndReadFalseOrderByCreatedAtDesc(
-                        userId
-                );
-    }
-
-
-    // Buscar notificações lidas
-    public List<Notification> findReadByUser(
-            UUID userId
-    ) {
-
-        return notificationRepository
-                .findByUser_UserIdAndReadTrueOrderByCreatedAtDesc(
-                        userId
-                );
-    }
-
-
-    // Contar notificações não lidas
-    public long countUnread(
-            UUID userId
-    ) {
-
-        return notificationRepository
-                .countByUser_UserIdAndReadFalse(
-                        userId
-                );
-    }
-
-
-    // Contar todas as notificações
-    public long countAll(
-            UUID userId
-    ) {
-
-        return notificationRepository
-                .countByUser_UserId(
-                        userId
-                );
-    }
-
-
-    // Buscar notificações por tipo
-    public List<Notification> findByType(
-            UUID userId,
-            NotificationType notificationType
-    ) {
-
-        return notificationRepository
-                .findByUser_UserIdAndNotificationTypeOrderByCreatedAtDesc(
-                        userId,
-                        notificationType
-                );
-    }
-
-
-    // Buscar notificações por referência
-    public List<Notification> findByReference(
-            UUID userId,
-            UUID referenceId
-    ) {
-
-        return notificationRepository
-                .findByUser_UserIdAndReferenceIdOrderByCreatedAtDesc(
-                        userId,
-                        referenceId
-                );
-    }
-
-
-    // Marcar uma notificação como lida
     @Transactional
-    public Notification markAsRead(
-            UUID notificationId,
-            UUID userId
-    ) {
+    public NotificationResponseDTO markAsRead(UUID notificationId) {
 
-        Notification notification = notificationRepository
-                .findById(notificationId)
+        User user = authenticatedUserService.getAuthenticatedUser();
+
+        Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Notificação não encontrada."
-                        )
-                );
+                        new RuntimeException("Notificação não encontrada."));
 
-        // Garantir que a notificação pertence ao usuário
-        if (!notification.getUser().getUserId().equals(userId)) {
-            throw new RuntimeException(
-                    "Você não tem permissão para alterar esta notificação."
-            );
+        if (!notification.getUser().getUserId().equals(user.getUserId())) {
+            throw new RuntimeException("Esta notificação não pertence ao utilizador autenticado.");
         }
 
         notification.setRead(true);
 
-        return notificationRepository.save(notification);
+        notification = notificationRepository.save(notification);
+
+        webSocketNotificationService.sendNotifications(user);
+
+        return toDTO(notification);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Marcar todas como lidas
+    |--------------------------------------------------------------------------
+    */
 
-    // Marcar uma notificação como não lida
     @Transactional
-    public Notification markAsUnread(
-            UUID notificationId,
-            UUID userId
-    ) {
+    public void markAllAsRead() {
 
-        Notification notification = notificationRepository
-                .findById(notificationId)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Notificação não encontrada."
-                        )
-                );
-
-        // Garantir que a notificação pertence ao usuário
-        if (!notification.getUser().getUserId().equals(userId)) {
-            throw new RuntimeException(
-                    "Você não tem permissão para alterar esta notificação."
-            );
-        }
-
-        notification.setRead(false);
-
-        return notificationRepository.save(notification);
-    }
-
-
-    // Marcar todas as notificações como lidas
-    @Transactional
-    public void markAllAsRead(
-            UUID userId
-    ) {
+        User user = authenticatedUserService.getAuthenticatedUser();
 
         List<Notification> notifications =
-                notificationRepository
-                        .findByUser_UserIdAndReadFalseOrderByCreatedAtDesc(
-                                userId
-                        );
+                notificationRepository.findByUser_UserIdAndReadFalseOrderByCreatedAtDesc(user.getUserId());
 
-        for (Notification notification : notifications) {
-            notification.setRead(true);
-        }
+        notifications.forEach(notification -> notification.setRead(true));
 
         notificationRepository.saveAll(notifications);
+
+        webSocketNotificationService.sendNotifications(user);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Converter Entity -> DTO
+    |--------------------------------------------------------------------------
+    */
 
-    // Apagar uma notificação
-    @Transactional
-    public void deleteNotification(
-            UUID notificationId,
-            UUID userId
-    ) {
+    private NotificationResponseDTO toDTO(Notification notification) {
 
-        Notification notification = notificationRepository
-                .findById(notificationId)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Notificação não encontrada."
-                        )
-                );
+        return new NotificationResponseDTO(
 
-        // Garantir que a notificação pertence ao usuário
-        if (!notification.getUser().getUserId().equals(userId)) {
-            throw new RuntimeException(
-                    "Você não tem permissão para apagar esta notificação."
-            );
-        }
+                notification.getNotificationId(),
 
-        notificationRepository.delete(notification);
+                notification.getUser().getUserId(),
+
+                notification.getTitle(),
+
+                notification.getContent(),
+
+                notification.isRead(),
+
+                notification.getCreatedAt()
+
+        );
+
     }
+
 }
