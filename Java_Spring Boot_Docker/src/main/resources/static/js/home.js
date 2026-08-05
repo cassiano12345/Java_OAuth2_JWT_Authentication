@@ -115,7 +115,7 @@ const state = {
 // ============================================================
 const API_CONFIG = {
     notifications: "/api/notifications/my", // GET — substitua se necessário
-    friendsPresence: "/api/friends/presence", // GET — substitua se necessário
+    friendsPresence: "/api/friendships/friends", // GET — substitua se necessário
     privateMessages: "/api/conversations", // GET /:friendId/messages
     groupMessages: "/api/groups", // GET /:groupId/messages
     createGroup: "/api/groups", // POST JSON
@@ -790,6 +790,7 @@ async function loadFriendsPresenceFromApi(endpoint = API_CONFIG.friendsPresence)
     const response = await fetch(endpoint, { headers: authHeaders() });
     if (!response.ok) throw new Error("Não foi possível buscar amigos.");
     const friends = await response.json();
+    console.log(friends);
     if (!Array.isArray(friends)) throw new Error("Resposta de amigos inválida.");
     const onlineList = $(".friends-list:not(.offline-friends)");
     const offlineList = $(".offline-friends");
@@ -798,10 +799,10 @@ async function loadFriendsPresenceFromApi(endpoint = API_CONFIG.friendsPresence)
         const online = Boolean(friend.online);
         const button = document.createElement("button");
         button.className = "friend-item" + (online ? "" : " offline");
-        button.dataset.friendId = String(friend.id || friend.userId || "");
+        button.dataset.friendId = String(friend.userId);
         const av = document.createElement("span"); av.className = "avatar" + (online ? " online" : ""); av.textContent = String(friend.username || "?")[0].toUpperCase();
         const text = document.createElement("span"); const name = document.createElement("b"); const status = document.createElement("small");
-        name.textContent = String(friend.username || friend.name || "Jogador"); status.textContent = String(friend.status || (online ? "Online" : "Offline"));
+        name.textContent = String(friend.username); status.textContent = String((online ? "Online" : "Offline"));
         text.append(name, status); button.append(av, text); (online ? onlineList : offlineList).append(button);
     });
 }
@@ -1231,23 +1232,6 @@ document.addEventListener("click", (event) => {
     }
     closeAccountMenus();
 });
-async function loadFriends() {
-    try {
-        const r = await fetch("/api/friendships/friends", {
-            headers: {
-                Authorization: "Bearer " + localStorage.getItem("accessToken"),
-            },
-        });
-        if (!r.ok) {
-            console.log("Amigos não obtidos!");
-            return;
-        }
-        const u = await r.json();
-            console.log(u);
-    } catch (e) {
-        console.error(e);
-    }
-}
 
 // ============================================================
 // INICIALIZAÇÃO DA PÁGINA
@@ -1257,7 +1241,7 @@ setTheme(localStorage.getItem("ludo-theme") === "light" ? "light" : "dark");
 updateBadges();
 updateNotificationsBadge();
 loadUser();
-loadFriends();
+loadFriendsPresenceFromApi();
 loadFriendRequestCount();
 loadBlockedFriendRequests();
 fetchNotificationsFromApi();
