@@ -123,7 +123,7 @@ const API_CONFIG = {
     acceptFriendRequest: "/api/friendships/accept", // POST JSON
     rejectFriendRequest: "/api/friendships/remove", // DELETE JSON
     blockFriendRequest: "/api/friendships/block", // POST JSON
-    cancelSentFriendRequest: "/api/friendships/cancel", // DELETE JSON — placeholder configurável
+    cancelSentFriendRequest: "/api/friendships/remove", // DELETE JSON — placeholder configurável
     blockedFriendRequests: "/api/friendships/blocked", // GET — placeholder configurável
     deleteNotification: "/api/notifications/:notificationId", // DELETE — placeholder configurável
     deleteAllNotifications: "/api/notifications", // DELETE — placeholder configurável
@@ -220,7 +220,7 @@ function requestCard(r, kind = "received") {
 
 // Aceita com o ID real recebido da API. Ajuste endpoint/payload ao contrato do backend.
 async function AcceptFriendRequest(id) {
-    console.log(id);
+    await loadUser();
     if (id == null || id === "") throw new Error("ID do utilizador indisponível.");
     const response = await fetch(API_CONFIG.acceptFriendRequest, {
         method: "PUT",
@@ -234,6 +234,7 @@ async function AcceptFriendRequest(id) {
 
 // Rejeita com o mesmo ID real. Endpoint e payload são marcadores substituíveis.
 async function RejectFriendRequest(id) {
+    await loadUser();
     if (id == null || id === "") throw new Error("ID do utilizador indisponível.");
     const response = await fetch(API_CONFIG.rejectFriendRequest, {
         method: "DELETE",
@@ -246,6 +247,7 @@ async function RejectFriendRequest(id) {
 }
 // Bloqueia com o mesmo ID real. Endpoint e payload são marcadores substituíveis.
 async function BlockFriendRequest(id) {
+    await loadUser();
     if (id == null || id === "") throw new Error("ID do utilizador indisponível.");
     const response = await fetch(API_CONFIG.blockFriendRequest, {
         method: "PUT",
@@ -259,6 +261,7 @@ async function BlockFriendRequest(id) {
 
 // Cancela um pedido enviado usando o ID de amizade retornado pela API.
 async function CancelSentFriendRequest(id) {
+    await loadUser();
     const friendshipId = entityId(id);
     if (!friendshipId) throw new Error("ID do pedido enviado indisponível.");
     const response = await fetch(API_CONFIG.cancelSentFriendRequest, {
@@ -591,6 +594,7 @@ $("#chatBody").addEventListener("input", (e) => {
     conversationGroupSearchTimer = setTimeout(() => searchConversationGroupMembers(query), 300);
 });
 async function searchUsers(username) {
+    await loadUser();
     try {
         const r = await fetch(`/search?username=${encodeURIComponent(username)}`, {
             headers: {
@@ -712,6 +716,7 @@ function renderNotifications(items = state.notifications) {
 }
 
 async function fetchNotificationsFromApi() {
+    await loadUser();
     const list = $("#notificationsList");
     if (!list) return;
     list.replaceChildren(Object.assign(document.createElement("p"), { className: "notifications-empty", textContent: "A carregar notificações..." }));
@@ -728,6 +733,7 @@ async function fetchNotificationsFromApi() {
 
 // Placeholders de remoção: ajuste os endpoints e o payload ao contrato real da API.
 async function deleteNotificationViaApi(notificationId, endpoint = API_CONFIG.deleteNotification) {
+    await loadUser();
     const id = entityId(notificationId);
     if (!id) throw new Error("ID da notificação indisponível.");
     const url = endpoint.replace(":notificationId", encodeURIComponent(id));
@@ -736,6 +742,7 @@ async function deleteNotificationViaApi(notificationId, endpoint = API_CONFIG.de
     return response.status === 204 ? null : response.json().catch(() => null);
 }
 async function deleteAllNotificationsViaApi(endpoint = API_CONFIG.deleteAllNotifications) {
+    await loadUser();
     const response = await fetch(endpoint, { method: "DELETE", headers: authHeaders() });
     if (!response.ok) throw new Error("Não foi possível eliminar as notificações.");
     return response.status === 204 ? null : response.json().catch(() => null);
@@ -777,6 +784,7 @@ $("#notificationsDeleteAll").addEventListener("click", async () => {
 
 // Atualiza a lista lateral com presença vinda da API; os botões mantêm delegação de clique.
 async function loadFriendsPresenceFromApi(endpoint = API_CONFIG.friendsPresence) {
+    await loadUser();
     const response = await fetch(endpoint, { headers: authHeaders() });
     if (!response.ok) throw new Error("Não foi possível buscar amigos.");
     const friends = await response.json();
@@ -807,6 +815,7 @@ function normalizeApiMessages(data) {
 }
 
 async function loadPrivateMessagesFromApi(friendId, conversation = state.conversation) {
+    await loadUser();
     if (!friendId) throw new Error("ID do amigo indisponível.");
     const response = await fetch(`${API_CONFIG.privateMessages}/${encodeURIComponent(friendId)}/messages`, { headers: authHeaders() });
     if (!response.ok) throw new Error("Não foi possível buscar mensagens privadas.");
@@ -816,6 +825,7 @@ async function loadPrivateMessagesFromApi(friendId, conversation = state.convers
 }
 
 async function loadGroupMessagesFromApi(groupId, conversation = state.conversation) {
+    await loadUser();
     if (!groupId) throw new Error("ID do grupo indisponível.");
     const response = await fetch(`${API_CONFIG.groupMessages}/${encodeURIComponent(groupId)}/messages`, { headers: authHeaders() });
     if (!response.ok) throw new Error("Não foi possível buscar mensagens do grupo.");
@@ -826,6 +836,7 @@ async function loadGroupMessagesFromApi(groupId, conversation = state.conversati
 
 // Adiciona um participante ao grupo. O endpoint e o payload são placeholders configuráveis.
 async function addGroupMemberViaApi(groupId, memberId, endpoint = API_CONFIG.addGroupMember) {
+    await loadUser();
     const validGroupId = entityId(groupId);
     const validMemberId = entityId(memberId);
     if (!validGroupId || !validMemberId) throw new Error("IDs de grupo ou participante indisponíveis.");
@@ -856,6 +867,7 @@ function addMemberToGroup(group, { id, name }) {
     return true;
 }
 async function searchConversationGroupMembers(username) {
+    await loadUser();
     const results = $("#groupMemberSearchResults");
     try {
         const response = await fetch(`/search?username=${encodeURIComponent(username)}`, { headers: authHeaders() });
@@ -900,6 +912,7 @@ function renderConversationGroupSearchResults(users) {
 
 // Demonstra POST JSON de criação. Não é chamado automaticamente.
 async function createGroupViaApi({ name, members, avatarImage = "" }, endpoint = API_CONFIG.createGroup) {
+    await loadUser();
     if (!name?.trim()) throw new Error("Indique o nome do grupo.");
     if (!Array.isArray(members)) throw new Error("Participantes inválidos.");
     const memberIds = members.map((member) => member.id).filter(Boolean);
@@ -914,6 +927,7 @@ async function createGroupViaApi({ name, members, avatarImage = "" }, endpoint =
 
 // Exemplo de remoção de amizade, chamado apenas pelo botão da conversa privada.
 async function RemoveFriendship(friendId) {
+    await loadUser();
     const response = await fetch(API_CONFIG.unfriend, {
         method: "DELETE", headers: authHeaders(true),
         // Exemplo: substitua friendId pelo campo/endpoint exigido pelo backend.
@@ -959,6 +973,7 @@ function renderGroupSearchResults(users) {
     }).join("") : '<p class="friend-search-empty">Nenhum jogador disponível.</p>';
 }
 async function searchGroupPlayers(username) {
+    await loadUser();
     try {
         const response = await fetch(`/search?username=${encodeURIComponent(username)}`, {
             headers: { Authorization: "Bearer " + localStorage.getItem("accessToken") },
@@ -1067,6 +1082,7 @@ async function loadUser() {
     }
 }
 async function loadFriendRequestCount() {
+    await loadUser();
     try {
         const r = await fetch("/api/friendships/received", {
             headers: {
@@ -1090,6 +1106,7 @@ async function loadFriendRequestCount() {
     }
 }
 async function loadFriendsentCount() {
+    await loadUser();
     try {
         const r = await fetch("/api/friendships/sent", {
             headers: {
@@ -1114,6 +1131,7 @@ async function loadFriendsentCount() {
 }
 // Lista pedidos bloqueados. Configure API_CONFIG.blockedFriendRequests conforme o backend.
 async function loadBlockedFriendRequests() {
+    await loadUser();
     try {
         const response = await fetch(API_CONFIG.blockedFriendRequests, { headers: authHeaders() });
         if (!response.ok) throw new Error("Não foi possível buscar pedidos bloqueados.");
@@ -1138,6 +1156,7 @@ async function loadBlockedFriendRequests() {
 
 // Reutilizável pelo WebSocket: atualiza o estado antes de corrigir badge e vista aberta.
 async function handleFriendshipWebSocketUpdate() {
+    await loadUser();
     await loadFriendRequestCount();
     updateBadges();
 
