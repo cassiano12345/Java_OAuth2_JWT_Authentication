@@ -75,7 +75,21 @@ function onConnected() {
      */
     stompClient.subscribe("/user/queue/friends", function (message) {
 
-        console.log("Estado dos amigos:", message.body);
+
+
+        if (message.body === "refresh") {
+
+            loadFriendsPresenceFromApi();
+            return;
+
+        }
+
+        const data = JSON.parse(message.body);
+
+
+         loadFriendsPresenceFromApi();
+
+        console.log("Estado dos amigos:", data);
 
     });
 

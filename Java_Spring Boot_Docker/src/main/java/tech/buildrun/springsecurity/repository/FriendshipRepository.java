@@ -54,4 +54,18 @@ OR
             User requester,
             User addressee
     );
+
+    @Query("""
+SELECT
+CASE
+WHEN f.requester.userId = :userId
+THEN f.addressee.username
+ELSE f.requester.username
+END
+FROM FRIENDSHIP f
+WHERE
+(f.requester.userId = :userId OR f.addressee.userId = :userId)
+AND f.status = tech.buildrun.springsecurity.entities.Chat.FriendshipStatus.ACCEPTED
+""")
+    List<String> findFriendUsernames(UUID userId);
 }

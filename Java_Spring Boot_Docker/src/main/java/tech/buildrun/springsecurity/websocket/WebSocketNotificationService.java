@@ -73,11 +73,11 @@ public class WebSocketNotificationService {
     |--------------------------------------------------------------------------
     */
 
-    public void sendOnlineFriends(User user) {
+    public void sendOnlineFriends(String username) {
 
         messagingTemplate.convertAndSendToUser(
 
-                user.getUsername(),
+                username,
 
                 "/queue/friends",
 

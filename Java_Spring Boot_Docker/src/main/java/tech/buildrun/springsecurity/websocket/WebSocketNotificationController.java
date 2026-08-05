@@ -60,7 +60,7 @@ public class WebSocketNotificationController {
 
         User user = (User) authentication.getPrincipal();
 
-        notificationService.sendOnlineFriends(user);
+        //notificationService.sendOnlineFriends(user);
 
     }
 

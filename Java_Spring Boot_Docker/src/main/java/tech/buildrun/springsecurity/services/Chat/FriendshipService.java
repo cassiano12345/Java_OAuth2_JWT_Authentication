@@ -231,9 +231,7 @@ public class FriendshipService {
     // AMIGOS
     // =========================================================
 
-    public List<FRIENDSHIP> getAcceptedFriendships() {
-
-        User authenticatedUser = authenticatedUserService.getAuthenticatedUser();
+    public List<FRIENDSHIP> getAcceptedFriendships(User authenticatedUser)  {
 
         List<FRIENDSHIP> friendships = new ArrayList<>();
 
@@ -257,7 +255,7 @@ public class FriendshipService {
 
         User authenticatedUser = authenticatedUserService.getAuthenticatedUser();
 
-        List<FRIENDSHIP> friendships = getAcceptedFriendships();
+        List<FRIENDSHIP> friendships = getAcceptedFriendships(authenticatedUser);
 
         List<FriendDTO> friends = new ArrayList<>();
 
@@ -338,5 +336,16 @@ public class FriendshipService {
                         friendshipRepository.findByRequesterAndAddressee(addressee, authenticatedUser))
                 .orElseThrow(() ->
                         new RuntimeException("Amizade não encontrada."));
+    }
+
+    // =========================================================
+    // PESQUISAR AMIGOS PARA ENVIAR O ESTADO DE ONLINE NO WEBSOCKET
+    // =========================================================
+    public List<String> getFriendUsernames(User user) {
+
+        return friendshipRepository.findFriendUsernames(
+                user.getUserId()
+        );
+
     }
 }
