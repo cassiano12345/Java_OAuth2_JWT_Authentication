@@ -1231,6 +1231,23 @@ document.addEventListener("click", (event) => {
     }
     closeAccountMenus();
 });
+async function loadFriends() {
+    try {
+        const r = await fetch("/api/friendships/friends", {
+            headers: {
+                Authorization: "Bearer " + localStorage.getItem("accessToken"),
+            },
+        });
+        if (!r.ok) {
+            console.log("Amigos não obtidos!");
+            return;
+        }
+        const u = await r.json();
+            console.log(u);
+    } catch (e) {
+        console.error(e);
+    }
+}
 
 // ============================================================
 // INICIALIZAÇÃO DA PÁGINA
@@ -1240,6 +1257,7 @@ setTheme(localStorage.getItem("ludo-theme") === "light" ? "light" : "dark");
 updateBadges();
 updateNotificationsBadge();
 loadUser();
+loadFriends();
 loadFriendRequestCount();
 loadBlockedFriendRequests();
 fetchNotificationsFromApi();

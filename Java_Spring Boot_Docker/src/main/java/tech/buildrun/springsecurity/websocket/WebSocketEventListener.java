@@ -10,12 +10,18 @@ import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import tech.buildrun.springsecurity.entities.User;
+import tech.buildrun.springsecurity.services.PresenceService;
 
 @Component
 public class WebSocketEventListener {
 
     private static final Logger logger =
             LoggerFactory.getLogger(WebSocketEventListener.class);
+    private final PresenceService presenceService;
+
+    public WebSocketEventListener(PresenceService presenceService) {
+        this.presenceService = presenceService;
+    }
 
     @EventListener
     public void handleSessionConnect(SessionConnectEvent event) {
@@ -51,7 +57,7 @@ public class WebSocketEventListener {
         }
 
         User user = (User) authentication.getPrincipal();
-
+        presenceService.setOnline(user.getUserId());
         logger.info("WebSocket CONNECTED -> {}", user.getUsername());
 
         // Aqui futuramente:
@@ -74,6 +80,7 @@ public class WebSocketEventListener {
         }
 
         User user = (User) authentication.getPrincipal();
+        presenceService.setOffline(user.getUserId());
 
         logger.info("WebSocket DISCONNECTED -> {}", user.getUsername());
 

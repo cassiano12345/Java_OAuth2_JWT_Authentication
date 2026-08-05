@@ -2,10 +2,7 @@ package tech.buildrun.springsecurity.controller.Chat;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tech.buildrun.springsecurity.dtos.Chat.FriendshipActionDTO;
-import tech.buildrun.springsecurity.dtos.Chat.FriendshipFindDTO;
-import tech.buildrun.springsecurity.dtos.Chat.FriendshipRequestDTO;
-import tech.buildrun.springsecurity.dtos.Chat.FriendshipResponseDTO;
+import tech.buildrun.springsecurity.dtos.Chat.*;
 import tech.buildrun.springsecurity.entities.Chat.FRIENDSHIP;
 import tech.buildrun.springsecurity.services.Chat.FriendshipService;
 
@@ -135,15 +132,12 @@ public class FriendshipController {
     // =========================================================
 
     @GetMapping("/friends")
-    public ResponseEntity<List<FriendshipResponseDTO>> getFriends() {
+    public ResponseEntity<List<FriendDTO>> getFriends() {
 
-        List<FriendshipResponseDTO> response = friendshipService
-                .getAcceptedFriendships()
-                .stream()
-                .map(this::toResponseDTO)
-                .toList();
+        return ResponseEntity.ok(
+                friendshipService.getFriends()
+        );
 
-        return ResponseEntity.ok(response);
     }
 
     // =========================================================

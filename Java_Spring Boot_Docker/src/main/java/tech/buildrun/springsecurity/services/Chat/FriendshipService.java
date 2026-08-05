@@ -2,6 +2,7 @@ package tech.buildrun.springsecurity.services.Chat;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import tech.buildrun.springsecurity.dtos.Chat.FriendDTO;
 import tech.buildrun.springsecurity.entities.Chat.FRIENDSHIP;
 import tech.buildrun.springsecurity.entities.Chat.FriendshipStatus;
 import tech.buildrun.springsecurity.entities.Chat.NotificationType;
@@ -9,6 +10,7 @@ import tech.buildrun.springsecurity.entities.User;
 import tech.buildrun.springsecurity.repository.FriendshipRepository;
 import tech.buildrun.springsecurity.repository.UserRepository;
 import tech.buildrun.springsecurity.services.AuthenticatedUserService;
+import tech.buildrun.springsecurity.services.PresenceService;
 import tech.buildrun.springsecurity.websocket.WebSocketNotificationService;
 
 import java.util.ArrayList;
@@ -24,18 +26,20 @@ public class FriendshipService {
     private final AuthenticatedUserService authenticatedUserService;
     private final WebSocketNotificationService webSocketNotificationService;
     private final NotificationService notificationService;
+    private final PresenceService presenceService;
     public FriendshipService(
             FriendshipRepository friendshipRepository,
             UserRepository userRepository,
             AuthenticatedUserService authenticatedUserService,
             WebSocketNotificationService webSocketNotificationService,
-            NotificationService notificationService
+            NotificationService notificationService, PresenceService presenceService
     ) {
         this.friendshipRepository = friendshipRepository;
         this.userRepository = userRepository;
         this.authenticatedUserService = authenticatedUserService;
         this.webSocketNotificationService = webSocketNotificationService;
         this.notificationService = notificationService;
+        this.presenceService = presenceService;
     }
 
     // =========================================================
@@ -248,6 +252,42 @@ public class FriendshipService {
         );
 
         return friendships;
+    }
+    public List<FriendDTO> getFriends() {
+
+        User authenticatedUser = authenticatedUserService.getAuthenticatedUser();
+
+        List<FRIENDSHIP> friendships = getAcceptedFriendships();
+
+        List<FriendDTO> friends = new ArrayList<>();
+
+        for (FRIENDSHIP friendship : friendships) {
+
+            User friend;
+
+            if (friendship.getRequester().getUserId().equals(authenticatedUser.getUserId())) {
+
+                friend = friendship.getAddressee();
+
+            } else {
+
+                friend = friendship.getRequester();
+
+            }
+
+            friends.add(new FriendDTO(
+
+                    friend.getUserId(),
+
+                    friend.getUsername(),
+
+                    presenceService.isOnline(friend.getUserId())
+
+            ));
+        }
+
+        return friends;
+
     }
 
     // =========================================================
