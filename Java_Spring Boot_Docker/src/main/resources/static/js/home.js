@@ -229,6 +229,7 @@ async function AcceptFriendRequest(id) {
         body: JSON.stringify({friendshipId: id }),
     });
     if (!response.ok) throw new Error("Não foi possível aceitar o pedido.");
+    loadFriendsPresenceFromApi();
     return response.status === 204 ? null : response.json().catch(() => null);
 }
 
