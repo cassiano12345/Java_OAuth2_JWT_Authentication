@@ -136,7 +136,42 @@ public class NotificationService {
 
         webSocketNotificationService.sendNotifications(user);
     }
+    // =========================================================
+    // APAGAR NOTIFICAÇÃO
+    // =========================================================
+    @Transactional
+    public void deleteNotification(UUID notificationId) {
 
+        User user = authenticatedUserService.getAuthenticatedUser();
+
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() ->
+                        new RuntimeException("Notificação não encontrada."));
+
+        if (!notification.getUser().getUserId().equals(user.getUserId())) {
+            throw new RuntimeException("Não tem permissão para apagar esta notificação.");
+        }
+
+        notificationRepository.delete(notification);
+
+        webSocketNotificationService.sendNotifications(user);
+
+    }
+
+    // =========================================================
+    // APAGAR TODAS NOTIFICAÇÕES
+    // =========================================================
+    @Transactional
+    public void deleteAllNotifications() {
+        User user = authenticatedUserService.getAuthenticatedUser();
+
+        List<Notification> notifications = notificationRepository.findByUser_UserIdOrderByCreatedAtDesc(user.getUserId());
+
+        notificationRepository.deleteAll(notifications);
+
+        webSocketNotificationService.sendNotifications(user);
+
+    }
     /*
     |--------------------------------------------------------------------------
     | Converter Entity -> DTO

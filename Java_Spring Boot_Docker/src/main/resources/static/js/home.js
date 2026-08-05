@@ -126,7 +126,7 @@ const API_CONFIG = {
     cancelSentFriendRequest: "/api/friendships/remove", // DELETE JSON — placeholder configurável
     blockedFriendRequests: "/api/friendships/blocked", // GET — placeholder configurável
     deleteNotification: "/api/notifications/:notificationId", // DELETE — placeholder configurável
-    deleteAllNotifications: "/api/notifications", // DELETE — placeholder configurável
+    deleteAllNotifications: "/api/notifications/delete-all", // DELETE — placeholder configurável
     unfriend: "/api/friendships/remove", // DELETE JSON
     enableRemoteOnInteraction: false,
 };
@@ -741,6 +741,8 @@ async function deleteNotificationViaApi(notificationId, endpoint = API_CONFIG.de
     if (!response.ok) throw new Error("Não foi possível eliminar a notificação.");
     return response.status === 204 ? null : response.json().catch(() => null);
 }
+
+
 async function deleteAllNotificationsViaApi(endpoint = API_CONFIG.deleteAllNotifications) {
     await loadUser();
     const response = await fetch(endpoint, { method: "DELETE", headers: authHeaders() });
