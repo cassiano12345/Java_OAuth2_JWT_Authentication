@@ -40,13 +40,14 @@ function onConnected() {
     /*
      * Pedidos de amizade
      */
-    stompClient.subscribe("/user/queue/friendships", function (message) {
-        updateBadges();
-        loadFriendRequestCount();
-        updateBadges();
+    stompClient.subscribe("/user/queue/friendships", async function (message) {
         console.log("Pedido de amizade:", message.body);
-
-
+        try {
+            // Aguarda a lista atualizada antes de corrigir o contador e a vista aberta.
+            await handleFriendshipWebSocketUpdate();
+        } catch (error) {
+            console.error("Não foi possível atualizar os pedidos de amizade.", error);
+        }
     });
 
     /*

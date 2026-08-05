@@ -31,6 +31,8 @@ const state = {
             text: "Pedido enviado. Aguardando resposta.",
         },
     ],
+    blockedRequests: [],
+    notifications: [],
     conversations: [
         {
             id: "ana",
@@ -117,9 +119,14 @@ const API_CONFIG = {
     privateMessages: "/api/conversations", // GET /:friendId/messages
     groupMessages: "/api/groups", // GET /:groupId/messages
     createGroup: "/api/groups", // POST JSON
+    addGroupMember: "/api/groups", // POST /:groupId/members — substitua conforme a API
     acceptFriendRequest: "/api/friendships/accept", // POST JSON
     rejectFriendRequest: "/api/friendships/remove", // DELETE JSON
     blockFriendRequest: "/api/friendships/block", // POST JSON
+    cancelSentFriendRequest: "/api/friendships/cancel", // DELETE JSON — placeholder configurável
+    blockedFriendRequests: "/api/friendships/blocked", // GET — placeholder configurável
+    deleteNotification: "/api/notifications/:notificationId", // DELETE — placeholder configurável
+    deleteAllNotifications: "/api/notifications", // DELETE — placeholder configurável
     unfriend: "/api/friendships/remove", // DELETE JSON
     enableRemoteOnInteraction: false,
 };
@@ -148,11 +155,22 @@ function title(a, b) {
     $("#chatTitle").textContent = a;
     $("#chatSubtitle").textContent = b;
 }
+function entityId(value) {
+    if (value === null || value === undefined) return "";
+    const id = String(value).trim();
+    return id ? id : "";
+}
 function updateBadges() {
     const n = state.requests.length,
         b = $("#requestBadge");
     b.textContent = n;
     b.style.display = n ? "grid" : "none";
+}
+function updateNotificationsBadge() {
+    const badge = $("#notificationsBadge");
+    const count = state.notifications.length;
+    badge.textContent = count > 99 ? "99+" : String(count);
+    badge.style.display = count ? "grid" : "none";
 }
 function showChat() {
     chatPanel.classList.add("open");
@@ -188,10 +206,16 @@ function renderMessages() {
     showChat();
 }
 function requestCard(r, kind = "received") {
-    const userId = r.userId == null ? "" : String(r.userId);
+    const requestId = entityId(r.id);
+    const userId = entityId(r.userId);
+    const escapedRequestId = escapeHtml(requestId);
     const escapedUserId = escapeHtml(userId);
-    const receivedActions = `<div class="request-actions"><button class="accept" data-action="accept" data-user-id="${escapedUserId}">Aceitar</button><button class="reject" data-action="reject" data-user-id="${escapedUserId}">Rejeitar</button><button class="block" data-action="block" data-user-id="${escapedUserId}">Bloquear</button></div>`;
-    return `<article class="request-item" data-request-id="${escapeHtml(String(r.id))}" data-user-id="${escapedUserId}" data-kind="${kind}">${avatar(r.letter)}<div><b>${escapeHtml(r.name)}</b><p>${escapeHtml(r.text)}</p>${kind === "received" ? receivedActions : '<span class="sent-status"><i class="bi bi-clock"></i> Enviado</span>'}</div></article>`;
+    const disabled = requestId ? "" : " disabled";
+    const receivedActions = `<div class="request-actions"><button class="accept" data-action="accept"${disabled}>Aceitar</button><button class="reject" data-action="reject"${disabled}>Rejeitar</button><button class="block" data-action="block"${disabled}>Bloquear</button></div>`;
+    const sentActions = `<div class="request-actions"><span class="sent-status"><i class="bi bi-clock"></i> Enviado</span><button class="reject" data-action="cancel-sent"${disabled}>Eliminar</button></div>`;
+    const blockedStatus = '<span class="sent-status"><i class="bi bi-slash-circle"></i> Bloqueado</span>';
+    const actions = kind === "received" ? receivedActions : kind === "sent" ? sentActions : blockedStatus;
+    return `<article class="request-item" data-request-id="${escapedRequestId}" data-user-id="${escapedUserId}" data-kind="${kind}">${avatar(r.letter)}<div><b>${escapeHtml(r.name)}</b><p>${escapeHtml(r.text)}</p>${actions}</div></article>`;
 }
 
 // Aceita com o ID real recebido da API. Ajuste endpoint/payload ao contrato do backend.
@@ -233,12 +257,26 @@ async function BlockFriendRequest(id) {
     return response.status === 204 ? null : response.json().catch(() => null);
 }
 
+// Cancela um pedido enviado usando o ID de amizade retornado pela API.
+async function CancelSentFriendRequest(id) {
+    const friendshipId = entityId(id);
+    if (!friendshipId) throw new Error("ID do pedido enviado indisponível.");
+    const response = await fetch(API_CONFIG.cancelSentFriendRequest, {
+        method: "DELETE",
+        headers: authHeaders(true),
+        // Ajuste friendshipId ao contrato efetivo do backend.
+        body: JSON.stringify({ friendshipId }),
+    });
+    if (!response.ok) throw new Error("Não foi possível eliminar o pedido enviado.");
+    return response.status === 204 ? null : response.json().catch(() => null);
+}
+
 function renderRequests() {
     state.view = "requests";
     state.conversation = null;
     title("Pedidos de amizade", `${state.requests.length} recebido(s)`);
     $("#chatBody").innerHTML =
-        `<section class="new-request"><h3>Fazer pedido</h3><p>Pesquise um jogador para enviar um pedido de amizade.</p><div class="friend-search-input"><i class="bi bi-search"></i><input id="friendSearchInput" type="search" autocomplete="off" placeholder="Pesquisar jogador..."></div><div id="friendSearchResults" class="friend-search-results"></div></section><section class="request-section"><h3>Pedidos recebidos <span>${state.requests.length}</span></h3>${state.requests.map((r) => requestCard(r)).join("") || '<p class="list-empty compact">Nenhum pedido recebido.</p>'}</section><section class="request-section"><h3>Pedidos enviados <span>${state.sentRequests.length}</span></h3>${state.sentRequests.map((r) => requestCard(r, "sent")).join("") || '<p class="list-empty compact">Nenhum pedido enviado.</p>'}</section>`;
+        `<section class="new-request"><h3>Fazer pedido</h3><p>Pesquise um jogador para enviar um pedido de amizade.</p><div class="friend-search-input"><i class="bi bi-search"></i><input id="friendSearchInput" type="search" autocomplete="off" placeholder="Pesquisar jogador..."></div><div id="friendSearchResults" class="friend-search-results"></div></section><section class="request-section"><h3>Pedidos recebidos <span>${state.requests.length}</span></h3>${state.requests.map((r) => requestCard(r)).join("") || '<p class="list-empty compact">Nenhum pedido recebido.</p>'}</section><section class="request-section"><h3>Pedidos enviados <span>${state.sentRequests.length}</span></h3>${state.sentRequests.map((r) => requestCard(r, "sent")).join("") || '<p class="list-empty compact">Nenhum pedido enviado.</p>'}</section><section class="request-section"><h3>Pedidos bloqueados <span>${state.blockedRequests.length}</span></h3>${state.blockedRequests.map((r) => requestCard(r, "blocked")).join("") || '<p class="list-empty compact">Nenhum pedido bloqueado.</p>'}</section>`;
     showChat();
 }
 function messageHtml([n, l, t, time], index) {
@@ -250,7 +288,7 @@ function messageHtml([n, l, t, time], index) {
 function groupParticipantsHtml(item) {
     if (!item.isGroup) return "";
     const count = item.participants.length;
-    return `<button type="button" class="group-participants-button" data-group-participants aria-expanded="false"><i class="bi bi-people-fill"></i> Participantes (${count})</button><button type="button" class="group-participants-button leave-group-button" data-leave-group><i class="bi bi-box-arrow-left"></i> Sair da conversa do grupo</button><div class="participants-list hidden" id="participantsList">${item.participants.map((member) => `<div class="participant-row">${avatar(member.letter)}<b>${escapeHtml(member.name)}</b>${member.role === "Admin" ? '<span class="participant-role">Admin</span>' : ""}</div>`).join("")}</div>`;
+    return `<button type="button" class="group-participants-button" data-group-participants aria-expanded="false"><i class="bi bi-people-fill"></i> Participantes (${count})</button><button type="button" class="group-participants-button leave-group-button" data-leave-group><i class="bi bi-box-arrow-left"></i> Sair da conversa do grupo</button><div class="participants-list hidden" id="participantsList">${item.participants.map((member) => `<div class="participant-row">${avatar(member.letter)}<b>${escapeHtml(member.name)}</b>${member.role === "Admin" ? '<span class="participant-role">Admin</span>' : ""}</div>`).join("")}</div><section class="conversation-member-adder"><label for="groupMemberSearch">Adicionar participante</label><div class="friend-search-input"><i class="bi bi-search"></i><input id="groupMemberSearch" type="search" autocomplete="off" placeholder="Pesquisar jogador..."></div><div class="group-member-search-results" id="groupMemberSearchResults"></div></section>`;
 }
 function conversationIcon(item) {
     return item.avatarImage ? `<img src="${item.avatarImage}" alt="" class="conversation-avatar-image">` : item.letter;
@@ -340,6 +378,31 @@ $("#chatBody").addEventListener("click", async (e) => {
         button.setAttribute("aria-expanded", String(!list.classList.contains("hidden")));
         return;
     }
+    const addGroupMemberButton = e.target.closest("[data-add-group-member]");
+    if (addGroupMemberButton) {
+        const group = state.conversation;
+        const memberId = entityId(addGroupMemberButton.dataset.groupMemberId);
+        const memberName = (addGroupMemberButton.dataset.groupMemberName || "").trim();
+        if (!group?.isGroup || !memberId || !memberName)
+            return toast("Não foi possível identificar o jogador.");
+        if (groupHasMember(group, memberId, memberName))
+            return toast("Este jogador já faz parte do grupo.");
+        addGroupMemberButton.disabled = true;
+        try {
+            // Mantém o fluxo local até o endpoint real ser ativado na configuração.
+            if (API_CONFIG.enableRemoteOnInteraction)
+                await addGroupMemberViaApi(getGroupId(group), memberId);
+            if (!addMemberToGroup(group, { id: memberId, name: memberName }))
+                return toast("Este jogador já faz parte do grupo.");
+            renderConversation(group);
+            toast(`${memberName} foi adicionado(a) ao grupo.`);
+        } catch (error) {
+            console.error("Erro ao adicionar participante ao grupo.", error);
+            addGroupMemberButton.disabled = false;
+            toast("Não foi possível adicionar o participante.");
+        }
+        return;
+    }
     if (e.target.closest("[data-leave-group]")) {
         const groupName = state.conversation.name;
         renderMessages();
@@ -393,19 +456,29 @@ $("#chatBody").addEventListener("click", async (e) => {
     if (actionButton) {
         const action = actionButton.dataset.action;
         const row = actionButton.closest("[data-request-id]");
-        const request = state.requests.find((x) => String(x.id) === row.dataset.requestId);
-
-
-        const userId = row.dataset.requestId || request?.requestId;
-        console.log("ID da amizade: " + userId);
-        if (!request || !userId) return toast("O ID real do utilizador não está disponível neste pedido.");
+        const requestId = entityId(row?.dataset.requestId);
+        const kind = row?.dataset.kind;
+        if (!requestId) return toast("O ID real do pedido não está disponível.");
         actionButton.disabled = true;
         try {
-            if (action === "accept") await AcceptFriendRequest(userId);
-            else if (action === "reject") await RejectFriendRequest(userId);
-            else if (action === "block") await BlockFriendRequest(userId);
-            // Bloquear é demonstrativo até existir o endpoint específico no backend.
+            if (action === "cancel-sent" && kind === "sent") {
+                const sentRequest = state.sentRequests.find((x) => entityId(x.id) === requestId);
+                if (!sentRequest) throw new Error("Pedido enviado não encontrado.");
+                await CancelSentFriendRequest(requestId);
+                state.sentRequests = state.sentRequests.filter((x) => x !== sentRequest);
+                renderRequests();
+                toast(`Pedido para ${sentRequest.name} eliminado.`);
+                return;
+            }
+            const request = state.requests.find((x) => entityId(x.id) === requestId);
+            if (!request) throw new Error("Pedido recebido não encontrado.");
+            if (action === "accept") await AcceptFriendRequest(requestId);
+            else if (action === "reject") await RejectFriendRequest(requestId);
+            else if (action === "block") await BlockFriendRequest(requestId);
+            else return;
             state.requests = state.requests.filter((x) => x !== request);
+            if (action === "block")
+                state.blockedRequests.unshift({ ...request, text: "Pedido bloqueado." });
             updateBadges();
             renderRequests();
             toast(action === "accept" ? `Pedido de ${request.name} aceito!` : action === "reject" ? `Pedido de ${request.name} rejeitado.` : `${request.name} foi bloqueado(a).`);
@@ -505,6 +578,18 @@ $("#chatBody").addEventListener("input", (e) => {
     }
     searchTimer = setTimeout(() => searchUsers(q), 300);
 });
+let conversationGroupSearchTimer;
+$("#chatBody").addEventListener("input", (e) => {
+    if (e.target.id !== "groupMemberSearch") return;
+    clearTimeout(conversationGroupSearchTimer);
+    const query = e.target.value.trim();
+    const results = $("#groupMemberSearchResults");
+    if (query.length < 2) {
+        results.replaceChildren();
+        return;
+    }
+    conversationGroupSearchTimer = setTimeout(() => searchConversationGroupMembers(query), 300);
+});
 async function searchUsers(username) {
     try {
         const r = await fetch(`/search?username=${encodeURIComponent(username)}`, {
@@ -580,6 +665,8 @@ $("#chatBody").addEventListener("click", async (e) => {
         b.disabled = true;
         b.classList.add("pending");
         b.innerHTML = '<i class="fa-solid fa-clock"></i> Enviado';
+        await loadFriendsentCount();
+        if (state.view === "requests" && chatPanel.classList.contains("open")) renderRequests();
     } catch {
         toast("Não foi possível enviar o pedido.");
     }
@@ -589,41 +676,104 @@ $("#chatBody").addEventListener("click", async (e) => {
 // ============================================================
 
 // Busca notificações e renderiza texto de forma segura, sem innerHTML da API.
+function renderNotifications(items = state.notifications) {
+    const list = $("#notificationsList");
+    if (!list) return;
+    state.notifications = Array.isArray(items) ? items : [];
+    list.replaceChildren();
+    if (!state.notifications.length) {
+        list.append(Object.assign(document.createElement("p"), { className: "notifications-empty", textContent: "Não há notificações." }));
+        updateNotificationsBadge();
+        return;
+    }
+    state.notifications.forEach((item) => {
+        const notificationId = entityId(item?.id ?? item?.notificationId);
+        const row = document.createElement("div");
+        row.className = "notification-item";
+        const content = document.createElement("p");
+        content.textContent = String(item?.content ?? item?.text ?? "Notificação");
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "notification-delete";
+        remove.setAttribute("aria-label", "Eliminar notificação");
+        const icon = document.createElement("i");
+        icon.className = "bi bi-x-lg";
+        icon.setAttribute("aria-hidden", "true");
+        remove.append(icon);
+        if (notificationId) remove.dataset.notificationId = notificationId;
+        else {
+            remove.disabled = true;
+            remove.title = "Notificação sem ID disponível.";
+        }
+        row.append(content, remove);
+        list.append(row);
+    });
+    updateNotificationsBadge();
+}
+
 async function fetchNotificationsFromApi() {
     const list = $("#notificationsList");
     if (!list) return;
-    list.replaceChildren(Object.assign(document.createElement("p"), { textContent: "A carregar notificações..." }));
+    list.replaceChildren(Object.assign(document.createElement("p"), { className: "notifications-empty", textContent: "A carregar notificações..." }));
     try {
         const response = await fetch(API_CONFIG.notifications, { headers: authHeaders() });
         if (!response.ok) throw new Error("Falha ao buscar notificações.");
         const items = await response.json();
-        console.log(items);
-        if (!Array.isArray(items) || !items.length) {
-            list.replaceChildren(Object.assign(document.createElement("p"), { textContent: "Não há notificações." }));
-            return;
-        }
-        list.replaceChildren(...items.map((item) => {
-            const button = document.createElement("button");
-            button.type = "button";
-            button.textContent = String( item.content);
-            return button;
-        }));
-
-        ///// NUMERO DE NOTIFICAÇÕES
-        const badge = document.getElementById("notificationsBadge");
-        if (items.length <= 0) {
-
-            badge.style.display = "none";
-            return;
-
-        }
-        badge.textContent = items.length > 99 ? "99+" : items.length;
-        ////////////
+        renderNotifications(items);
     } catch (error) {
         console.error("Erro ao buscar notificações.", error);
-        list.replaceChildren(Object.assign(document.createElement("p"), { textContent: "Não foi possível carregar as notificações." }));
+        list.replaceChildren(Object.assign(document.createElement("p"), { className: "notifications-empty", textContent: "Não foi possível carregar as notificações." }));
     }
 }
+
+// Placeholders de remoção: ajuste os endpoints e o payload ao contrato real da API.
+async function deleteNotificationViaApi(notificationId, endpoint = API_CONFIG.deleteNotification) {
+    const id = entityId(notificationId);
+    if (!id) throw new Error("ID da notificação indisponível.");
+    const url = endpoint.replace(":notificationId", encodeURIComponent(id));
+    const response = await fetch(url, { method: "DELETE", headers: authHeaders() });
+    if (!response.ok) throw new Error("Não foi possível eliminar a notificação.");
+    return response.status === 204 ? null : response.json().catch(() => null);
+}
+async function deleteAllNotificationsViaApi(endpoint = API_CONFIG.deleteAllNotifications) {
+    const response = await fetch(endpoint, { method: "DELETE", headers: authHeaders() });
+    if (!response.ok) throw new Error("Não foi possível eliminar as notificações.");
+    return response.status === 204 ? null : response.json().catch(() => null);
+}
+
+$("#notificationsList").addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-notification-id]");
+    if (!button || button.disabled) return;
+    const notificationId = entityId(button.dataset.notificationId);
+    if (!notificationId) return toast("Esta notificação não tem um ID válido.");
+    button.disabled = true;
+    try {
+        await deleteNotificationViaApi(notificationId);
+        state.notifications = state.notifications.filter((item) => entityId(item?.id ?? item?.notificationId) !== notificationId);
+        renderNotifications();
+        toast("Notificação eliminada.");
+    } catch (error) {
+        console.error("Erro ao eliminar notificação.", error);
+        button.disabled = false;
+        toast("Não foi possível eliminar a notificação.");
+    }
+});
+$("#notificationsDeleteAll").addEventListener("click", async () => {
+    const button = $("#notificationsDeleteAll");
+    if (!state.notifications.length) return;
+    button.disabled = true;
+    try {
+        await deleteAllNotificationsViaApi();
+        state.notifications = [];
+        renderNotifications();
+        toast("Todas as notificações foram eliminadas.");
+    } catch (error) {
+        console.error("Erro ao eliminar notificações.", error);
+        toast("Não foi possível eliminar as notificações.");
+    } finally {
+        button.disabled = false;
+    }
+});
 
 // Atualiza a lista lateral com presença vinda da API; os botões mantêm delegação de clique.
 async function loadFriendsPresenceFromApi(endpoint = API_CONFIG.friendsPresence) {
@@ -672,6 +822,80 @@ async function loadGroupMessagesFromApi(groupId, conversation = state.conversati
     conversation.messages = normalizeApiMessages(await response.json());
     if (state.conversation === conversation) renderConversation(conversation);
     return conversation.messages;
+}
+
+// Adiciona um participante ao grupo. O endpoint e o payload são placeholders configuráveis.
+async function addGroupMemberViaApi(groupId, memberId, endpoint = API_CONFIG.addGroupMember) {
+    const validGroupId = entityId(groupId);
+    const validMemberId = entityId(memberId);
+    if (!validGroupId || !validMemberId) throw new Error("IDs de grupo ou participante indisponíveis.");
+    const response = await fetch(`${endpoint}/${encodeURIComponent(validGroupId)}/members`, {
+        method: "POST",
+        headers: authHeaders(true),
+        // Ajuste memberId ao campo exigido pelo backend.
+        body: JSON.stringify({ memberId: validMemberId }),
+    });
+    if (!response.ok) throw new Error("Não foi possível adicionar o participante ao grupo.");
+    return response.status === 204 ? null : response.json().catch(() => null);
+}
+
+function getGroupId(group) {
+    return entityId(group?.id) || Object.keys(state.groups).find((id) => state.groups[id] === group) || "";
+}
+function groupHasMember(group, memberId, memberName) {
+    const normalizedName = memberName.trim().toLocaleLowerCase();
+    return group.participants.some((member) => {
+        const existingId = entityId(member.id ?? member.userId);
+        return (memberId && existingId && existingId === memberId) || member.name.trim().toLocaleLowerCase() === normalizedName;
+    });
+}
+function addMemberToGroup(group, { id, name }) {
+    if (groupHasMember(group, id, name)) return false;
+    group.participants.push({ id, name, letter: name[0].toUpperCase(), role: "Usuário normal" });
+    group.subtitle = `${group.participants.length} membro(s)`;
+    return true;
+}
+async function searchConversationGroupMembers(username) {
+    const results = $("#groupMemberSearchResults");
+    try {
+        const response = await fetch(`/search?username=${encodeURIComponent(username)}`, { headers: authHeaders() });
+        if (!response.ok) throw new Error("Não foi possível pesquisar jogadores.");
+        renderConversationGroupSearchResults(await response.json());
+    } catch (error) {
+        console.error("Erro ao pesquisar participantes do grupo.", error);
+        results.replaceChildren(Object.assign(document.createElement("p"), { className: "friend-search-empty", textContent: "Não foi possível pesquisar agora." }));
+    }
+}
+function renderConversationGroupSearchResults(users) {
+    const results = $("#groupMemberSearchResults");
+    const group = state.conversation;
+    if (!results || !group?.isGroup) return;
+    results.replaceChildren();
+    const available = (Array.isArray(users) ? users : []).filter((user) => {
+        const memberId = entityId(user?.userId ?? user?.id);
+        const name = String(user?.username ?? user?.name ?? "").trim();
+        return memberId && name && !groupHasMember(group, memberId, name);
+    });
+    if (!available.length) {
+        results.append(Object.assign(document.createElement("p"), { className: "friend-search-empty", textContent: "Nenhum jogador disponível." }));
+        return;
+    }
+    available.forEach((user) => {
+        const memberId = entityId(user.userId ?? user.id);
+        const name = String(user.username ?? user.name).trim();
+        const row = document.createElement("div");
+        row.className = "group-search-user";
+        row.innerHTML = `${avatar(name[0].toUpperCase())}<span>${escapeHtml(name)}</span>`;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "group-add-member";
+        button.dataset.addGroupMember = "";
+        button.dataset.groupMemberId = memberId;
+        button.dataset.groupMemberName = name;
+        button.textContent = "Adicionar";
+        row.append(button);
+        results.append(row);
+    });
 }
 
 // Demonstra POST JSON de criação. Não é chamado automaticamente.
@@ -853,8 +1077,8 @@ async function loadFriendRequestCount() {
         const data = await r.json();
         if (Array.isArray(data)) {
             state.requests = data.map((x, i) => ({
-                id: x.id || x.friendshipId || i + 1,
-                userId: x.userId || x.senderId || x.sender?.id || x.requesterId || null,
+                id: entityId(x.id ?? x.friendshipId),
+                userId: x.userId ?? x.senderId ?? x.sender?.id ?? x.requesterId ?? null,
                 name: x.username || x.requesterUsername  || "Jogador",
                 letter: (x.username || x.requesterUsername  || "J")[0].toUpperCase(),
                 text: "enviou um pedido de amizade.",
@@ -865,6 +1089,61 @@ async function loadFriendRequestCount() {
         console.error(e);
     }
 }
+async function loadFriendsentCount() {
+    try {
+        const r = await fetch("/api/friendships/sent", {
+            headers: {
+                Authorization: "Bearer " + localStorage.getItem("accessToken"),
+            },
+        });
+        if (!r.ok) return;
+        const data = await r.json();
+        console.log(data);
+        if (Array.isArray(data)) {
+            state.sentRequests = data.map((x, i) => ({
+                id: entityId(x.id ?? x.friendshipId),
+                userId: x.userId ?? x.senderId ?? x.sender?.id ?? x.requesterId ?? null,
+                name: x.username || x.addresseeUsername  || "Jogador",
+                letter: (x.username || x.addresseeUsername  || "J")[0].toUpperCase(),
+                text: "enviou um pedido de amizade.",
+            }));
+            updateBadges();
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+// Lista pedidos bloqueados. Configure API_CONFIG.blockedFriendRequests conforme o backend.
+async function loadBlockedFriendRequests() {
+    try {
+        const response = await fetch(API_CONFIG.blockedFriendRequests, { headers: authHeaders() });
+        if (!response.ok) throw new Error("Não foi possível buscar pedidos bloqueados.");
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error("Resposta de pedidos bloqueados inválida.");
+        state.blockedRequests = data.map((x, i) => {
+            const name = x.username || x.blockedUsername || x.addresseeUsername || x.requesterUsername || "Jogador";
+            return {
+                id: x.id ?? x.friendshipId ?? `blocked-${i + 1}`,
+                userId: x.userId ?? x.senderId ?? x.requesterId ?? null,
+                name,
+                letter: String(name)[0].toUpperCase(),
+                text: "Pedido bloqueado.",
+            };
+        });
+        if (state.view === "requests" && chatPanel.classList.contains("open")) renderRequests();
+    } catch (error) {
+        console.error("Erro ao carregar pedidos bloqueados.", error);
+    }
+}
+
+// Reutilizável pelo WebSocket: atualiza o estado antes de corrigir badge e vista aberta.
+async function handleFriendshipWebSocketUpdate() {
+    await loadFriendRequestCount();
+    updateBadges();
+    if (state.view === "requests" && chatPanel.classList.contains("open")) renderRequests();
+}
+window.handleFriendshipWebSocketUpdate = handleFriendshipWebSocketUpdate;
+
 // ============================================================
 // MENU DA CONTA E MODO DE COR
 // ============================================================
@@ -937,6 +1216,9 @@ document.addEventListener("click", (event) => {
 
 setTheme(localStorage.getItem("ludo-theme") === "light" ? "light" : "dark");
 updateBadges();
+updateNotificationsBadge();
 loadUser();
 loadFriendRequestCount();
+loadBlockedFriendRequests();
 fetchNotificationsFromApi();
+loadFriendsentCount();

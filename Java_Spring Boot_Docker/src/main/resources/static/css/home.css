@@ -1355,3 +1355,101 @@ body.light-mode .modal-field > input:not([type="search"]) { color: var(--text); 
     background: rgba(230, 66, 91, 0.1);
 }
 .unfriend-button:hover { background: rgba(230, 66, 91, 0.2); }
+
+/* ============================================================
+   PARTICIPANTES E AÇÕES DE NOTIFICAÇÕES
+   ============================================================ */
+.conversation-member-adder {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    text-align: left;
+}
+.conversation-member-adder > label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: bold;
+}
+.group-member-search-results {
+    max-height: 145px;
+    overflow-y: auto;
+}
+.notifications-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 2px 4px 7px;
+}
+.notifications-menu-header > b {
+    font-size: 11px;
+}
+.notification-delete-all,
+.notification-delete {
+    border: 0;
+    cursor: pointer;
+}
+.notification-delete-all {
+    padding: 4px 6px;
+    border-radius: 5px;
+    color: #ffb0bd;
+    background: rgba(230, 66, 91, 0.13);
+    font-size: 9px;
+}
+.notification-delete-all:hover,
+.notification-delete:hover {
+    color: #fff;
+    background: rgba(230, 66, 91, 0.28);
+}
+.notification-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-top: 1px solid var(--line);
+}
+.notification-item p {
+    flex: 1;
+    margin: 0;
+    padding: 9px 5px;
+    color: var(--muted);
+    font-size: 10px;
+}
+.notification-delete {
+    width: 25px;
+    height: 25px;
+    flex: none;
+    border-radius: 6px;
+    color: #d7b5e2;
+    background: transparent;
+    font-size: 11px;
+}
+.notification-delete:disabled,
+.notification-delete-all:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+.notifications-empty {
+    margin: 0;
+    padding: 12px 5px;
+    color: var(--muted);
+    font-size: 10px;
+    text-align: center;
+}
+body.light-mode .notification-item p { color: var(--muted); }
+/* As regras genéricas do menu aplicam-se aos botões da lista; estas ações
+   usam medidas próprias para não ocuparem toda a largura. */
+.notifications-menu .notification-delete-all {
+    width: auto;
+    padding: 4px 6px;
+    border: 0;
+    text-align: center;
+}
+.notifications-menu .notification-delete {
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border: 0;
+    text-align: center;
+}
