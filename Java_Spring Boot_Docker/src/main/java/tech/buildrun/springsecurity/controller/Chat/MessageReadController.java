@@ -32,8 +32,7 @@ public class MessageReadController {
 
         MessageRead messageRead =
                 messageReadService.markAsRead(
-                        dto.messageId(),
-                        dto.userId()
+                        dto.messageId()
                 );
 
         return ResponseEntity.ok(
@@ -50,8 +49,7 @@ public class MessageReadController {
 
         boolean hasRead =
                 messageReadService.hasRead(
-                        dto.messageId(),
-                        dto.userId()
+                        dto.messageId()
                 );
 
         return ResponseEntity.ok(hasRead);
@@ -66,8 +64,7 @@ public class MessageReadController {
 
         MessageRead messageRead =
                 messageReadService.findRead(
-                        dto.messageId(),
-                        dto.userId()
+                        dto.messageId()
                 );
 
         return ResponseEntity.ok(
@@ -84,7 +81,7 @@ public class MessageReadController {
 
         List<MessageRead> messageReads =
                 messageReadService.findByUser(
-                        dto.userId()
+
                 );
 
         List<MessageReadResponseDTO> response =

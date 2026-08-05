@@ -47,7 +47,6 @@ public class ConversationMemberController {
 
         List<ConversationMember> members =
                 conversationMemberService.findConversationsByUser(
-                        dto.userId()
                 );
 
         List<ConversationMemberResponseDTO> response = members.stream()
@@ -65,8 +64,7 @@ public class ConversationMemberController {
 
         ConversationMember member =
                 conversationMemberService.findMember(
-                        dto.conversationId(),
-                        dto.userId()
+                        dto.conversationId()
                 );
 
         return ResponseEntity.ok(toResponseDTO(member));
@@ -80,8 +78,7 @@ public class ConversationMemberController {
 
         boolean isMember =
                 conversationMemberService.isMember(
-                        dto.conversationId(),
-                        dto.userId()
+                        dto.conversationId()
                 );
 
         return ResponseEntity.ok(isMember);
@@ -95,8 +92,7 @@ public class ConversationMemberController {
 
         boolean isAdmin =
                 conversationMemberService.isAdmin(
-                        dto.conversationId(),
-                        dto.userId()
+                        dto.conversationId()
                 );
 
         return ResponseEntity.ok(isAdmin);
@@ -109,8 +105,7 @@ public class ConversationMemberController {
     ) {
 
         conversationMemberService.delete(
-                dto.conversationId(),
-                dto.userId()
+                dto.conversationId()
         );
 
         return ResponseEntity.noContent().build();

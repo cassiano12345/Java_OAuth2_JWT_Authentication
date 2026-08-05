@@ -7,7 +7,6 @@ import java.util.UUID;
 public record MessageDTO(
         UUID messageId,
         UUID conversationId,
-        UUID senderId,
         MessageType messageType,
         String content
 ) {

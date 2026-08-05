@@ -28,7 +28,6 @@ public class MessageController {
 
         Message message = messageService.sendMessage(
                 dto.conversationId(),
-                dto.senderId(),
                 dto.messageType(),
                 dto.content()
         );
@@ -66,7 +65,6 @@ public class MessageController {
 
         List<Message> messages =
                 messageService.findMessagesByUser(
-                        dto.senderId()
                 );
 
         List<MessageResponseDTO> response = messages.stream()
@@ -85,8 +83,7 @@ public class MessageController {
 
         List<Message> messages =
                 messageService.findMessagesByUserAndConversation(
-                        dto.conversationId(),
-                        dto.senderId()
+                        dto.conversationId()
                 );
 
         List<MessageResponseDTO> response = messages.stream()
@@ -123,7 +120,6 @@ public class MessageController {
         Message message =
                 messageService.editMessage(
                         dto.messageId(),
-                        dto.senderId(),
                         dto.content()
                 );
 
@@ -140,8 +136,7 @@ public class MessageController {
     ) {
 
         messageService.deleteMessage(
-                dto.messageId(),
-                dto.senderId()
+                dto.messageId()
         );
 
         return ResponseEntity.noContent().build();

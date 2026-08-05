@@ -28,8 +28,7 @@ public class ConversationController {
         Conversation conversation =
                 conversationService.createConversation(
                         dto.type(),
-                        dto.name(),
-                        dto.creatorId()
+                        dto.name()
                 );
 
         return ResponseEntity.ok(conversation);
@@ -55,7 +54,6 @@ public class ConversationController {
 
         List<Conversation> conversations =
                 conversationService.findByCreator(
-                        dto.creatorId()
                 );
 
         return ResponseEntity.ok(conversations);

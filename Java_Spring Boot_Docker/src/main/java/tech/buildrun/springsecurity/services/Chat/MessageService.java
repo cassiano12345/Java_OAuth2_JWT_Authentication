@@ -9,6 +9,7 @@ import tech.buildrun.springsecurity.entities.User;
 import tech.buildrun.springsecurity.repository.Chat.ConversationRepository;
 import tech.buildrun.springsecurity.repository.Chat.MessageRepository;
 import tech.buildrun.springsecurity.repository.UserRepository;
+import tech.buildrun.springsecurity.services.AuthenticatedUserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,15 +21,17 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
+    private final AuthenticatedUserService authenticatedUserService;
 
     public MessageService(
             MessageRepository messageRepository,
             ConversationRepository conversationRepository,
-            UserRepository userRepository
+            UserRepository userRepository, AuthenticatedUserService authenticatedUserService
     ) {
         this.messageRepository = messageRepository;
         this.conversationRepository = conversationRepository;
         this.userRepository = userRepository;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
 
@@ -36,10 +39,10 @@ public class MessageService {
     @Transactional
     public Message sendMessage(
             UUID conversationId,
-            UUID senderId,
             MessageType messageType,
             String content
     ) {
+        User user = authenticatedUserService.getAuthenticatedUser();
 
         Conversation conversation = conversationRepository
                 .findById(conversationId)
@@ -50,7 +53,7 @@ public class MessageService {
                 );
 
         User sender = userRepository
-                .findById(senderId)
+                .findById(user.getUserId())
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Usuário não encontrado."
@@ -96,26 +99,26 @@ public class MessageService {
 
     // Buscar mensagens enviadas por um usuário
     public List<Message> findMessagesByUser(
-            UUID userId
     ) {
+        User user = authenticatedUserService.getAuthenticatedUser();
 
         return messageRepository
                 .findBySender_UserIdOrderBySentAtAsc(
-                        userId
+                        user.getUserId()
                 );
     }
 
 
     // Buscar mensagens de um usuário em uma conversa
     public List<Message> findMessagesByUserAndConversation(
-            UUID conversationId,
-            UUID userId
+            UUID conversationId
     ) {
+        User user = authenticatedUserService.getAuthenticatedUser();
 
         return messageRepository
                 .findByConversation_ConversationIdAndSender_UserIdOrderBySentAtAsc(
                         conversationId,
-                        userId
+                        user.getUserId()
                 );
     }
 
@@ -124,9 +127,9 @@ public class MessageService {
     @Transactional
     public Message editMessage(
             UUID messageId,
-            UUID userId,
             String newContent
     ) {
+        User user = authenticatedUserService.getAuthenticatedUser();
 
         Message message = messageRepository
                 .findById(messageId)
@@ -136,7 +139,7 @@ public class MessageService {
                         )
                 );
 
-        if (!message.getSender().getUserId().equals(userId)) {
+        if (!message.getSender().getUserId().equals(user.getUserId())) {
             throw new RuntimeException(
                     "Você não pode editar esta mensagem."
             );
@@ -152,9 +155,9 @@ public class MessageService {
     // Apagar mensagem
     @Transactional
     public void deleteMessage(
-            UUID messageId,
-            UUID userId
+            UUID messageId
     ) {
+        User user = authenticatedUserService.getAuthenticatedUser();
 
         Message message = messageRepository
                 .findById(messageId)
@@ -164,7 +167,7 @@ public class MessageService {
                         )
                 );
 
-        if (!message.getSender().getUserId().equals(userId)) {
+        if (!message.getSender().getUserId().equals(user.getUserId())) {
             throw new RuntimeException(
                     "Você não pode apagar esta mensagem."
             );
