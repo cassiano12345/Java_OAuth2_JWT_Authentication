@@ -790,8 +790,17 @@ async function loadFriendsPresenceFromApi(endpoint = API_CONFIG.friendsPresence)
     const response = await fetch(endpoint, { headers: authHeaders() });
     if (!response.ok) throw new Error("Não foi possível buscar amigos.");
     const friends = await response.json();
-    console.log(friends);
     if (!Array.isArray(friends)) throw new Error("Resposta de amigos inválida.");
+
+    //////// Contagem do .lenght do array
+    const onlineCount = friends.filter(friend => friend.online).length;
+    const offlineCount = friends.filter(friend => !friend.online).length;
+    const numero_online = document.getElementById("amigosOnline");
+    numero_online.textContent = onlineCount > 99 ? "99+" : onlineCount;
+
+    const numero_offline = document.getElementById("amigosOffline");
+    numero_offline.textContent = offlineCount > 99 ? "99+" : offlineCount;
+    ///////////////////
     const onlineList = $(".friends-list:not(.offline-friends)");
     const offlineList = $(".offline-friends");
     onlineList.replaceChildren(); offlineList.replaceChildren();
