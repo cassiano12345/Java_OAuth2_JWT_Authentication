@@ -32,8 +32,18 @@ function onConnected() {
     stompClient.subscribe("/user/queue/notifications", function (message) {
 
         console.log("Notificação:", message.body);
+
+        if (message.body === "refresh") {
+
+             fetchNotificationsFromApi();
+            return;
+
+        }
+
         const data = JSON.parse(message.body);
+
         toast(data.content);
+
          fetchNotificationsFromApi();
     });
 
@@ -48,6 +58,7 @@ function onConnected() {
         } catch (error) {
             console.error("Não foi possível atualizar os pedidos de amizade.", error);
         }
+        await handleFriendshipWebSocketUpdate();
     });
 
     /*
