@@ -195,6 +195,19 @@ public class FriendshipService {
                 FriendshipStatus.PENDING
         );
     }
+    // =========================================================
+    // PEDIDOS BLOQUEADOS
+    // =========================================================
+
+    public List<FRIENDSHIP> getBlockRequests() {
+
+        User authenticatedUser = authenticatedUserService.getAuthenticatedUser();
+
+        return friendshipRepository.findByAddresseeAndStatus(
+                authenticatedUser,
+                FriendshipStatus.BLOCKED
+        );
+    }
 
     // =========================================================
     // PEDIDOS ENVIADOS

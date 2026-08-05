@@ -99,6 +99,22 @@ public class FriendshipController {
     }
 
     // =========================================================
+    // LISTAR PEDIDOS BLOQUEADOS
+    // =========================================================
+
+    @GetMapping("/blocked")
+    public ResponseEntity<List<FriendshipResponseDTO>> getBlockRequests() {
+
+        List<FriendshipResponseDTO> response = friendshipService
+                .getBlockRequests()
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+    // =========================================================
     // LISTAR PEDIDOS ENVIADOS
     // =========================================================
 

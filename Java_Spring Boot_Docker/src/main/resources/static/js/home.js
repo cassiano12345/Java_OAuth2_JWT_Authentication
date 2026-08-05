@@ -1098,7 +1098,6 @@ async function loadFriendsentCount() {
         });
         if (!r.ok) return;
         const data = await r.json();
-        console.log(data);
         if (Array.isArray(data)) {
             state.sentRequests = data.map((x, i) => ({
                 id: entityId(x.id ?? x.friendshipId),
@@ -1119,9 +1118,10 @@ async function loadBlockedFriendRequests() {
         const response = await fetch(API_CONFIG.blockedFriendRequests, { headers: authHeaders() });
         if (!response.ok) throw new Error("Não foi possível buscar pedidos bloqueados.");
         const data = await response.json();
+        //console.log(data);
         if (!Array.isArray(data)) throw new Error("Resposta de pedidos bloqueados inválida.");
         state.blockedRequests = data.map((x, i) => {
-            const name = x.username || x.blockedUsername || x.addresseeUsername || x.requesterUsername || "Jogador";
+            const name =  x.requesterUsername;
             return {
                 id: x.id ?? x.friendshipId ?? `blocked-${i + 1}`,
                 userId: x.userId ?? x.senderId ?? x.requesterId ?? null,
