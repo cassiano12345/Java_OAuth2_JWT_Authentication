@@ -1140,6 +1140,7 @@ async function loadBlockedFriendRequests() {
 async function handleFriendshipWebSocketUpdate() {
     await loadFriendRequestCount();
     updateBadges();
+
     if (state.view === "requests" && chatPanel.classList.contains("open")) renderRequests();
 }
 window.handleFriendshipWebSocketUpdate = handleFriendshipWebSocketUpdate;

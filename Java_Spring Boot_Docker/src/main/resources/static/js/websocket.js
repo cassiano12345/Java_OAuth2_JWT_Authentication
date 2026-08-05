@@ -34,7 +34,7 @@ function onConnected() {
         console.log("Notificação:", message.body);
         const data = JSON.parse(message.body);
         toast(data.content);
-        fetchNotificationsFromApi();
+         fetchNotificationsFromApi();
     });
 
     /*
