@@ -271,7 +271,11 @@ public class FriendshipService {
                     "Não tem permissão para remover esta amizade."
             );
         }
-
+        Optional<User> user = userRepository.findById(friendship.getAddressee().getUserId());
+        webSocketNotificationService.sendFriendRequest(
+                user.get(),
+                friendship.getStatus()
+        );
         friendshipRepository.delete(friendship);
     }
 
