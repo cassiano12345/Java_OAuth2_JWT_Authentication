@@ -241,6 +241,12 @@ public class MessageService {
 
         return savedMessage;
     }
+    public long getUnreadMessagesCount() {
+
+        User user = authenticatedUserService.getAuthenticatedUser();
+
+        return messageRepository.countUnreadMessages(user.getUserId());
+    }
     public List<User> getRecipients(
             UUID conversationId,
             UUID senderId

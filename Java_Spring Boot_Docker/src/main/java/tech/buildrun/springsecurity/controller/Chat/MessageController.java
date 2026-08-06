@@ -18,6 +18,11 @@ public class MessageController {
     public MessageController(MessageService messageService) {
         this.messageService = messageService;
     }
+    // OBTER MENSAGENS NÃO LIDAS PARA O MENU
+    @GetMapping("/unread-count")
+    public long getUnreadMessagesCount() {
+        return messageService.getUnreadMessagesCount();
+    }
 
 
     // Enviar mensagem

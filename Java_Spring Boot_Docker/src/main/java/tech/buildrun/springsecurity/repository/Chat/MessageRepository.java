@@ -1,12 +1,31 @@
 package tech.buildrun.springsecurity.repository.Chat;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import tech.buildrun.springsecurity.entities.Chat.Message;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface MessageRepository extends JpaRepository<Message, UUID> {
+    @Query("""
+        SELECT COUNT(m)
+        FROM Message m
+        WHERE EXISTS (
+            SELECT cm
+            FROM ConversationMember cm
+            WHERE cm.conversation = m.conversation
+              AND cm.user.userId = :userId
+        )
+        AND m.sender.userId <> :userId
+        AND NOT EXISTS (
+            SELECT mr
+            FROM MessageRead mr
+            WHERE mr.message = m
+              AND mr.user.userId = :userId
+        )
+    """)
+    long countUnreadMessages(UUID userId);
 
     // Buscar todas as mensagens de uma conversa
     List<Message> findByConversation_ConversationIdOrderBySentAtAsc(

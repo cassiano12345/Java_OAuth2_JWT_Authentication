@@ -66,8 +66,13 @@ function onConnected() {
      */
     stompClient.subscribe("/user/queue/messages", function (message) {
 
-        console.log("Mensagem privada:", message.body);
 
+        if (message.body === "refresh") {
+
+            loadnewmessages();
+            return;
+
+        }
     });
 
     /*

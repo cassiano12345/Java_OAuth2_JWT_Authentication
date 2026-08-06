@@ -1480,6 +1480,51 @@ document.addEventListener("click", (event) => {
     closeAccountMenus();
 });
 
+// OBTER NOVAS MENSAGENS PARA O MENU LEFT SIDBAR-BADGE!!!!
+async function loadnewmessages() {
+    await loadUser();
+    try {
+
+        const response = await fetch("/api/messages/unread-count", {
+
+            headers: {
+                Authorization: "Bearer " + localStorage.getItem("accessToken")
+            }
+
+        });
+
+        if (!response.ok)
+            throw new Error();
+
+        const requests = await response.json();
+
+        updatenewmessagesBadge(requests.toString());
+
+    }
+    catch (e) {
+
+        console.error(e);
+
+    }
+
+}
+function updatenewmessagesBadge(count) {
+
+    const badge = document.getElementById("messageBadge");
+
+    if (count <= 0) {
+
+        badge.style.display = "none";
+        return;
+
+    }
+
+    //badge.style.display = "flex";
+
+    badge.textContent = count > 99 ? "99+" : count;
+
+}
+
 // ============================================================
 // INICIALIZAÇÃO DA PÁGINA
 // ============================================================
@@ -1493,3 +1538,4 @@ loadFriendRequestCount();
 loadBlockedFriendRequests();
 fetchNotificationsFromApi();
 loadFriendsentCount();
+loadnewmessages();
