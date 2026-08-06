@@ -2,7 +2,7 @@
 // LUDO STAR — LAYOUT BASE
 // Interações da sidebar, chat, amizades e conta
 // ============================================================
-
+var conversa;
 // ============================================================
 // ELEMENTOS E ESTADO DA INTERFACE
 // ============================================================
@@ -15,6 +15,8 @@ const state = {
     view: "messages",
     conversation: null,
     replyTo: null,
+    // ID do utilizador autenticado, usado para não marcar as próprias mensagens como lidas.
+    currentUserId: "",
     requests: [
         {
             id: 1,
@@ -118,7 +120,8 @@ const API_CONFIG = {
     notifications: "/api/notifications/my", // GET — substitua se necessário
     friendsPresence: "/api/friendships/friends", // GET — substitua se necessário
     conversations: "/api/conversations/listar_conversas", // GET — devolve conversationId, friendId, friendName, online e lastMessage
-    privateMessages: "/api/conversations", // GET /:friendId/messages
+    privateMessages: "/api/messages/conversation/:conversationId", // GET — mensagens de uma conversa privada
+    markMessagesAsRead: "/api/message-reads/mark-as-read", // POST JSON — messageID e conversationId
     sendPrivateMessage: "/api/messages/send", // POST JSON — conversationId, messageType e content
     deleteConversation: "/api/conversations/:conversationId", // DELETE — ajuste se necessário
     groupMessages: "/api/groups", // GET /:groupId/messages
@@ -293,11 +296,19 @@ function renderRequests() {
     showChat();
 }
 function messageHtml([n, l, t, time, reply], index) {
-    const ownActions = n === "Você"
+    const message = arguments[0];
+    // A API informa explicitamente se a mensagem é do utilizador autenticado.
+    // A verificação por nome mantém compatibilidade com mensagens criadas localmente.
+    const mine = message.mine === true || n === "Você";
+    const unread = message.readAt === null;
+    const ownActions = mine
         ? `<div class="message-actions"><button type="button" data-message-action="edit" data-message-index="${index}" aria-label="Editar mensagem"><i class="bi bi-pencil-fill"></i> Editar</button><button type="button" data-message-action="delete" data-message-index="${index}" aria-label="Eliminar mensagem"><i class="bi bi-trash-fill"></i> Eliminar</button></div>`
         : `<div class="message-actions message-reply-action"><button type="button" data-message-action="reply" data-message-index="${index}" aria-label="Responder a esta mensagem" title="Responder">↩️</button></div>`;
     const quoted = reply ? `<div class="message-reply-reference"><b>${escapeHtml(reply.name)}</b><span>${escapeHtml(reply.text)}</span></div>` : "";
-    return `<div class="message" data-message-index="${index}">${avatar(l)}<div class="message-content"><b>${escapeHtml(n)}</b><time>${escapeHtml(time)}</time>${quoted}<p>${escapeHtml(t)}</p>${ownActions}</div></div>`;
+    const image = Array.isArray(message) && message.messageType === "IMAGE";
+    const body = image ? `<img class="chat-message-image" src="${escapeHtml(t)}" alt="Imagem enviada por ${escapeHtml(n)}">` : `<p>${escapeHtml(t)}</p>`;
+    const classes = `message${mine ? " is-mine" : ""}${unread ? " is-unread" : ""}`;
+    return `<div class="${classes}" data-message-index="${index}">${avatar(l)}<div class="message-content"><b>${escapeHtml(n)}</b><time>${escapeHtml(time)}</time>${quoted}${body}${ownActions}</div></div>`;
 }
 function updateChatActionsMenu() {
     const wrap = $("#chatActionsWrap");
@@ -339,7 +350,18 @@ function renderConversation(item) {
     $("#chatBody").innerHTML =
         `<div class="conversation"><div class="messages" id="messageList"><div class="chat-welcome"><div class="placeholder-icon">${conversationIcon(item)}</div><h2>${escapeHtml(item.name)}</h2><span>Este é o começo da conversa.</span>${groupParticipantsHtml(item)}</div>${item.messages.map(messageHtml).join("")}</div>${replyComposerHtml()}<form class="message-form" id="messageForm"><input id="attachmentInput" type="file" accept="image/*" hidden multiple><button type="button" class="plain-icon attachment-button" id="attachmentButton" aria-label="Anexar ficheiro"><i class="bi bi-plus-circle-fill"></i></button><input id="messageInput" autocomplete="off" placeholder="Enviar mensagem..."><button class="send" aria-label="Enviar"><i class="bi bi-send-fill"></i></button></form></div>`;
     showChat();
-    $("#messageList").scrollTop = 99999;
+    scrollConversationToFirstUnread();
+}
+
+// Ao abrir o chat, a leitura inicia na primeira mensagem cujo readAt veio a null.
+// Se não existirem mensagens pendentes, mantém o comportamento habitual: fim do chat.
+function scrollConversationToFirstUnread() {
+    const list = $("#messageList");
+    if (!list) return;
+    const firstUnread = list.querySelector(".message.is-unread");
+    list.scrollTop = firstUnread
+        ? Math.max(0, firstUnread.offsetTop - list.clientHeight * 0.22)
+        : list.scrollHeight;
 }
 // ============================================================
 // EVENTOS DE NAVEGAÇÃO E CHAT
@@ -380,17 +402,22 @@ function openFriendConversation(friend) {
     const name = $("b", friend).textContent.trim();
     const letter = $(".avatar", friend).textContent.trim() || name[0].toUpperCase();
     const online = !friend.classList.contains("offline");
-    let conversation = state.conversations.find((item) => item.name === name);
+    const conversationId = entityId(friend.dataset.conversationId);
+    let conversation = state.conversations.find((item) =>
+        (conversationId && entityId(item.conversationId) === conversationId) || item.name === name,
+    );
     if (!conversation) {
-        conversation = { id: `friend-${name.toLowerCase().replace(/[^a-z0-9]+/gi, "-")}`, friendId: friend.dataset.friendId || friend.dataset.userId || null, name, letter, online, messages: [] };
+        conversation = { id: conversationId || `friend-${name.toLowerCase().replace(/[^a-z0-9]+/gi, "-")}`, conversationId, friendId: friend.dataset.friendId || friend.dataset.userId || null, name, letter, online, messages: [] };
         state.conversations.push(conversation);
     }
     conversation.online = online;
+    if (conversationId) conversation.conversationId = conversationId;
     sidebar.classList.remove("open");
     renderConversation(conversation);
-    // Busca opcional por ID real; não interrompe o chat local em caso de falha.
-    if (API_CONFIG.enableRemoteOnInteraction && conversation.friendId)
-        loadPrivateMessagesFromApi(conversation.friendId, conversation).catch((error) => console.error("Erro ao carregar conversa privada.", error));
+    conversa = conversation;
+    // Carrega as mensagens pelo conversationId devolvido pelo endpoint de amigos.
+    if (conversation.conversationId)
+        loadPrivateMessagesFromApi(conversation.conversationId).catch((error) => console.error("Erro ao carregar conversa privada.", error));
 }
 $(".sidebar").addEventListener("click", (event) => {
     const friend = event.target.closest(".friend-item");
@@ -521,10 +548,17 @@ $("#chatBody").addEventListener("click", async (e) => {
         return;
     }
     const c = e.target.closest("[data-conversation-id]");
-    if (c)
-        return renderConversation(
-            state.conversations.find((x) => x.id === c.dataset.conversationId),
-        );
+    if (c) {
+        const conversation = state.conversations.find((x) => x.id === c.dataset.conversationId);
+        if (!conversation) return;
+        renderConversation(conversation);
+        // A lista de conversas já traz conversationId; usamos esse valor para
+        // buscar o histórico completo quando o utilizador abre o chat.
+        conversa = conversation;
+        if (conversation.conversationId)
+            loadPrivateMessagesFromApi(conversation.conversationId).catch((error) => console.error("Erro ao carregar conversa privada.", error));
+        return;
+    }
     const actionButton = e.target.closest("[data-action]");
     if (actionButton) {
         const action = actionButton.dataset.action;
@@ -953,6 +987,9 @@ async function loadFriendsPresenceFromApi(endpoint = API_CONFIG.friendsPresence)
         const button = document.createElement("button");
         button.className = "friend-item" + (online ? "" : " offline");
         button.dataset.friendId = String(friend.userId);
+        // A API também fornece o conversationId: preservamo-lo no botão para
+        // abrir a conversa correta, sem depender apenas do ID do amigo.
+        if (entityId(friend.conversationId)) button.dataset.conversationId = entityId(friend.conversationId);
         const av = document.createElement("span"); av.className = "avatar" + (online ? " online" : ""); av.textContent = String(friend.username || "?")[0].toUpperCase();
         const text = document.createElement("span"); const name = document.createElement("b"); const status = document.createElement("small");
         name.textContent = String(friend.username); status.textContent = String((online ? "Online" : "Offline"));
@@ -1027,23 +1064,70 @@ function readImageAsDataUrl(file) {
     });
 }
 
-function normalizeApiMessages(data) {
-    if (!Array.isArray(data)) return [];
-    return data.map((message) => [
-        String(message.senderName || message.sender?.username || message.sender || "Jogador"),
-        String(message.senderLetter || message.senderName?.[0] || "J")[0].toUpperCase(),
-        String(message.content || message.text || ""),
-        String(message.time || message.createdAt || "agora"),
-    ]);
+function formatApiMessageTime(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString("pt-PT", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" });
 }
 
-async function loadPrivateMessagesFromApi(friendId, conversation = state.conversation) {
-    await loadUser();
-    if (!friendId) throw new Error("ID do amigo indisponível.");
-    const response = await fetch(`${API_CONFIG.privateMessages}/${encodeURIComponent(friendId)}/messages`, { headers: authHeaders() });
+function normalizeApiMessages(data) {
+    if (!Array.isArray(data)) return [];
+    return data.map((message) => {
+        const senderName = String(message.senderName || message.sender?.username || message.sender || "Jogador");
+        const type = String(message.messageType || "TEXT").toUpperCase();
+        const content = String(message.Content ?? message.content ?? message.text ?? "");
+        // O layout continua a usar arrays, mas guardamos os campos da API para
+        // poder marcar a mensagem certa como lida sem alterar as ações existentes.
+        const item = [senderName, String(message.senderLetter || senderName[0] || "J")[0].toUpperCase(), content, formatApiMessageTime(message.editedAt || message.sentAt || message.createdAt || message.time)];
+        item.messageId = entityId(message.messageID ?? message.messageId ?? message.id);
+        item.messageType = type;
+        item.sentAt = message.sentAt || message.createdAt || null;
+        item.editedAt = message.editedAt || null;
+        item.readAt = message.readAt ?? null;
+        // "mine" é a fonte de verdade da API para alinhar a mensagem à direita.
+        item.mine = message.mine === true || message.mine === "true";
+        item.senderId = entityId(message.senderID ?? message.senderId);
+        return item;
+    });
+}
+
+// Marca uma mensagem recebida como lida. O backend recebe exatamente os IDs
+// retornados por /api/messages/conversation/{conversationId}.
+async function markMessageAsReadViaApi(messageID, conversationId, endpoint = API_CONFIG.markMessagesAsRead) {
+    const validMessageId = entityId(messageID);
+    const validConversationId = entityId(conversationId);
+    if (!validMessageId || !validConversationId) return null;
+    const response = await fetch(endpoint, {
+        method: "POST",
+        headers: authHeaders(true),
+        body: JSON.stringify({ messageId: validMessageId, conversationId: validConversationId }),
+    });
+    if (!response.ok) throw new Error("Não foi possível marcar a mensagem como lida.");
+    return response.status === 204 ? null : response.json().catch(() => null);
+}
+
+async function markUnreadConversationMessagesAsRead(conversation) {
+    const conversationId = entityId(conversation?.conversationId);
+    if (!conversationId) return;
+    const unread = (conversation.messages || []).filter((message) => message.messageId && message.readAt === null && message.mine !== true && message.senderId !== entityId(state.currentUserId));
+    await Promise.all(unread.map(async (message) => {
+        await markMessageAsReadViaApi(message.messageId, conversationId);
+        message.readAt = new Date().toISOString();
+    }));
+}
+
+// conversationId é usado aqui porque é a chave da conversa, não o ID do amigo.
+async function loadPrivateMessagesFromApi(conversationId = state.conversation) {
+    conversation = conversa;
+    const id = entityId(conversationId || conversation?.conversationId);
+    if (!id) throw new Error("conversationId indisponível.");
+    const response = await fetch(API_CONFIG.privateMessages.replace(":conversationId", encodeURIComponent(id)), { headers: authHeaders() });
     if (!response.ok) throw new Error("Não foi possível buscar mensagens privadas.");
+    conversation.conversationId = id;
     conversation.messages = normalizeApiMessages(await response.json());
     if (state.conversation === conversation) renderConversation(conversation);
+    // Só depois de apresentar as mensagens fazemos o POST de leitura.
+    await markUnreadConversationMessagesAsRead(conversation);
     return conversation.messages;
 }
 
@@ -1311,6 +1395,7 @@ async function loadUser() {
         }
         const u = await r.json(),
             name = u.nome || u.username;
+        state.currentUserId = entityId(u.userId ?? u.id ?? u.userID);
         $("#username").textContent = name;
         $("#onlineName").textContent = name;
     } catch (e) {

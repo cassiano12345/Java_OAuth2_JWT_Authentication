@@ -1,6 +1,7 @@
 package tech.buildrun.springsecurity.repository.Chat;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import tech.buildrun.springsecurity.entities.Chat.MessageRead;
 
 import java.util.List;
@@ -12,6 +13,16 @@ public interface MessageReadRepository extends JpaRepository<MessageRead, UUID> 
     // Verificar se um usuário já leu uma determinada mensagem
     boolean existsByMessage_MessageIdAndUser_UserId(
             UUID messageId,
+            UUID userId
+    );
+    @Query("""
+    SELECT mr
+    FROM MessageRead mr
+    WHERE mr.user.userId = :userId
+      AND mr.message.conversation.conversationId = :conversationId
+""")
+    List<MessageRead> findByConversationAndUser(
+            UUID conversationId,
             UUID userId
     );
 

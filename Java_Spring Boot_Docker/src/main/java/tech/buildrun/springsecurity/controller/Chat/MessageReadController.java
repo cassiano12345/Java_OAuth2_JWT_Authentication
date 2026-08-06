@@ -30,8 +30,7 @@ public class MessageReadController {
             @RequestBody MessageReadDTO dto
     ) {
 
-        MessageRead messageRead =
-                messageReadService.markAsRead(
+        MessageRead messageRead =messageReadService.markAsRead(
                         dto.messageId()
                 );
 

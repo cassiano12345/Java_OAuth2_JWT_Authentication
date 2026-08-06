@@ -45,9 +45,8 @@ AND NOT EXISTS (
     );
 
     // Buscar todas as mensagens de uma conversa
-    List<Message> findByConversation_ConversationIdOrderBySentAtAsc(
-            UUID conversationId
-    );
+    List<Message> findByConversation_ConversationIdOrderBySentAtAsc(UUID conversationId);
+
 
     // Buscar todas as mensagens enviadas por um usuário
     List<Message> findBySender_UserIdOrderBySentAtAsc(
@@ -64,4 +63,14 @@ AND NOT EXISTS (
     boolean existsByConversation_ConversationId(
             UUID conversationId
     );
+    @Query("""
+    SELECT m
+    FROM Message m
+    LEFT JOIN FETCH m.sender
+    LEFT JOIN FETCH m.messageReads mr
+    WHERE m.conversation.conversationId = :conversationId
+    ORDER BY m.sentAt ASC
+""")
+    List<Message> findMessagesWithReads(UUID conversationId);
+
 }

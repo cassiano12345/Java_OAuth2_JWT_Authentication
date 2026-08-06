@@ -1543,3 +1543,43 @@ body.light-mode .reply-composer { background: rgba(116, 225, 228, .12); }
 .participant-remove:hover { color: #fff; background: rgba(230, 66, 91, .38); }
 .participant-remove:disabled { cursor: not-allowed; opacity: .55; }
 body.light-mode .participant-remove { color: #ffd4dc; background: rgba(230, 66, 91, .26); }
+
+/* Mensagens de imagem recebidas pela API: mantêm-se dentro da conversa. */
+.chat-message-image {
+    display: block;
+    width: min(220px, 100%);
+    max-height: 260px;
+    margin-top: 5px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    object-fit: cover;
+}
+
+
+/* Mensagens da API: "mine: true" mantém as mensagens do utilizador à direita. */
+.message.is-mine {
+    flex-direction: row-reverse;
+}
+.message.is-mine .message-content {
+    text-align: right;
+}
+.message.is-mine .message-actions {
+    justify-content: flex-end;
+}
+.message.is-mine .message-reply-reference {
+    border-right: 3px solid var(--gold);
+    border-left: 0;
+}
+.message.is-mine .chat-message-image {
+    margin-left: auto;
+}
+
+/* readAt nulo identifica uma mensagem que ainda não tinha sido lida ao abrir o chat. */
+.message.is-unread .message-content {
+    padding: 5px 8px;
+    border-radius: 8px;
+    background: rgba(137, 75, 181, .15);
+}
+body.light-mode .message.is-unread .message-content {
+    background: rgba(91, 215, 218, .18);
+}

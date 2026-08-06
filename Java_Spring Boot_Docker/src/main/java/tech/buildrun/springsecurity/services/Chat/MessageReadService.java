@@ -9,6 +9,7 @@ import tech.buildrun.springsecurity.repository.Chat.MessageReadRepository;
 import tech.buildrun.springsecurity.repository.Chat.MessageRepository;
 import tech.buildrun.springsecurity.repository.UserRepository;
 import tech.buildrun.springsecurity.services.AuthenticatedUserService;
+import tech.buildrun.springsecurity.websocket.WebSocketNotificationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,16 +22,18 @@ public class MessageReadService {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final AuthenticatedUserService authenticatedUserService;
+    private final WebSocketNotificationService webSocketNotificationService;
 
     public MessageReadService(
             MessageReadRepository messageReadRepository,
             MessageRepository messageRepository,
-            UserRepository userRepository, AuthenticatedUserService authenticatedUserService
+            UserRepository userRepository, AuthenticatedUserService authenticatedUserService, WebSocketNotificationService webSocketNotificationService
     ) {
         this.messageReadRepository = messageReadRepository;
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
         this.authenticatedUserService = authenticatedUserService;
+        this.webSocketNotificationService = webSocketNotificationService;
     }
 
 
@@ -70,6 +73,10 @@ public class MessageReadService {
                     messageRead.setMessage(message);
                     messageRead.setUser(user);
                     messageRead.setReadAt(LocalDateTime.now());
+
+                    webSocketNotificationService.sendPrivateMessage(
+                            user_// ou MessageDTO
+                    );
 
                     return messageReadRepository.save(messageRead);
                 });

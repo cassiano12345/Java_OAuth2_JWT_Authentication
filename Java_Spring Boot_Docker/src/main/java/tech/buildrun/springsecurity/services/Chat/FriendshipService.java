@@ -8,16 +8,15 @@ import tech.buildrun.springsecurity.entities.Chat.FRIENDSHIP;
 import tech.buildrun.springsecurity.entities.Chat.FriendshipStatus;
 import tech.buildrun.springsecurity.entities.Chat.NotificationType;
 import tech.buildrun.springsecurity.entities.User;
+import tech.buildrun.springsecurity.repository.Chat.ConversationRepository;
 import tech.buildrun.springsecurity.repository.FriendshipRepository;
 import tech.buildrun.springsecurity.repository.UserRepository;
 import tech.buildrun.springsecurity.services.AuthenticatedUserService;
 import tech.buildrun.springsecurity.services.PresenceService;
 import tech.buildrun.springsecurity.websocket.WebSocketNotificationService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class FriendshipService {
@@ -30,12 +29,13 @@ public class FriendshipService {
     private final PresenceService presenceService;
     private NotificationType notificationType;
     private final ConversationService conversationService;
+    private final ConversationRepository conversationRepository;
     public FriendshipService(
             FriendshipRepository friendshipRepository,
             UserRepository userRepository,
             AuthenticatedUserService authenticatedUserService,
             WebSocketNotificationService webSocketNotificationService,
-            NotificationService notificationService, PresenceService presenceService, ConversationService conversationService
+            NotificationService notificationService, PresenceService presenceService, ConversationService conversationService, ConversationRepository conversationRepository
     ) {
         this.friendshipRepository = friendshipRepository;
         this.userRepository = userRepository;
@@ -44,6 +44,7 @@ public class FriendshipService {
         this.notificationService = notificationService;
         this.presenceService = presenceService;
         this.conversationService = conversationService;
+        this.conversationRepository = conversationRepository;
     }
 
     // =========================================================
@@ -260,41 +261,45 @@ public class FriendshipService {
 
         return friendships;
     }
+    //OBTER A LISTA DE AMIGOS A APRESENTAR NA LISTA LATERAL DO LAYOUT
+    @Transactional()
     public List<FriendDTO> getFriends() {
 
-        User authenticatedUser = authenticatedUserService.getAuthenticatedUser();
+        User user = authenticatedUserService.getAuthenticatedUser();
 
-        List<FRIENDSHIP> friendships = getAcceptedFriendships(authenticatedUser);
+        List<FRIENDSHIP> friendships = getAcceptedFriendships(user);
 
-        List<FriendDTO> friends = new ArrayList<>();
+        Map<UUID, UUID> conversationMap = conversationRepository
+                .findConversationIdsByUser(user.getUserId())
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (UUID) row[0],
+                        row -> (UUID) row[1]
+                ));
 
-        for (FRIENDSHIP friendship : friendships) {
+        return friendships.stream()
+                .map(friendship -> {
 
-            User friend;
+                    User friend = friendship.getRequester().equals(user)
+                            ? friendship.getAddressee()
+                            : friendship.getRequester();
 
-            if (friendship.getRequester().getUserId().equals(authenticatedUser.getUserId())) {
+                    return new FriendDTO(
 
-                friend = friendship.getAddressee();
+                            friend.getUserId(),
 
-            } else {
+                            friend.getUsername(),
 
-                friend = friendship.getRequester();
+                            conversationMap.get(friend.getUserId()),
 
-            }
+                            presenceService.isOnline(friend.getUserId())
 
-            friends.add(new FriendDTO(
 
-                    friend.getUserId(),
 
-                    friend.getUsername(),
+                    );
 
-                    presenceService.isOnline(friend.getUserId())
-
-            ));
-        }
-
-        return friends;
-
+                })
+                .toList();
     }
 
     // =========================================================

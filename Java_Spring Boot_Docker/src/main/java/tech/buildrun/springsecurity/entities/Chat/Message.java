@@ -41,6 +41,9 @@ public class Message {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @OneToMany(mappedBy = "message", fetch = FetchType.LAZY)
+    private List<MessageRead> messageReads = new ArrayList<>();
+
     @OneToMany(
             mappedBy = "message",
             cascade = CascadeType.ALL,
@@ -48,6 +51,13 @@ public class Message {
     )
     private List<Attachment> attachments = new ArrayList<>();
 
+    public List<MessageRead> getMessageReads() {
+        return messageReads;
+    }
+
+    public void setMessageReads(List<MessageRead> messageReads) {
+        this.messageReads = messageReads;
+    }
 
     public UUID getMessageId() {
         return messageId;

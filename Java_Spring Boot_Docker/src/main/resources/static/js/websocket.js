@@ -68,7 +68,7 @@ function onConnected() {
 
 
         if (message.body === "refresh") {
-
+            //loadPrivateMessagesFromApi();
             loadnewmessages();
             return;
 

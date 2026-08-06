@@ -3,12 +3,15 @@ package tech.buildrun.springsecurity.services.Chat;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.buildrun.springsecurity.dtos.Chat.MessageDTO;
+import tech.buildrun.springsecurity.dtos.Chat.Message_listDTO;
 import tech.buildrun.springsecurity.entities.Chat.Conversation;
 import tech.buildrun.springsecurity.entities.Chat.Message;
+import tech.buildrun.springsecurity.entities.Chat.MessageRead;
 import tech.buildrun.springsecurity.entities.Chat.MessageType;
 import tech.buildrun.springsecurity.entities.User;
 import tech.buildrun.springsecurity.repository.Chat.ConversationMemberRepository;
 import tech.buildrun.springsecurity.repository.Chat.ConversationRepository;
+import tech.buildrun.springsecurity.repository.Chat.MessageReadRepository;
 import tech.buildrun.springsecurity.repository.Chat.MessageRepository;
 import tech.buildrun.springsecurity.repository.UserRepository;
 import tech.buildrun.springsecurity.services.AuthenticatedUserService;
@@ -16,7 +19,9 @@ import tech.buildrun.springsecurity.websocket.WebSocketNotificationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class MessageService {
@@ -27,10 +32,11 @@ public class MessageService {
     private final AuthenticatedUserService authenticatedUserService;
     private final ConversationMemberRepository conversationMemberRepository;
     private final WebSocketNotificationService webSocketNotificationService;
+    private final MessageReadRepository messageReadRepository;
     public MessageService(
             MessageRepository messageRepository,
             ConversationRepository conversationRepository,
-            UserRepository userRepository, AuthenticatedUserService authenticatedUserService, ConversationMemberRepository conversationMemberRepository, WebSocketNotificationService webSocketNotificationService
+            UserRepository userRepository, AuthenticatedUserService authenticatedUserService, ConversationMemberRepository conversationMemberRepository, WebSocketNotificationService webSocketNotificationService, MessageReadRepository messageReadRepository
     ) {
         this.messageRepository = messageRepository;
         this.conversationRepository = conversationRepository;
@@ -38,6 +44,7 @@ public class MessageService {
         this.authenticatedUserService = authenticatedUserService;
         this.conversationMemberRepository = conversationMemberRepository;
         this.webSocketNotificationService = webSocketNotificationService;
+        this.messageReadRepository = messageReadRepository;
     }
 
 /*
@@ -241,6 +248,70 @@ public class MessageService {
 
         return savedMessage;
     }
+
+    @Transactional(readOnly = true)
+    public List<Message_listDTO> getConversationMessages(UUID conversationId) {
+
+        User loggedUser = authenticatedUserService.getAuthenticatedUser();
+
+        // Verifica se o utilizador pertence à conversa
+        boolean member = conversationMemberRepository
+                .existsByConversation_ConversationIdAndUser_UserId(
+                        conversationId,
+                        loggedUser.getUserId()
+                );
+
+        if (!member) {
+            throw new RuntimeException("Você não pertence a esta conversa.");
+        }
+
+        // Busca todas as mensagens da conversa
+        List<Message> messages = messageRepository
+                .findByConversation_ConversationIdOrderBySentAtAsc(
+                        conversationId
+                );
+
+        // Busca apenas as leituras do utilizador autenticado
+        Map<UUID, LocalDateTime> readMap =
+                messageReadRepository
+                        .findByConversationAndUser(
+                                conversationId,
+                                loggedUser.getUserId()
+                        )
+                        .stream()
+                        .collect(Collectors.toMap(
+                                mr -> mr.getMessage().getMessageId(),
+                                MessageRead::getReadAt
+                        ));
+
+        // Constrói o DTO
+        return messages.stream()
+                .map(message -> new Message_listDTO(
+
+                        message.getMessageId(),
+
+                        message.getSender().getUserId(),
+
+                        message.getSender().getUsername(),
+
+                        message.getMessageType(),
+
+                        message.getContent(),
+
+                        message.getSentAt(),
+
+                        message.getEditedAt(),
+
+                        readMap.get(message.getMessageId()),
+
+                        message.getSender()
+                                .getUserId()
+                                .equals(loggedUser.getUserId())
+
+                ))
+                .toList();
+    }
+
     public long getUnreadMessagesCount() {
 
         User user = authenticatedUserService.getAuthenticatedUser();

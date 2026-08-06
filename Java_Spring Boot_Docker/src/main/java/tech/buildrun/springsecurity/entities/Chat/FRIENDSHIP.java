@@ -52,6 +52,7 @@ public class FRIENDSHIP {
         }
     }
 
+
     public UUID getFriendshipId() {
         return friendshipId;
     }

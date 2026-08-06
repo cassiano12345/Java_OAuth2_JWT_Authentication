@@ -8,7 +8,8 @@ public record FriendDTO(
 
         String username,
 
-        boolean online
+        UUID conversationId,
 
+        boolean online
 ) {
 }

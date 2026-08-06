@@ -4,10 +4,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.buildrun.springsecurity.dtos.Chat.MessageDTO;
 import tech.buildrun.springsecurity.dtos.Chat.MessageResponseDTO;
+import tech.buildrun.springsecurity.dtos.Chat.Message_listDTO;
 import tech.buildrun.springsecurity.entities.Chat.Message;
 import tech.buildrun.springsecurity.services.Chat.MessageService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/messages")
@@ -141,6 +143,15 @@ public class MessageController {
         );
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/conversation/{conversationId}")
+    public ResponseEntity<List<Message_listDTO>> getConversationMessages(
+            @PathVariable UUID conversationId
+    ) {
+
+        return ResponseEntity.ok(messageService.getConversationMessages(conversationId)
+        );
     }
 
 

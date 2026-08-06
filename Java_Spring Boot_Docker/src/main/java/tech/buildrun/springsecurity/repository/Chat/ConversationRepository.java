@@ -23,10 +23,36 @@ public interface ConversationRepository extends JpaRepository<Conversation, UUID
             UUID userId,
             ConversationType type
     );
+    @Query("""
+    SELECT cm.user.userId, c.conversationId
+    FROM Conversation c
+    JOIN c.members cm
+    WHERE c.type = tech.buildrun.springsecurity.entities.Chat.ConversationType.PRIVATE
+      AND c.conversationId IN (
+            SELECT cm2.conversation.conversationId
+            FROM ConversationMember cm2
+            WHERE cm2.user.userId = :userId
+      )
+      AND cm.user.userId <> :userId
+""")
+    List<Object[]> findConversationIdsByUser(UUID userId);
 
     // Verificar se existe uma conversa
     boolean existsByConversationId(UUID conversationId);
-
+    @Query("""
+    SELECT c
+    FROM Conversation c
+    JOIN FETCH c.members m
+    JOIN FETCH m.user
+    WHERE c.type = tech.buildrun.springsecurity.entities.Chat.ConversationType.PRIVATE
+      AND EXISTS (
+            SELECT 1
+            FROM ConversationMember cm
+            WHERE cm.conversation = c
+              AND cm.user.userId = :userId
+      )
+""")
+    List<Conversation> findPrivateConversationsByUserId(UUID userId);
     @Query("""
     SELECT c
     FROM Conversation c
