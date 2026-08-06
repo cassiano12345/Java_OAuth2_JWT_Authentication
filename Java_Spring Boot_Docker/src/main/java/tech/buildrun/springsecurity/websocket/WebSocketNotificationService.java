@@ -93,7 +93,7 @@ public class WebSocketNotificationService {
     |--------------------------------------------------------------------------
     */
 
-    public void sendPrivateMessage(User receiver, Object message) {
+    public void sendPrivateMessage(User receiver) {
 
         messagingTemplate.convertAndSendToUser(
 
@@ -101,7 +101,7 @@ public class WebSocketNotificationService {
 
                 "/queue/messages",
 
-                message
+                "refresh"
 
         );
 

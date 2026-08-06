@@ -2,6 +2,7 @@ package tech.buildrun.springsecurity.services.Chat;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.buildrun.springsecurity.dtos.Chat.MessageDTO;
 import tech.buildrun.springsecurity.entities.Chat.Conversation;
 import tech.buildrun.springsecurity.entities.Chat.Message;
 import tech.buildrun.springsecurity.entities.Chat.MessageType;
@@ -11,6 +12,7 @@ import tech.buildrun.springsecurity.repository.Chat.ConversationRepository;
 import tech.buildrun.springsecurity.repository.Chat.MessageRepository;
 import tech.buildrun.springsecurity.repository.UserRepository;
 import tech.buildrun.springsecurity.services.AuthenticatedUserService;
+import tech.buildrun.springsecurity.websocket.WebSocketNotificationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,16 +26,18 @@ public class MessageService {
     private final UserRepository userRepository;
     private final AuthenticatedUserService authenticatedUserService;
     private final ConversationMemberRepository conversationMemberRepository;
+    private final WebSocketNotificationService webSocketNotificationService;
     public MessageService(
             MessageRepository messageRepository,
             ConversationRepository conversationRepository,
-            UserRepository userRepository, AuthenticatedUserService authenticatedUserService, ConversationMemberRepository conversationMemberRepository
+            UserRepository userRepository, AuthenticatedUserService authenticatedUserService, ConversationMemberRepository conversationMemberRepository, WebSocketNotificationService webSocketNotificationService
     ) {
         this.messageRepository = messageRepository;
         this.conversationRepository = conversationRepository;
         this.userRepository = userRepository;
         this.authenticatedUserService = authenticatedUserService;
         this.conversationMemberRepository = conversationMemberRepository;
+        this.webSocketNotificationService = webSocketNotificationService;
     }
 
 /*
@@ -220,8 +224,31 @@ public class MessageService {
         conversation.setLastMessage(savedMessage);
         conversation.setLastMessageAt(savedMessage.getSentAt());
 
+        List<User> recipients = conversationMemberRepository
+                .findUsersByConversationExcludingSender(
+                        conversationId,
+                        user.getUserId()
+                );
+        System.out.println("Passou daqui");
+        for (User recipient : recipients) {
+            // enviar websocket
+            webSocketNotificationService.sendPrivateMessage(
+                    recipient// ou MessageDTO
+            );
+
+        }
         conversationRepository.save(conversation);
 
         return savedMessage;
+    }
+    public List<User> getRecipients(
+            UUID conversationId,
+            UUID senderId
+    ) {
+        return conversationMemberRepository
+                .findUsersByConversationExcludingSender(
+                        conversationId,
+                        senderId
+                );
     }
 }

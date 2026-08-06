@@ -24,7 +24,16 @@ public interface ConversationMemberRepository
             UUID userId
     );
 
-
+    @Query("""
+    SELECT cm.user
+    FROM ConversationMember cm
+    WHERE cm.conversation.conversationId = :conversationId
+      AND cm.user.userId <> :senderId
+""")
+    List<User> findUsersByConversationExcludingSender(
+            @Param("conversationId") UUID conversationId,
+            @Param("senderId") UUID senderId
+    );
 
     Optional<ConversationMember> findByConversation_ConversationIdAndUser_UserId(
             UUID conversationId,
