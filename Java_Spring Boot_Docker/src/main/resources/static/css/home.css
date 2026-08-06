@@ -1482,3 +1482,64 @@ body.light-mode .chat-actions-menu { background: #fff; border-color: var(--line)
 body.light-mode .chat-actions-menu button { color: #165260; }
 body.light-mode .chat-actions-menu button.danger { color: #a13b4e; }
 body.light-mode .message-reply-reference, body.light-mode .reply-composer { background: #edf8f9; }
+
+
+/* ============================================================
+   MODO CLARO: AZUL-CERCETA MAIS PROFUNDO E LEGÍVEL
+   ============================================================ */
+body.light-mode {
+    --bg: #0a5362;
+    --side: #063e4b;
+    --panel: #0c6170;
+    --purple: #13a1ae;
+    --gold: #ffc928;
+    --text: #efffff;
+    --muted: #c1e2e6;
+    --muted2: #9fcbd1;
+    --line: rgba(167, 236, 239, .22);
+    --green: #60e89b;
+    background: radial-gradient(circle at 65% 0, #168b99, transparent 38%), var(--bg);
+}
+body.light-mode .main-content { background: radial-gradient(circle at 70% 0, rgba(59, 201, 207, .24), transparent 36%); }
+body.light-mode .sidebar,
+body.light-mode .chat-panel,
+body.light-mode .mobile-bar { color: var(--text); background: linear-gradient(180deg, #075363, #063e4b); }
+body.light-mode .chat-actions-menu,
+body.light-mode .account-menu,
+body.light-mode .notifications-menu { background: #0b5868; }
+body.light-mode .chat-actions-menu button,
+body.light-mode .account-menu button,
+body.light-mode .notifications-menu button { color: var(--text); }
+body.light-mode .chat-search,
+body.light-mode .message-form,
+body.light-mode .participants-list,
+body.light-mode .request-item,
+body.light-mode .new-request { background: #0a4a58; }
+body.light-mode .conversation-item { color: var(--text); }
+body.light-mode .conversation-item:hover { background: rgba(126, 228, 231, .13); }
+body.light-mode .message-form input,
+body.light-mode .chat-search input,
+body.light-mode .message-edit-form input { color: var(--text); background: #0a4a58; }
+body.light-mode .message-content p,
+body.light-mode .chat-header small,
+body.light-mode .conversation-content small,
+body.light-mode .request-item p,
+body.light-mode .list-empty { color: var(--muted); }
+body.light-mode .message-content time { color: var(--muted2); }
+body.light-mode .message-reply-reference,
+body.light-mode .reply-composer { background: rgba(116, 225, 228, .12); }
+
+/* Botão de eliminar participante, alinhado no fim de cada linha. */
+.participant-remove {
+    width: 25px;
+    height: 25px;
+    margin-left: 3px;
+    border: 0;
+    border-radius: 6px;
+    color: #ffc3cd;
+    background: rgba(230, 66, 91, .17);
+    font-size: 10px;
+}
+.participant-remove:hover { color: #fff; background: rgba(230, 66, 91, .38); }
+.participant-remove:disabled { cursor: not-allowed; opacity: .55; }
+body.light-mode .participant-remove { color: #ffd4dc; background: rgba(230, 66, 91, .26); }

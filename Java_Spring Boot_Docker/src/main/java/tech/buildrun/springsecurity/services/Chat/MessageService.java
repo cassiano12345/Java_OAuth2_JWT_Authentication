@@ -6,6 +6,7 @@ import tech.buildrun.springsecurity.entities.Chat.Conversation;
 import tech.buildrun.springsecurity.entities.Chat.Message;
 import tech.buildrun.springsecurity.entities.Chat.MessageType;
 import tech.buildrun.springsecurity.entities.User;
+import tech.buildrun.springsecurity.repository.Chat.ConversationMemberRepository;
 import tech.buildrun.springsecurity.repository.Chat.ConversationRepository;
 import tech.buildrun.springsecurity.repository.Chat.MessageRepository;
 import tech.buildrun.springsecurity.repository.UserRepository;
@@ -22,19 +23,20 @@ public class MessageService {
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
     private final AuthenticatedUserService authenticatedUserService;
-
+    private final ConversationMemberRepository conversationMemberRepository;
     public MessageService(
             MessageRepository messageRepository,
             ConversationRepository conversationRepository,
-            UserRepository userRepository, AuthenticatedUserService authenticatedUserService
+            UserRepository userRepository, AuthenticatedUserService authenticatedUserService, ConversationMemberRepository conversationMemberRepository
     ) {
         this.messageRepository = messageRepository;
         this.conversationRepository = conversationRepository;
         this.userRepository = userRepository;
         this.authenticatedUserService = authenticatedUserService;
+        this.conversationMemberRepository = conversationMemberRepository;
     }
 
-
+/*
     // Enviar mensagem
     @Transactional
     public Message sendMessage(
@@ -71,7 +73,7 @@ public class MessageService {
         return messageRepository.save(message);
     }
 
-
+*/
     // Buscar mensagem pelo ID
     public Message findById(UUID messageId) {
 
@@ -176,5 +178,50 @@ public class MessageService {
         message.setDeletedAt(LocalDateTime.now());
 
         messageRepository.save(message);
+    }
+
+    @Transactional
+    public Message sendMessage(
+            UUID conversationId,
+            MessageType messageType,
+            String content
+    ) {
+        User user = authenticatedUserService.getAuthenticatedUser();
+
+        Conversation conversation = conversationRepository
+                .findById(conversationId)
+                .orElseThrow(() ->
+                        new RuntimeException("Conversa não encontrada.")
+                );
+
+        // Verifica se o usuário pertence à conversa
+        boolean isMember = conversationMemberRepository
+                .existsByConversation_ConversationIdAndUser_UserId(
+                        conversationId,
+                        user.getUserId()
+                );
+
+        if (!isMember) {
+            throw new RuntimeException(
+                    "Você não faz parte desta conversa."
+            );
+        }
+
+        Message message = new Message();
+        message.setConversation(conversation);
+        message.setSender(user);
+        message.setMessageType(messageType);
+        message.setContent(content);
+        message.setSentAt(LocalDateTime.now());
+
+        Message savedMessage = messageRepository.save(message);
+
+        // Atualiza a última mensagem da conversa
+        conversation.setLastMessage(savedMessage);
+        conversation.setLastMessageAt(savedMessage.getSentAt());
+
+        conversationRepository.save(conversation);
+
+        return savedMessage;
     }
 }

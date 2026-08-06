@@ -73,9 +73,9 @@ const state = {
             letter: "🎮",
             isGroup: true,
             participants: [
-                { name: "AnaLudo", letter: "A", role: "Admin" },
-                { name: "JoãoKing", letter: "J", role: "Usuário normal" },
-                { name: "PedroLudo", letter: "P", role: "Usuário normal" },
+                { userId: "ana-ludo", name: "AnaLudo", letter: "A", role: "Admin" },
+                { userId: "joao-king", name: "JoãoKing", letter: "J", role: "Usuário normal" },
+                { userId: "pedro-ludo", name: "PedroLudo", letter: "P", role: "Usuário normal" },
             ],
             messages: [
                 ["AnaLudo", "A", "Alguém vai participar hoje? 🏆", "14:21"],
@@ -88,7 +88,7 @@ const state = {
             letter: "🏆",
             isGroup: true,
             participants: [
-                { name: "LudoBot", letter: "L", role: "Admin" },
+                { userId: "ludo-bot", name: "LudoBot", letter: "L", role: "Admin" },
                 { name: "AnaLudo", letter: "A", role: "Usuário normal" },
             ],
             messages: [
@@ -101,7 +101,7 @@ const state = {
             letter: "🎲",
             isGroup: true,
             participants: [
-                { name: "Você", letter: "S", role: "Admin" },
+                { userId: "current-user", name: "Você", letter: "S", role: "Admin" },
                 { name: "AnaLudo", letter: "A", role: "Usuário normal" },
             ],
             messages: [["AnaLudo", "A", "Bem-vindos ao grupo!", "ontem"]],
@@ -119,12 +119,14 @@ const API_CONFIG = {
     friendsPresence: "/api/friendships/friends", // GET — substitua se necessário
     conversations: "/api/conversations/listar_conversas", // GET — devolve conversationId, friendId, friendName, online e lastMessage
     privateMessages: "/api/conversations", // GET /:friendId/messages
+    sendPrivateMessage: "/api/messages/send", // POST JSON — conversationId, messageType e content
     deleteConversation: "/api/conversations/:conversationId", // DELETE — ajuste se necessário
     groupMessages: "/api/groups", // GET /:groupId/messages
     leaveGroup: "/api/groups/:groupId/leave", // POST — ajuste se necessário
     offlineMode: "/api/presence/offline", // POST — ajuste se necessário
     createGroup: "/api/groups", // POST JSON
     addGroupMember: "/api/groups", // POST /:groupId/members — substitua conforme a API
+    removeGroupParticipant: "/api/groups/:groupId/members/:userId", // DELETE — ajuste se necessário
     acceptFriendRequest: "/api/friendships/accept", // POST JSON
     rejectFriendRequest: "/api/friendships/remove", // DELETE JSON
     blockFriendRequest: "/api/friendships/block", // POST JSON
@@ -315,10 +317,16 @@ function replyComposerHtml() {
     return `<div class="reply-composer"><span>↩️ A responder a <b>${escapeHtml(state.replyTo.name)}</b>: ${escapeHtml(state.replyTo.text)}</span><button type="button" data-cancel-reply aria-label="Cancelar resposta"><i class="bi bi-x-lg"></i></button></div>`;
 }
 
+function memberUserId(member) {
+    return entityId(member?.userId ?? member?.id);
+}
 function groupParticipantsHtml(item) {
     if (!item.isGroup) return "";
-    const count = item.participants.length;
-    return `<div class="participants-list hidden" id="participantsList">${item.participants.map((member) => `<div class="participant-row">${avatar(member.letter)}<b>${escapeHtml(member.name)}</b>${member.role === "Admin" ? '<span class="participant-role">Admin</span>' : ""}</div>`).join("")}</div><section class="conversation-member-adder"><label for="groupMemberSearch">Adicionar participante</label><div class="friend-search-input"><i class="bi bi-search"></i><input id="groupMemberSearch" type="search" autocomplete="off" placeholder="Pesquisar jogador..."></div><div class="group-member-search-results" id="groupMemberSearchResults"></div></section>`;
+    return `<div class="participants-list hidden" id="participantsList">${item.participants.map((member) => {
+        const userId = memberUserId(member);
+        const removeButton = userId ? `<button type="button" class="participant-remove" data-remove-group-member data-member-user-id="${escapeHtml(userId)}" data-member-name="${escapeHtml(member.name)}" aria-label="Eliminar ${escapeHtml(member.name)}" title="Eliminar participante"><i class="bi bi-x-lg"></i></button>` : "";
+        return `<div class="participant-row">${avatar(member.letter)}<b>${escapeHtml(member.name)}</b>${member.role === "Admin" ? '<span class="participant-role">Admin</span>' : ""}${removeButton}</div>`;
+    }).join("")}</div><section class="conversation-member-adder"><label for="groupMemberSearch">Adicionar participante</label><div class="friend-search-input"><i class="bi bi-search"></i><input id="groupMemberSearch" type="search" autocomplete="off" placeholder="Pesquisar jogador..."></div><div class="group-member-search-results" id="groupMemberSearchResults"></div></section>`;
 }
 function conversationIcon(item) {
     return item.avatarImage ? `<img src="${item.avatarImage}" alt="" class="conversation-avatar-image">` : item.letter;
@@ -329,7 +337,7 @@ function renderConversation(item) {
     title(item.name, item.subtitle || (item.online ? "Online" : "Offline"));
     updateChatActionsMenu();
     $("#chatBody").innerHTML =
-        `<div class="conversation"><div class="messages" id="messageList"><div class="chat-welcome"><div class="placeholder-icon">${conversationIcon(item)}</div><h2>${escapeHtml(item.name)}</h2><span>Este é o começo da conversa.</span>${groupParticipantsHtml(item)}</div>${item.messages.map(messageHtml).join("")}</div>${replyComposerHtml()}<form class="message-form" id="messageForm"><input id="attachmentInput" type="file" hidden multiple><button type="button" class="plain-icon attachment-button" id="attachmentButton" aria-label="Anexar ficheiro"><i class="bi bi-plus-circle-fill"></i></button><input id="messageInput" autocomplete="off" placeholder="Enviar mensagem..."><button class="send" aria-label="Enviar"><i class="bi bi-send-fill"></i></button></form></div>`;
+        `<div class="conversation"><div class="messages" id="messageList"><div class="chat-welcome"><div class="placeholder-icon">${conversationIcon(item)}</div><h2>${escapeHtml(item.name)}</h2><span>Este é o começo da conversa.</span>${groupParticipantsHtml(item)}</div>${item.messages.map(messageHtml).join("")}</div>${replyComposerHtml()}<form class="message-form" id="messageForm"><input id="attachmentInput" type="file" accept="image/*" hidden multiple><button type="button" class="plain-icon attachment-button" id="attachmentButton" aria-label="Anexar ficheiro"><i class="bi bi-plus-circle-fill"></i></button><input id="messageInput" autocomplete="off" placeholder="Enviar mensagem..."><button class="send" aria-label="Enviar"><i class="bi bi-send-fill"></i></button></form></div>`;
     showChat();
     $("#messageList").scrollTop = 99999;
 }
@@ -412,6 +420,28 @@ $("#chatBody").addEventListener("click", async (e) => {
         const button = e.target.closest("[data-group-participants]");
         list.classList.toggle("hidden");
         button.setAttribute("aria-expanded", String(!list.classList.contains("hidden")));
+        return;
+    }
+    const removeGroupMemberButton = e.target.closest("[data-remove-group-member]");
+    if (removeGroupMemberButton) {
+        const group = state.conversation;
+        const userId = entityId(removeGroupMemberButton.dataset.memberUserId);
+        const memberName = (removeGroupMemberButton.dataset.memberName || "participante").trim();
+        if (!group?.isGroup || !userId) return toast("O ID do participante não está disponível.");
+        removeGroupMemberButton.disabled = true;
+        try {
+            if (API_CONFIG.enableRemoteOnInteraction)
+                await removeGroupParticipantViaApi(getGroupId(group), userId);
+            group.participants = group.participants.filter((member) => memberUserId(member) !== userId);
+            group.subtitle = `${group.participants.length} membro(s)`;
+            renderConversation(group);
+            $("#participantsList")?.classList.remove("hidden");
+            toast(`${memberName} foi removido(a) do grupo.`);
+        } catch (error) {
+            console.error("Erro ao eliminar participante do grupo.", error);
+            removeGroupMemberButton.disabled = false;
+            toast("Não foi possível eliminar o participante.");
+        }
         return;
     }
     const addGroupMemberButton = e.target.closest("[data-add-group-member]");
@@ -536,7 +566,7 @@ $("#chatBody").addEventListener("change", (e) => {
     if (e.target.id === "attachmentInput" && e.target.files.length)
         toast(`${e.target.files.length} ficheiro(s) selecionado(s).`);
 });
-$("#chatBody").addEventListener("submit", (e) => {
+$("#chatBody").addEventListener("submit", async (e) => {
     if (e.target.matches("[data-edit-message-index]")) {
         e.preventDefault();
         const index = Number(e.target.dataset.editMessageIndex);
@@ -549,12 +579,37 @@ $("#chatBody").addEventListener("submit", (e) => {
     }
     if (e.target.id !== "messageForm") return;
     e.preventDefault();
-    const input = $("#messageInput"),
-        text = input.value.trim();
-    if (!text) return;
-    state.conversation.messages.push(["Você", "S", text, "agora", state.replyTo ? { ...state.replyTo } : null]);
-    state.replyTo = null;
-    renderConversation(state.conversation);
+    const input = $("#messageInput");
+    const text = input.value.trim();
+    const files = Array.from($("#attachmentInput")?.files || []);
+    if (!text && !files.length) return;
+
+    const conversation = state.conversation;
+    const reply = state.replyTo ? { ...state.replyTo } : null;
+    const sendButton = $(".message-form .send");
+    sendButton.disabled = true;
+    try {
+        // Mensagens privadas usam a API fornecida; grupos preservam o fluxo local existente.
+        if (!conversation.isGroup) {
+            // Conversas devolvidas pela API usam conversationId; o id local serve
+            // apenas como alternativa para a interface de demonstração.
+            const conversationId = entityId(conversation.conversationId || conversation.id);
+            if (!conversationId) throw new Error("conversationId indisponível.");
+            if (text) await sendPrivateMessageViaApi(conversationId, "TEXT", text);
+            for (const file of files) {
+                const content = await readImageAsDataUrl(file);
+                await sendPrivateMessageViaApi(conversationId, "IMAGE", content);
+            }
+        }
+        if (text) conversation.messages.push(["Você", "S", text, "agora", reply]);
+        files.forEach((file) => conversation.messages.push(["Você", "S", `📷 ${file.name}`, "agora", reply]));
+        state.replyTo = null;
+        renderConversation(conversation);
+    } catch (error) {
+        console.error("Erro ao enviar mensagem privada.", error);
+        toast(error.message || "Não foi possível enviar a mensagem.");
+        sendButton.disabled = false;
+    }
 });
 $("#chatActionsButton").addEventListener("click", (event) => {
     event.stopPropagation();
@@ -946,6 +1001,31 @@ async function leaveGroupViaApi(groupId, endpoint = API_CONFIG.leaveGroup) {
     return response.status === 204 ? null : response.json().catch(() => null);
 }
 
+// Envia uma mensagem privada para /api/messages/send.
+// Exemplo: await sendPrivateMessageViaApi("42", "TEXT", "Olá!");
+async function sendPrivateMessageViaApi(conversationId, messageType, content, endpoint = API_CONFIG.sendPrivateMessage) {
+    const id = entityId(conversationId);
+    if (!id) throw new Error("conversationId indisponível.");
+    if (messageType !== "TEXT" && messageType !== "IMAGE") throw new Error("Tipo de mensagem inválido.");
+    if (!String(content || "").trim()) throw new Error("O conteúdo da mensagem está vazio.");
+    const response = await fetch(endpoint, {
+        method: "POST",
+        headers: authHeaders(true),
+        body: JSON.stringify({ conversationId: id, messageType, content }),
+    });
+    if (!response.ok) throw new Error("Não foi possível enviar a mensagem.");
+    return response.status === 204 ? null : response.json().catch(() => null);
+}
+
+function readImageAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error("Não foi possível ler a imagem."));
+        reader.readAsDataURL(file);
+    });
+}
+
 function normalizeApiMessages(data) {
     if (!Array.isArray(data)) return [];
     return data.map((message) => [
@@ -989,6 +1069,19 @@ async function addGroupMemberViaApi(groupId, memberId, endpoint = API_CONFIG.add
         body: JSON.stringify({ memberId: validMemberId }),
     });
     if (!response.ok) throw new Error("Não foi possível adicionar o participante ao grupo.");
+    return response.status === 204 ? null : response.json().catch(() => null);
+}
+
+// Remove um participante enviando o respetivo userId ao endpoint configurado.
+async function removeGroupParticipantViaApi(groupId, userId, endpoint = API_CONFIG.removeGroupParticipant) {
+    const validGroupId = entityId(groupId);
+    const validUserId = entityId(userId);
+    if (!validGroupId || !validUserId) throw new Error("IDs de grupo ou participante indisponíveis.");
+    const url = endpoint
+        .replace(":groupId", encodeURIComponent(validGroupId))
+        .replace(":userId", encodeURIComponent(validUserId));
+    const response = await fetch(url, { method: "DELETE", headers: authHeaders() });
+    if (!response.ok) throw new Error("Não foi possível eliminar o participante.");
     return response.status === 204 ? null : response.json().catch(() => null);
 }
 
@@ -1190,7 +1283,7 @@ $("#createGroupForm").addEventListener("submit", async (event) => {
     const group = {
         id, name: remoteGroup?.name || name, subtitle: `${groupDraft.members.length + 1} membro(s)`, letter: "👥", isGroup: true,
         avatarImage: groupDraft.avatarImage,
-        participants: [{ name: "Você", letter: "S", role: "Admin" }, ...groupDraft.members],
+        participants: [{ userId: "current-user", name: "Você", letter: "S", role: "Admin" }, ...groupDraft.members],
         messages: [],
     };
     addCreatedGroup(group);

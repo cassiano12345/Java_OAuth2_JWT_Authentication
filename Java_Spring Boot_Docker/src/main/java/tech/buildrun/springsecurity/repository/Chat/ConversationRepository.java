@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ConversationRepository extends JpaRepository<Conversation, UUID> {
-
     // Buscar todas as conversas criadas por um usuário
     List<Conversation> findByCreatedBy_UserId(UUID userId);
 

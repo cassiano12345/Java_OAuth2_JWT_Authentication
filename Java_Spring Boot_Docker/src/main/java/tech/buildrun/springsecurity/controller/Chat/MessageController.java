@@ -26,11 +26,7 @@ public class MessageController {
             @RequestBody MessageDTO dto
     ) {
 
-        Message message = messageService.sendMessage(
-                dto.conversationId(),
-                dto.messageType(),
-                dto.content()
-        );
+        Message message = messageService.sendMessage(dto.conversationId(),dto.messageType(),dto.content());
 
         return ResponseEntity.ok(
                 toResponseDTO(message)

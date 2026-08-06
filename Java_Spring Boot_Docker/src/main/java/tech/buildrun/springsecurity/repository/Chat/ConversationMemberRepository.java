@@ -25,6 +25,7 @@ public interface ConversationMemberRepository
     );
 
 
+
     Optional<ConversationMember> findByConversation_ConversationIdAndUser_UserId(
             UUID conversationId,
             UUID userId
@@ -34,6 +35,8 @@ public interface ConversationMemberRepository
             UUID conversationId,
             ConversationMemberRole role
     );
+
+
 
     @Query("""
     SELECT DISTINCT cm
