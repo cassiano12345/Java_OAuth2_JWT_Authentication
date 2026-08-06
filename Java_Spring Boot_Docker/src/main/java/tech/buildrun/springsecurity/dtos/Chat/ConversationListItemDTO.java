@@ -15,6 +15,8 @@ public record ConversationListItemDTO(
 
         String lastMessage,
 
-        LocalDateTime lastMessageDate
+        LocalDateTime lastMessageDate,
+
+        long unreadCount
 
 ) {}

@@ -7,6 +7,7 @@ import tech.buildrun.springsecurity.entities.Chat.*;
 import tech.buildrun.springsecurity.entities.User;
 import tech.buildrun.springsecurity.repository.Chat.ConversationMemberRepository;
 import tech.buildrun.springsecurity.repository.Chat.ConversationRepository;
+import tech.buildrun.springsecurity.repository.Chat.MessageRepository;
 import tech.buildrun.springsecurity.repository.UserRepository;
 import tech.buildrun.springsecurity.services.AuthenticatedUserService;
 import tech.buildrun.springsecurity.services.PresenceService;
@@ -25,17 +26,18 @@ public class ConversationService {
     private final AuthenticatedUserService authenticatedUserService;
     ConversationMemberRole ConversationRole;
     private final PresenceService presenceService;;
-
+    private final MessageRepository messageRepository;
     public ConversationService(
             ConversationRepository conversationRepository,
             ConversationMemberRepository conversationMemberRepository,
-            UserRepository userRepository, AuthenticatedUserService authenticatedUserService, PresenceService presenceService
+            UserRepository userRepository, AuthenticatedUserService authenticatedUserService, PresenceService presenceService, MessageRepository messageRepository
     ) {
         this.conversationRepository = conversationRepository;
         this.conversationMemberRepository = conversationMemberRepository;
         this.userRepository = userRepository;
         this.authenticatedUserService = authenticatedUserService;
         this.presenceService = presenceService;
+        this.messageRepository = messageRepository;
     }
 
     // Criar uma nova conversa
@@ -169,14 +171,18 @@ public class ConversationService {
                             .orElseThrow();
 
                     Message lastMessage = conversation.getLastMessage();
-
+                    long unreadCount = messageRepository.countUnreadMessagesByConversation(
+                            conversation.getConversationId(),
+                            user.getUserId()
+                    );
                     return new ConversationListItemDTO(
                             conversation.getConversationId(),
                             friend.getUserId(),
                             friend.getUsername(),
                             presenceService.isOnline(friend.getUserId()), // adapta ao teu User
                             lastMessage != null ? lastMessage.getContent() : null,
-                            conversation.getLastMessageAt()
+                            conversation.getLastMessageAt(),
+                            unreadCount
                     );
 
                 })

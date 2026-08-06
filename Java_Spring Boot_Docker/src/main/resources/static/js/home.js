@@ -966,6 +966,7 @@ async function loadConversationsFromApi(endpoint = API_CONFIG.conversations) {
     const response = await fetch(endpoint, { headers: authHeaders() });
     if (!response.ok) throw new Error("Não foi possível listar as conversas.");
     const data = await response.json();
+    console.log(data);
     if (!Array.isArray(data)) throw new Error("Resposta de conversas inválida.");
     state.conversations = data.map((conversation) => {
         const name = String(conversation.friendName || "Jogador");

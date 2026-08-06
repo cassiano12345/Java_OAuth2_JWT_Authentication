@@ -27,6 +27,23 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
     """)
     long countUnreadMessages(UUID userId);
 
+    @Query("""
+SELECT COUNT(m)
+FROM Message m
+WHERE m.conversation.conversationId = :conversationId
+AND m.sender.userId <> :userId
+AND NOT EXISTS (
+    SELECT mr
+    FROM MessageRead mr
+    WHERE mr.message = m
+      AND mr.user.userId = :userId
+)
+""")
+    long countUnreadMessagesByConversation(
+            UUID conversationId,
+            UUID userId
+    );
+
     // Buscar todas as mensagens de uma conversa
     List<Message> findByConversation_ConversationIdOrderBySentAtAsc(
             UUID conversationId
