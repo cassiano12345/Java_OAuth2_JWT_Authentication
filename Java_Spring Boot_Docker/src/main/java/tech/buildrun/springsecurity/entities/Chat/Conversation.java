@@ -38,6 +38,36 @@ public class Conversation {
     )
     private List<ConversationMember> members = new ArrayList<>();
 
+    public void addMember(ConversationMember member) {
+        members.add(member);
+        member.setConversation(this);
+    }
+
+    public void removeMember(ConversationMember member) {
+        members.remove(member);
+        member.setConversation(null);
+    }
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "last_message_id")
+    private Message lastMessage;
+    @Column(name = "last_message_at")
+    private LocalDateTime lastMessageAt;
+
+    public LocalDateTime getLastMessageAt() {
+        return lastMessageAt;
+    }
+
+    public void setLastMessage(Message lastMessage) {
+        this.lastMessage = lastMessage;
+    }
+
+    public void setLastMessageAt(LocalDateTime lastMessageAt) {
+        this.lastMessageAt = lastMessageAt;
+    }
+
+    public Message getLastMessage() {
+        return lastMessage;
+    }
 
     public UUID getConversationId() {
         return conversationId;

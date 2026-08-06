@@ -2,15 +2,14 @@ package tech.buildrun.springsecurity.services.Chat;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.buildrun.springsecurity.entities.Chat.Conversation;
-import tech.buildrun.springsecurity.entities.Chat.ConversationMember;
-import tech.buildrun.springsecurity.entities.Chat.ConversationMemberRole;
-import tech.buildrun.springsecurity.entities.Chat.ConversationType;
+import tech.buildrun.springsecurity.dtos.Chat.ConversationListItemDTO;
+import tech.buildrun.springsecurity.entities.Chat.*;
 import tech.buildrun.springsecurity.entities.User;
 import tech.buildrun.springsecurity.repository.Chat.ConversationMemberRepository;
 import tech.buildrun.springsecurity.repository.Chat.ConversationRepository;
 import tech.buildrun.springsecurity.repository.UserRepository;
 import tech.buildrun.springsecurity.services.AuthenticatedUserService;
+import tech.buildrun.springsecurity.services.PresenceService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,15 +24,18 @@ public class ConversationService {
     private final UserRepository userRepository;
     private final AuthenticatedUserService authenticatedUserService;
     ConversationMemberRole ConversationRole;
+    private final PresenceService presenceService;;
+
     public ConversationService(
             ConversationRepository conversationRepository,
             ConversationMemberRepository conversationMemberRepository,
-            UserRepository userRepository, AuthenticatedUserService authenticatedUserService
+            UserRepository userRepository, AuthenticatedUserService authenticatedUserService, PresenceService presenceService
     ) {
         this.conversationRepository = conversationRepository;
         this.conversationMemberRepository = conversationMemberRepository;
         this.userRepository = userRepository;
         this.authenticatedUserService = authenticatedUserService;
+        this.presenceService = presenceService;
     }
 
     // Criar uma nova conversa
@@ -46,7 +48,7 @@ public class ConversationService {
         User user = authenticatedUserService.getAuthenticatedUser();
         User creator = userRepository.findById(user.getUserId())
                 .orElseThrow(() ->
-                        new RuntimeException("Usuário não encontrado.")
+                        new RuntimeException("Usuário não encontrado    .")
                 );
 
         // Criar a conversa
@@ -146,5 +148,38 @@ public class ConversationService {
         Conversation conversation = findById(conversationId);
 
         conversationRepository.delete(conversation);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ConversationListItemDTO> getMyConversations() {
+        User user = authenticatedUserService.getAuthenticatedUser();
+        List<ConversationMember> memberships =
+                conversationMemberRepository.findByUserWithConversation(user);
+
+        return memberships.stream()
+                .map(member -> {
+
+                    Conversation conversation = member.getConversation();
+
+                    User friend = conversation.getMembers()
+                            .stream()
+                            .map(ConversationMember::getUser)
+                            .filter(u -> !u.getUserId().equals(user.getUserId()))
+                            .findFirst()
+                            .orElseThrow();
+
+                    Message lastMessage = conversation.getLastMessage();
+
+                    return new ConversationListItemDTO(
+                            conversation.getConversationId(),
+                            friend.getUserId(),
+                            friend.getUsername(),
+                            presenceService.isOnline(friend.getUserId()), // adapta ao teu User
+                            lastMessage != null ? lastMessage.getContent() : null,
+                            conversation.getLastMessageAt()
+                    );
+
+                })
+                .toList();
     }
 }

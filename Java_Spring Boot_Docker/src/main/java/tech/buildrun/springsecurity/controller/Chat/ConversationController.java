@@ -3,6 +3,7 @@ package tech.buildrun.springsecurity.controller.Chat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.buildrun.springsecurity.dtos.Chat.ConversationDTO;
+import tech.buildrun.springsecurity.dtos.Chat.ConversationListItemDTO;
 import tech.buildrun.springsecurity.entities.Chat.Conversation;
 import tech.buildrun.springsecurity.services.Chat.ConversationService;
 
@@ -82,5 +83,9 @@ public class ConversationController {
         );
 
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("listar_conversas")
+    public ResponseEntity<List<ConversationListItemDTO>> getMyConversations() {
+        return ResponseEntity.ok(conversationService.getMyConversations());
     }
 }

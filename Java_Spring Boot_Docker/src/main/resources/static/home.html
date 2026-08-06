@@ -124,11 +124,14 @@
                     <button data-account-action="profile">
                         <i class="bi bi-person-circle"></i> Meu perfil
                     </button>
+                    <button data-account-action="theme">
+                        <i class="bi bi-sun-fill"></i> <span>Modo claro</span>
+                    </button>
+                    <button data-account-action="offline">
+                        <i class="bi bi-circle-fill"></i> <span>Modo offline</span>
+                    </button>
                     <button data-account-action="settings">
                         <i class="bi bi-gear"></i> Definições
-                    </button>
-                    <button data-account-action="theme">
-                        <i class="bi bi-moon-stars"></i> <span>Modo escuro</span>
                     </button>
                     <button class="danger" data-account-action="logout">
                         <i class="bi bi-box-arrow-right"></i> Logout
@@ -151,13 +154,21 @@
                 <b id="chatTitle">Mensagens</b
                 ><small id="chatSubtitle">Escolha uma conversa</small>
             </div>
-            <button
-                    class="plain-icon"
-                    id="chatSearchButton"
-                    aria-label="Pesquisar"
-            >
-                <i class="bi bi-search"></i>
-            </button>
+            <div class="chat-header-actions">
+                <button
+                        class="plain-icon"
+                        id="chatSearchButton"
+                        aria-label="Pesquisar conversas"
+                >
+                    <i class="bi bi-search"></i>
+                </button>
+                <div class="chat-actions-wrap hidden" id="chatActionsWrap">
+                    <button class="plain-icon" id="chatActionsButton" aria-label="Opções da conversa" aria-expanded="false">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <div class="chat-actions-menu hidden" id="chatActionsMenu"></div>
+                </div>
+            </div>
         </header>
         <div class="chat-search hidden" id="chatSearch">
             <i class="bi bi-search"></i
@@ -207,11 +218,14 @@
                         <button data-account-action="profile">
                             <i class="bi bi-person-circle"></i> Meu perfil
                         </button>
+                        <button data-account-action="theme">
+                            <i class="bi bi-sun-fill"></i> <span>Modo claro</span>
+                        </button>
+                        <button data-account-action="offline">
+                            <i class="bi bi-circle-fill"></i> <span>Modo offline</span>
+                        </button>
                         <button data-account-action="settings">
                             <i class="bi bi-gear"></i> Definições
-                        </button>
-                        <button data-account-action="theme">
-                            <i class="bi bi-moon-stars"></i> <span>Modo escuro</span>
                         </button>
                         <button class="danger" data-account-action="logout">
                             <i class="bi bi-box-arrow-right"></i> Logout

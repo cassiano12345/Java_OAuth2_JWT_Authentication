@@ -35,7 +35,7 @@ function onConnected() {
 
         if (message.body === "refresh") {
 
-             fetchNotificationsFromApi();
+            fetchNotificationsFromApi();
             return;
 
         }
@@ -44,7 +44,7 @@ function onConnected() {
 
         toast(data.content);
 
-         fetchNotificationsFromApi();
+        fetchNotificationsFromApi();
     });
 
     /*
@@ -87,7 +87,7 @@ function onConnected() {
         const data = JSON.parse(message.body);
 
 
-         loadFriendsPresenceFromApi();
+        loadFriendsPresenceFromApi();
 
         console.log("Estado dos amigos:", data);
 

@@ -1,8 +1,11 @@
 package tech.buildrun.springsecurity.repository.Chat;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import tech.buildrun.springsecurity.entities.Chat.ConversationMember;
 import tech.buildrun.springsecurity.entities.Chat.ConversationMemberRole;
+import tech.buildrun.springsecurity.entities.User;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,4 +34,16 @@ public interface ConversationMemberRepository
             UUID conversationId,
             ConversationMemberRole role
     );
+
+    @Query("""
+    SELECT DISTINCT cm
+    FROM ConversationMember cm
+    JOIN FETCH cm.conversation c
+    JOIN FETCH c.members members
+    JOIN FETCH members.user
+    LEFT JOIN FETCH c.lastMessage
+    WHERE cm.user = :user
+    ORDER BY c.lastMessageAt DESC NULLS LAST
+""")
+    List<ConversationMember> findByUserWithConversation(User user);
 }

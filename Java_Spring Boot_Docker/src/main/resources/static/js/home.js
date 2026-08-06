@@ -14,6 +14,7 @@ const chatPanel = $("#chatPanel"),
 const state = {
     view: "messages",
     conversation: null,
+    replyTo: null,
     requests: [
         {
             id: 1,
@@ -116,8 +117,12 @@ const state = {
 const API_CONFIG = {
     notifications: "/api/notifications/my", // GET — substitua se necessário
     friendsPresence: "/api/friendships/friends", // GET — substitua se necessário
+    conversations: "/api/conversations/listar_conversas", // GET — devolve conversationId, friendId, friendName, online e lastMessage
     privateMessages: "/api/conversations", // GET /:friendId/messages
+    deleteConversation: "/api/conversations/:conversationId", // DELETE — ajuste se necessário
     groupMessages: "/api/groups", // GET /:groupId/messages
+    leaveGroup: "/api/groups/:groupId/leave", // POST — ajuste se necessário
+    offlineMode: "/api/presence/offline", // POST — ajuste se necessário
     createGroup: "/api/groups", // POST JSON
     addGroupMember: "/api/groups", // POST /:groupId/members — substitua conforme a API
     acceptFriendRequest: "/api/friendships/accept", // POST JSON
@@ -192,18 +197,18 @@ function toast(t) {
 // PAINEL DE CHAT: LISTAS E CONVERSAS
 // ============================================================
 
-function renderMessages() {
+function renderMessages({ loadRemote = true } = {}) {
     state.view = "messages";
     state.conversation = null;
+    state.replyTo = null;
+    updateChatActionsMenu();
     title("Mensagens", "Escolha uma conversa");
     $("#chatBody").innerHTML =
         state.conversations
-            .map(
-                (c) =>
-                    `<button class="conversation-item" data-conversation-id="${c.id}">${avatar(c.letter, c.online)}<span class="conversation-content"><b>${c.name}</b><small>${c.preview}</small></span><time>${c.time}</time></button>`,
-            )
+            .map((c) => `<button class="conversation-item" data-conversation-id="${escapeHtml(String(c.id))}">${avatar(c.letter, c.online)}<span class="conversation-content"><b>${escapeHtml(c.name)}</b><small>${escapeHtml(c.preview || "")}</small></span><time>${escapeHtml(c.time || "")}</time></button>`)
             .join("") || '<p class="list-empty">Nenhuma mensagem por aqui.</p>';
     showChat();
+    if (loadRemote) loadConversationsFromApi().catch((error) => console.error("Erro ao listar conversas.", error));
 }
 function requestCard(r, kind = "received") {
     const requestId = entityId(r.id);
@@ -278,21 +283,42 @@ async function CancelSentFriendRequest(id) {
 function renderRequests() {
     state.view = "requests";
     state.conversation = null;
+    state.replyTo = null;
+    updateChatActionsMenu();
     title("Pedidos de amizade", `${state.requests.length} recebido(s)`);
     $("#chatBody").innerHTML =
         `<section class="new-request"><h3>Fazer pedido</h3><p>Pesquise um jogador para enviar um pedido de amizade.</p><div class="friend-search-input"><i class="bi bi-search"></i><input id="friendSearchInput" type="search" autocomplete="off" placeholder="Pesquisar jogador..."></div><div id="friendSearchResults" class="friend-search-results"></div></section><section class="request-section"><h3>Pedidos recebidos <span>${state.requests.length}</span></h3>${state.requests.map((r) => requestCard(r)).join("") || '<p class="list-empty compact">Nenhum pedido recebido.</p>'}</section><section class="request-section"><h3>Pedidos enviados <span>${state.sentRequests.length}</span></h3>${state.sentRequests.map((r) => requestCard(r, "sent")).join("") || '<p class="list-empty compact">Nenhum pedido enviado.</p>'}</section><section class="request-section"><h3>Pedidos bloqueados <span>${state.blockedRequests.length}</span></h3>${state.blockedRequests.map((r) => requestCard(r, "blocked")).join("") || '<p class="list-empty compact">Nenhum pedido bloqueado.</p>'}</section>`;
     showChat();
 }
-function messageHtml([n, l, t, time], index) {
+function messageHtml([n, l, t, time, reply], index) {
     const ownActions = n === "Você"
         ? `<div class="message-actions"><button type="button" data-message-action="edit" data-message-index="${index}" aria-label="Editar mensagem"><i class="bi bi-pencil-fill"></i> Editar</button><button type="button" data-message-action="delete" data-message-index="${index}" aria-label="Eliminar mensagem"><i class="bi bi-trash-fill"></i> Eliminar</button></div>`
-        : "";
-    return `<div class="message" data-message-index="${index}">${avatar(l)}<div class="message-content"><b>${escapeHtml(n)}</b><time>${time}</time><p>${escapeHtml(t)}</p>${ownActions}</div></div>`;
+        : `<div class="message-actions message-reply-action"><button type="button" data-message-action="reply" data-message-index="${index}" aria-label="Responder a esta mensagem" title="Responder">↩️</button></div>`;
+    const quoted = reply ? `<div class="message-reply-reference"><b>${escapeHtml(reply.name)}</b><span>${escapeHtml(reply.text)}</span></div>` : "";
+    return `<div class="message" data-message-index="${index}">${avatar(l)}<div class="message-content"><b>${escapeHtml(n)}</b><time>${escapeHtml(time)}</time>${quoted}<p>${escapeHtml(t)}</p>${ownActions}</div></div>`;
 }
+function updateChatActionsMenu() {
+    const wrap = $("#chatActionsWrap");
+    const menu = $("#chatActionsMenu");
+    if (!wrap || !menu) return;
+    const item = state.conversation;
+    menu.classList.add("hidden");
+    $("#chatActionsButton")?.setAttribute("aria-expanded", "false");
+    if (!item) { wrap.classList.add("hidden"); return; }
+    wrap.classList.remove("hidden");
+    menu.innerHTML = item.isGroup
+        ? '<button type="button" data-chat-menu-action="participants"><i class="bi bi-people-fill"></i> Ver participantes (' + item.participants.length + ')</button><button type="button" class="danger" data-chat-menu-action="leave-group"><i class="bi bi-box-arrow-left"></i> Sair da conversa de grupo</button>'
+        : '<button type="button" class="danger" data-chat-menu-action="unfriend"><i class="bi bi-person-dash-fill"></i> Desfazer amizade</button><button type="button" class="danger" data-chat-menu-action="delete-conversation"><i class="bi bi-trash-fill"></i> Apagar conversa</button>';
+}
+function replyComposerHtml() {
+    if (!state.replyTo) return "";
+    return `<div class="reply-composer"><span>↩️ A responder a <b>${escapeHtml(state.replyTo.name)}</b>: ${escapeHtml(state.replyTo.text)}</span><button type="button" data-cancel-reply aria-label="Cancelar resposta"><i class="bi bi-x-lg"></i></button></div>`;
+}
+
 function groupParticipantsHtml(item) {
     if (!item.isGroup) return "";
     const count = item.participants.length;
-    return `<button type="button" class="group-participants-button" data-group-participants aria-expanded="false"><i class="bi bi-people-fill"></i> Participantes (${count})</button><button type="button" class="group-participants-button leave-group-button" data-leave-group><i class="bi bi-box-arrow-left"></i> Sair da conversa do grupo</button><div class="participants-list hidden" id="participantsList">${item.participants.map((member) => `<div class="participant-row">${avatar(member.letter)}<b>${escapeHtml(member.name)}</b>${member.role === "Admin" ? '<span class="participant-role">Admin</span>' : ""}</div>`).join("")}</div><section class="conversation-member-adder"><label for="groupMemberSearch">Adicionar participante</label><div class="friend-search-input"><i class="bi bi-search"></i><input id="groupMemberSearch" type="search" autocomplete="off" placeholder="Pesquisar jogador..."></div><div class="group-member-search-results" id="groupMemberSearchResults"></div></section>`;
+    return `<div class="participants-list hidden" id="participantsList">${item.participants.map((member) => `<div class="participant-row">${avatar(member.letter)}<b>${escapeHtml(member.name)}</b>${member.role === "Admin" ? '<span class="participant-role">Admin</span>' : ""}</div>`).join("")}</div><section class="conversation-member-adder"><label for="groupMemberSearch">Adicionar participante</label><div class="friend-search-input"><i class="bi bi-search"></i><input id="groupMemberSearch" type="search" autocomplete="off" placeholder="Pesquisar jogador..."></div><div class="group-member-search-results" id="groupMemberSearchResults"></div></section>`;
 }
 function conversationIcon(item) {
     return item.avatarImage ? `<img src="${item.avatarImage}" alt="" class="conversation-avatar-image">` : item.letter;
@@ -301,8 +327,9 @@ function renderConversation(item) {
     state.view = "conversation";
     state.conversation = item;
     title(item.name, item.subtitle || (item.online ? "Online" : "Offline"));
+    updateChatActionsMenu();
     $("#chatBody").innerHTML =
-        `<div class="conversation"><div class="messages" id="messageList"><div class="chat-welcome"><div class="placeholder-icon">${conversationIcon(item)}</div><h2>${escapeHtml(item.name)}</h2><span>Este é o começo da conversa.</span>${groupParticipantsHtml(item)}${!item.isGroup ? '<button type="button" class="group-participants-button unfriend-button" data-unfriend data-friend-id="' + escapeHtml(String(item.friendId || "")) + '"><i class="bi bi-person-dash-fill"></i> Desfazer amizade</button>' : ""}</div>${item.messages.map(messageHtml).join("")}</div><form class="message-form" id="messageForm"><input id="attachmentInput" type="file" hidden multiple><button type="button" class="plain-icon attachment-button" id="attachmentButton" aria-label="Anexar ficheiro"><i class="bi bi-plus-circle-fill"></i></button><input id="messageInput" autocomplete="off" placeholder="Enviar mensagem..."><button class="send" aria-label="Enviar"><i class="bi bi-send-fill"></i></button></form></div>`;
+        `<div class="conversation"><div class="messages" id="messageList"><div class="chat-welcome"><div class="placeholder-icon">${conversationIcon(item)}</div><h2>${escapeHtml(item.name)}</h2><span>Este é o começo da conversa.</span>${groupParticipantsHtml(item)}</div>${item.messages.map(messageHtml).join("")}</div>${replyComposerHtml()}<form class="message-form" id="messageForm"><input id="attachmentInput" type="file" hidden multiple><button type="button" class="plain-icon attachment-button" id="attachmentButton" aria-label="Anexar ficheiro"><i class="bi bi-plus-circle-fill"></i></button><input id="messageInput" autocomplete="off" placeholder="Enviar mensagem..."><button class="send" aria-label="Enviar"><i class="bi bi-send-fill"></i></button></form></div>`;
     showChat();
     $("#messageList").scrollTop = 99999;
 }
@@ -373,6 +400,11 @@ $("#chatBody").addEventListener("click", async (e) => {
     // Impedimos que o clique seja interpretado como um clique fora do chat.
     e.stopPropagation();
 
+    if (e.target.closest("[data-cancel-reply]")) {
+        state.replyTo = null;
+        renderConversation(state.conversation);
+        return;
+    }
     if (e.target.closest("#attachmentButton"))
         return $("#attachmentInput").click();
     if (e.target.closest("[data-group-participants]")) {
@@ -432,6 +464,13 @@ $("#chatBody").addEventListener("click", async (e) => {
     const messageAction = e.target.closest("[data-message-action]");
     if (messageAction) {
         const index = Number(messageAction.dataset.messageIndex);
+        if (messageAction.dataset.messageAction === "reply") {
+            const [name, , text] = state.conversation.messages[index];
+            state.replyTo = { name, text };
+            renderConversation(state.conversation);
+            $("#messageInput")?.focus();
+            return;
+        }
         if (messageAction.dataset.messageAction === "delete") {
             state.conversation.messages.splice(index, 1);
             renderConversation(state.conversation);
@@ -513,9 +552,58 @@ $("#chatBody").addEventListener("submit", (e) => {
     const input = $("#messageInput"),
         text = input.value.trim();
     if (!text) return;
-    state.conversation.messages.push(["Você", "S", text, "agora"]);
+    state.conversation.messages.push(["Você", "S", text, "agora", state.replyTo ? { ...state.replyTo } : null]);
+    state.replyTo = null;
     renderConversation(state.conversation);
 });
+$("#chatActionsButton").addEventListener("click", (event) => {
+    event.stopPropagation();
+    const menu = $("#chatActionsMenu");
+    const open = menu.classList.toggle("hidden");
+    $("#chatActionsButton").setAttribute("aria-expanded", String(!open));
+});
+document.addEventListener("click", (event) => {
+    if (!event.target.closest(".chat-actions-wrap")) {
+        $("#chatActionsMenu")?.classList.add("hidden");
+        $("#chatActionsButton")?.setAttribute("aria-expanded", "false");
+    }
+});
+
+$("#chatActionsMenu").addEventListener("click", async (event) => {
+    const action = event.target.closest("[data-chat-menu-action]")?.dataset.chatMenuAction;
+    const item = state.conversation;
+    if (!action || !item) return;
+    try {
+        if (action === "participants") {
+            const list = $("#participantsList");
+            list?.classList.toggle("hidden");
+        } else if (action === "unfriend") {
+            if (!item.friendId) throw new Error("ID do amigo indisponível.");
+            await RemoveFriendship(item.friendId);
+            state.conversations = state.conversations.filter((conversation) => conversation !== item);
+            renderMessages({ loadRemote: false });
+            toast("Amizade desfeita.");
+        } else if (action === "delete-conversation") {
+            await deleteConversationViaApi(item.id);
+            state.conversations = state.conversations.filter((conversation) => conversation !== item);
+            renderMessages({ loadRemote: false });
+            toast("Conversa apagada.");
+        } else if (action === "leave-group") {
+            await leaveGroupViaApi(getGroupId(item));
+            const id = getGroupId(item);
+            delete state.groups[id];
+            document.querySelector(`.group[data-conversation="${CSS.escape(id)}"]`)?.remove();
+            renderMessages({ loadRemote: false });
+            toast("Você saiu da conversa de grupo.");
+        }
+    } catch (error) {
+        console.error("Erro na ação da conversa.", error);
+        toast("Não foi possível concluir esta ação.");
+    } finally {
+        $("#chatActionsMenu").classList.add("hidden");
+    }
+});
+
 $("#chatSearchButton").addEventListener("click", () => {
     $("#chatSearch").classList.toggle("hidden");
     if (!$("#chatSearch").classList.contains("hidden"))
@@ -815,6 +903,47 @@ async function loadFriendsPresenceFromApi(endpoint = API_CONFIG.friendsPresence)
         name.textContent = String(friend.username); status.textContent = String((online ? "Online" : "Offline"));
         text.append(name, status); button.append(av, text); (online ? onlineList : offlineList).append(button);
     });
+}
+
+// Lista as conversas privadas da API. É chamada ao abrir "Mensagens".
+async function loadConversationsFromApi(endpoint = API_CONFIG.conversations) {
+    console.log("Aqui vai listar as conversas");
+    const response = await fetch(endpoint, { headers: authHeaders() });
+    if (!response.ok) throw new Error("Não foi possível listar as conversas.");
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error("Resposta de conversas inválida.");
+    state.conversations = data.map((conversation) => {
+        const name = String(conversation.friendName || "Jogador");
+        return {
+            id: entityId(conversation.conversationId) || `conversation-${entityId(conversation.friendId)}`,
+            conversationId: entityId(conversation.conversationId),
+            friendId: entityId(conversation.friendId),
+            name,
+            letter: name[0].toUpperCase(),
+            online: Boolean(conversation.online),
+            preview: String(conversation.lastMessage || ""),
+            time: "",
+            messages: [],
+        };
+    });
+    if (state.view === "messages" && chatPanel.classList.contains("open")) renderMessages({ loadRemote: false });
+    return state.conversations;
+}
+
+async function deleteConversationViaApi(conversationId, endpoint = API_CONFIG.deleteConversation) {
+    const id = entityId(conversationId);
+    if (!id) throw new Error("ID da conversa indisponível.");
+    const response = await fetch(endpoint.replace(":conversationId", encodeURIComponent(id)), { method: "DELETE", headers: authHeaders() });
+    if (!response.ok) throw new Error("Não foi possível apagar a conversa.");
+    return response.status === 204 ? null : response.json().catch(() => null);
+}
+
+async function leaveGroupViaApi(groupId, endpoint = API_CONFIG.leaveGroup) {
+    const id = entityId(groupId);
+    if (!id) throw new Error("ID do grupo indisponível.");
+    const response = await fetch(endpoint.replace(":groupId", encodeURIComponent(id)), { method: "POST", headers: authHeaders() });
+    if (!response.ok) throw new Error("Não foi possível sair do grupo.");
+    return response.status === 204 ? null : response.json().catch(() => null);
 }
 
 function normalizeApiMessages(data) {
@@ -1176,6 +1305,16 @@ async function handleFriendshipWebSocketUpdate() {
     if (state.view === "requests" && chatPanel.classList.contains("open")) renderRequests();
 }
 window.handleFriendshipWebSocketUpdate = handleFriendshipWebSocketUpdate;
+window.loadConversationsFromApi = loadConversationsFromApi;
+
+// Define o estado offline no servidor e atualiza a indicação local.
+async function setOfflineModeViaApi(endpoint = API_CONFIG.offlineMode) {
+    const response = await fetch(endpoint, { method: "POST", headers: authHeaders() });
+    if (!response.ok) throw new Error("Não foi possível ativar o modo offline.");
+    document.querySelector(".sidebar-footer small").textContent = "● Offline";
+    document.querySelector(".sidebar-footer small").classList.add("offline-status");
+    return response.status === 204 ? null : response.json().catch(() => null);
+}
 
 // ============================================================
 // MENU DA CONTA E MODO DE COR
@@ -1229,6 +1368,11 @@ document.addEventListener("click", (event) => {
     if (action === "theme") {
         setTheme(document.body.classList.contains("light-mode") ? "dark" : "light");
         toast(document.body.classList.contains("light-mode") ? "Modo claro ativado." : "Modo escuro ativado.");
+    } else if (action === "offline") {
+        setOfflineModeViaApi().then(() => toast("Modo offline ativado.")).catch((error) => {
+            console.error("Erro ao ativar modo offline.", error);
+            toast("Não foi possível ativar o modo offline.");
+        });
     } else if (action === "logout") {
         localStorage.removeItem("accessToken");
         disconnectWebSocket();

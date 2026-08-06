@@ -1453,3 +1453,32 @@ body.light-mode .notification-item p { color: var(--muted); }
     border: 0;
     text-align: center;
 }
+
+
+/* ============================================================
+   MENU DE AÇÕES DA CONVERSA E RESPOSTAS
+   ============================================================ */
+.chat-header-actions { display: flex; align-items: center; gap: 4px; }
+.chat-actions-wrap { position: relative; }
+.chat-actions-menu { position: absolute; z-index: 150; top: calc(100% + 8px); right: 0; width: 205px; padding: 6px; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 14px 30px rgba(0,0,0,.38); background: #260043; }
+.chat-actions-menu button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px; border: 0; border-radius: 6px; color: #e0c9e8; background: transparent; font-size: 10px; text-align: left; }
+.chat-actions-menu button:hover { color: #fff; background: rgba(255,255,255,.09); }
+.chat-actions-menu button.danger { color: #ffadbb; }
+.message-reply-action { display: inline-flex; margin-top: 5px; }
+.message-reply-action button { padding: 3px 5px; font-size: 13px; }
+.message-reply-reference { margin-top: 6px; padding: 6px 8px; border-left: 3px solid var(--gold); border-radius: 5px; color: var(--muted); background: rgba(255,255,255,.055); font-size: 9px; }
+.message-reply-reference b, .message-reply-reference span { display: block; }
+.reply-composer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 10px; padding: 7px 9px; border-left: 3px solid var(--gold); border-radius: 7px; color: var(--muted); background: rgba(255,255,255,.06); font-size: 9px; }
+.reply-composer span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.reply-composer button { flex: none; border: 0; color: var(--muted); background: transparent; }
+.offline-status { color: #b79bbe !important; }
+
+/* Modo claro em azul-cerceta, mantendo boa leitura. */
+body.light-mode { --bg: #e8f7f8; --side: #075b70; --panel: #ffffff; --purple: #087e94; --gold: #a46100; --text: #123e4a; --muted: #56747c; --muted2: #63838b; --line: rgba(8, 105, 124, .2); --green: #168453; background: radial-gradient(circle at 65% 0, #a5e3e8, transparent 34%), var(--bg); }
+body.light-mode .main-content { background: radial-gradient(circle at 70% 0, rgba(59, 178, 192, .17), transparent 34%); }
+body.light-mode .sidebar, body.light-mode .mobile-bar { background: linear-gradient(180deg, #087084, #075063); }
+body.light-mode .chat-panel { background: #fff; }
+body.light-mode .chat-actions-menu { background: #fff; border-color: var(--line); }
+body.light-mode .chat-actions-menu button { color: #165260; }
+body.light-mode .chat-actions-menu button.danger { color: #a13b4e; }
+body.light-mode .message-reply-reference, body.light-mode .reply-composer { background: #edf8f9; }
