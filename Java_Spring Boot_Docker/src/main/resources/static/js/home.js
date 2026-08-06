@@ -977,7 +977,7 @@ async function loadConversationsFromApi(endpoint = API_CONFIG.conversations) {
             letter: name[0].toUpperCase(),
             online: Boolean(conversation.online),
             preview: String(conversation.lastMessage || ""),
-            time: "",
+            time: conversation.lastMessageDate,
             messages: [],
         };
     });
