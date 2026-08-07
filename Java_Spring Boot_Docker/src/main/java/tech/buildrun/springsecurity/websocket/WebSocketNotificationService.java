@@ -2,8 +2,10 @@ package tech.buildrun.springsecurity.websocket;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import tech.buildrun.springsecurity.dtos.Chat.Message_listDTO;
 import tech.buildrun.springsecurity.entities.User;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -129,7 +131,7 @@ public class WebSocketNotificationService {
 
     /*
     |--------------------------------------------------------------------------
-    | Mensagem privada
+    | Mensagens
     |--------------------------------------------------------------------------
     */
 
@@ -160,6 +162,22 @@ public class WebSocketNotificationService {
         );
 
     }
+
+    public void atualizacao_num_msglidas(User receiver, List<Message_listDTO> num_mensagens_lidas) {
+
+        messagingTemplate.convertAndSendToUser(
+
+                receiver.getUsername(),
+
+                "/queue/messages/atualizacao_num_msglidas",
+
+                num_mensagens_lidas
+
+        );
+
+    }
+
+
 
     /*
     |--------------------------------------------------------------------------

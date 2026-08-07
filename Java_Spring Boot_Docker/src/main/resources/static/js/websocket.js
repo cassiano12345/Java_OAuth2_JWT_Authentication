@@ -95,6 +95,16 @@ function onConnected() {
         updatenewmessagesBadge(message.body);
     });
 
+    stompClient.subscribe("/user/queue/messages/atualizacao_num_msglidas", function (message) {
+
+        updatenewmessagesBadge(message.body);
+    });
+
+
+    stompClient.subscribe("/user/queue/messages/obter_msgprivada_usuario", function (message) {
+        console.log(JSON.parse(message.body));
+        //normalizeApiMessages(JSON.parse(message.body));
+    });
     /*
     |--------------------------------------------------------------------------
     | AMIGOS ONLINE
@@ -120,7 +130,7 @@ function onConnected() {
 
     });
 
-    
+
     //Apos aceitar pedido de amizade atualiza a lista lateral
     stompClient.subscribe("/user/queue/friends/amizade_aceite", function (message) {
 

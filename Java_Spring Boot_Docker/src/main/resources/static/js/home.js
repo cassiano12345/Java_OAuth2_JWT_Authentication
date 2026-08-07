@@ -1001,13 +1001,13 @@ function atualizaramigosonline(friends) {
 
 // Lista as conversas privadas da API. É chamada ao abrir "Mensagens".
 async function loadConversationsFromApi(endpoint = API_CONFIG.conversations) {
-    console.log("Aqui vai listar as conversas");
     const response = await fetch(endpoint, { headers: authHeaders() });
     if (!response.ok) throw new Error("Não foi possível listar as conversas.");
     const data = await response.json();
     console.log(data);
     if (!Array.isArray(data)) throw new Error("Resposta de conversas inválida.");
     state.conversations = data.map((conversation) => {
+        console.log(conversation);
         const name = String(conversation.friendName || "Jogador");
         return {
             id: entityId(conversation.conversationId) || `conversation-${entityId(conversation.friendId)}`,
@@ -1126,6 +1126,7 @@ async function loadPrivateMessagesFromApi(conversationId, conversation = state.c
     if (!response.ok) throw new Error("Não foi possível buscar mensagens privadas.");
     conversation.conversationId = id;
     conversation.messages = normalizeApiMessages(await response.json());
+    console.log("Mensagem fora do websocker:  " +conversation.messages);
     if (state.conversation === conversation) renderConversation(conversation);
     // Só depois de apresentar as mensagens fazemos o POST de leitura.
     await markUnreadConversationMessagesAsRead(conversation);

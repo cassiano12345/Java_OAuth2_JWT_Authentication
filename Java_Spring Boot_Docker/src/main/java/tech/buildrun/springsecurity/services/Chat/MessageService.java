@@ -247,7 +247,8 @@ public class MessageService {
             long unreadCount = messageRepository.countUnreadMessages(recipient.getUserId());
             // enviar websocket
             webSocketNotificationService.sendPrivateM(recipient, unreadCount);
-
+            //Object mensagens = getConversationMessages(conversationId);
+            webSocketNotificationService.atualizacao_num_msglidas(recipient,getConversationMessages(conversationId));
         }
 
         conversationRepository.save(conversation);
