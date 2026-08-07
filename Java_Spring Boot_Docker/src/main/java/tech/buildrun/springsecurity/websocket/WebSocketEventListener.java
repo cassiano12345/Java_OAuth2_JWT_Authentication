@@ -69,7 +69,6 @@ public class WebSocketEventListener {
         User user = (User) authentication.getPrincipal();
 
         presenceService.setOnline(user.getUserId());
-
         friendshipService.getFriendUsernames(user).forEach(
                 webSocketNotificationService::sendOnlineFriends
         );

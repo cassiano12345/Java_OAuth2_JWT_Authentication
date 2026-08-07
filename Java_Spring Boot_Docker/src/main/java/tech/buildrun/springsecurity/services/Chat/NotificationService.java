@@ -66,8 +66,6 @@ public class NotificationService {
 
         NotificationResponseDTO dto = toDTO(notification);
 
-        webSocketNotificationService.sendNotification(receiver, dto);
-
         return dto;
     }
 

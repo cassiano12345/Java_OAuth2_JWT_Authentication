@@ -1454,7 +1454,6 @@ async function loadBlockedFriendRequests() {
         const response = await fetch(API_CONFIG.blockedFriendRequests, { headers: authHeaders() });
         if (!response.ok) throw new Error("Não foi possível buscar pedidos bloqueados.");
         const data = await response.json();
-        //console.log(data);
         if (!Array.isArray(data)) throw new Error("Resposta de pedidos bloqueados inválida.");
         state.blockedRequests = data.map((x, i) => {
             const name =  x.requesterUsername;
@@ -1594,7 +1593,7 @@ async function loadnewmessages() {
 function updatenewmessagesBadge(count) {
 
     const badge = document.getElementById("messageBadge");
-    
+
 
     badge.textContent = count > 99 ? "99+" : count;
 

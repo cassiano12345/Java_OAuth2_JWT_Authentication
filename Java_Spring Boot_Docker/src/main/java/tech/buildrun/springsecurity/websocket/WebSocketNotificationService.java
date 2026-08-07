@@ -48,6 +48,33 @@ public class WebSocketNotificationService {
         );
 
     }
+    public void pedido_de_amizade_aceite(User user, Object resposta) {
+
+        messagingTemplate.convertAndSendToUser(
+
+                user.getUsername(),
+
+                "/queue/notifications/amizade_aceite",
+
+                resposta
+
+        );
+    }
+
+    public void pedido_de_amizade_recebido(User user, Object resposta) {
+
+        messagingTemplate.convertAndSendToUser(
+
+                user.getUsername(),
+
+                "/queue/notifications",
+
+                resposta
+
+        );
+    }
+
+
 
     /*
     |--------------------------------------------------------------------------
@@ -86,7 +113,18 @@ public class WebSocketNotificationService {
                 "refresh"
 
         );
+    }
+    public void sendOnlineFriends_amizade_aceite(String username, Object nova_lista) {
 
+        messagingTemplate.convertAndSendToUser(
+
+                username,
+
+                "/queue/friends/amizade_aceite",
+
+                nova_lista
+
+        );
     }
 
     /*

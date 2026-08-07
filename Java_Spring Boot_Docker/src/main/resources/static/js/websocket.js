@@ -28,11 +28,11 @@ function onConnected() {
     console.log("✅ WebSocket conectado.");
 
     /*
-     * Notificações gerais
-     */
+    |--------------------------------------------------------------------------
+    | Notificações
+    |--------------------------------------------------------------------------
+    */
     stompClient.subscribe("/user/queue/notifications", function (message) {
-
-        console.log("Notificação:", message.body);
 
         if (message.body === "refresh") {
 
@@ -42,15 +42,25 @@ function onConnected() {
         }
 
         const data = JSON.parse(message.body);
-
         toast(data.content);
 
         fetchNotificationsFromApi();
     });
 
-    /*
-     * Pedidos de amizade
-     */
+    stompClient.subscribe("/user/queue/notifications/amizade_aceite", function (message) {
+
+        const data = JSON.parse(message.body);
+        console.log(message.body);
+        toast(data.mensagem);
+        renderNotifications(data.notificacoes);
+    });
+
+
+ /*
+|--------------------------------------------------------------------------
+| PEDIDOS DE AMIZADE
+|--------------------------------------------------------------------------
+*/
     stompClient.subscribe("/user/queue/friendships", async function (message) {
         console.log("Pedido de amizade:", message.body);
         try {
@@ -63,8 +73,10 @@ function onConnected() {
     });
 
     /*
-     * Mensagens privadas
-     */
+    |--------------------------------------------------------------------------
+    | MENSAGENS
+    |--------------------------------------------------------------------------
+    */
     stompClient.subscribe("/user/queue/messages/mensagens", function (message) {
 
 
@@ -76,14 +88,19 @@ function onConnected() {
         }
         loadnewmessages();
     });
+
+
+
     stompClient.subscribe("/user/queue/messages/privadas", function (message) {
 
         updatenewmessagesBadge(message.body);
     });
 
     /*
-     * Amigos online
-     */
+    |--------------------------------------------------------------------------
+    | AMIGOS ONLINE
+    |--------------------------------------------------------------------------
+    */
     stompClient.subscribe("/user/queue/friends", function (message) {
 
 
