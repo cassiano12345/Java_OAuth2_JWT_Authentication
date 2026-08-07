@@ -2,6 +2,7 @@ package tech.buildrun.springsecurity.websocket;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import tech.buildrun.springsecurity.dtos.Chat.FriendDTO;
 import tech.buildrun.springsecurity.dtos.Chat.Message_listDTO;
 import tech.buildrun.springsecurity.entities.User;
 
@@ -116,7 +117,8 @@ public class WebSocketNotificationService {
 
         );
     }
-    public void sendOnlineFriends_amizade_aceite(String username, Object nova_lista) {
+
+    public void sendOnlineFriends_amizade_aceite(String username, List<FriendDTO> nova_lista) {
 
         messagingTemplate.convertAndSendToUser(
 

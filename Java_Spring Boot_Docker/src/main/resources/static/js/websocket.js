@@ -51,6 +51,7 @@ function onConnected() {
 
         const data = JSON.parse(message.body);
         console.log(message.body);
+        toast(data.mensagem);
         renderNotifications(data.notificacoes);
     });
 
@@ -146,7 +147,7 @@ function onConnected() {
         atualizaramigosonline(JSON.parse(message.body));
 
 
-        console.log("Amigos online: " + JSON.parse(message.body));
+        console.log("Amigos online: " + message.body);
 
     });
 

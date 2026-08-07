@@ -1062,6 +1062,7 @@ async function sendPrivateMessageViaApi(conversationId, messageType, content, en
     if (!id) throw new Error("conversationId indisponível.");
     if (messageType !== "TEXT" && messageType !== "IMAGE") throw new Error("Tipo de mensagem inválido.");
     if (!String(content || "").trim()) throw new Error("O conteúdo da mensagem está vazio.");
+    console.log("ID conversa: "+ id + "tipo de mensagem: "+ messageType + "conteudo: " + content);
     const response = await fetch(endpoint, {
         method: "POST",
         headers: authHeaders(true),

@@ -127,18 +127,17 @@ public class FriendshipService {
         friendship.setStatus(FriendshipStatus.ACCEPTED);
         notificationService.createNotification(friendship.getRequester().getUserId(), notificationType.NEW_MESSAGE,"Pedido de amizade.", "🎲 O seu pedido de amizade a "+ authenticatedUser.getUsername() + " foi aceite!");
         User user = userRepository.findById(friendship.getRequester().getUserId()).orElseThrow(() -> new RuntimeException("Utilizador não encontrado"));
-        Notificão_aceitar_amizade notificãoAceitarAmizade = new Notificão_aceitar_amizade("🎲 O seu pedido de amizade a "+ authenticatedUser.getUsername() + " foi aceite!", notificationRepository.findByUser_UserIdOrderByCreatedAtDesc(friendship.getRequester().getUserId()).stream().map(this::toDTO).toList());
+        Notificão_aceitar_amizade notificcoAceitarAmizade = new Notificão_aceitar_amizade("🎲 O seu pedido de amizade a "+ authenticatedUser.getUsername() + " foi aceite!", notificationRepository.findByUser_UserIdOrderByCreatedAtDesc(friendship.getRequester().getUserId()).stream().map(this::toDTO).toList());
         webSocketNotificationService.pedido_de_amizade_aceite(
-                user, notificãoAceitarAmizade
+                user, notificcoAceitarAmizade
         );
-        webSocketNotificationService.sendOnlineFriends_amizade_aceite(
-                user.getUsername(), getFriends(user)
-        );
-
         //Criar conversa e adicionar elementos a conversa!!!!!!!!
         conversationService.createPrivateConversation(
                 friendship.getRequester(),
                 friendship.getAddressee()
+        );
+        webSocketNotificationService.sendOnlineFriends_amizade_aceite(
+                user.getUsername(), getFriends(user)
         );
         return friendshipRepository.save(friendship);
     }
