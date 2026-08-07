@@ -51,7 +51,6 @@ function onConnected() {
 
         const data = JSON.parse(message.body);
         console.log(message.body);
-        toast(data.mensagem);
         renderNotifications(data.notificacoes);
     });
 
@@ -118,6 +117,17 @@ function onConnected() {
         loadFriendsPresenceFromApi();
 
         console.log("Estado dos amigos:", data);
+
+    });
+
+    
+    //Apos aceitar pedido de amizade atualiza a lista lateral
+    stompClient.subscribe("/user/queue/friends/amizade_aceite", function (message) {
+
+        atualizaramigosonline(JSON.parse(message.body));
+
+
+        console.log("Amigos online: " + JSON.parse(message.body));
 
     });
 

@@ -4,6 +4,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.buildrun.springsecurity.dtos.Chat.*;
 import tech.buildrun.springsecurity.entities.Chat.FRIENDSHIP;
+import tech.buildrun.springsecurity.entities.User;
+import tech.buildrun.springsecurity.services.AuthenticatedUserService;
 import tech.buildrun.springsecurity.services.Chat.FriendshipService;
 
 import java.util.List;
@@ -13,9 +15,10 @@ import java.util.List;
 public class FriendshipController {
 
     private final FriendshipService friendshipService;
-
-    public FriendshipController(FriendshipService friendshipService) {
+    private final AuthenticatedUserService authenticatedUserService;
+    public FriendshipController(FriendshipService friendshipService, AuthenticatedUserService authenticatedUserService) {
         this.friendshipService = friendshipService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     // =========================================================
@@ -133,9 +136,9 @@ public class FriendshipController {
 
     @GetMapping("/friends")
     public ResponseEntity<List<FriendDTO>> getFriends() {
-
+        User user = authenticatedUserService.getAuthenticatedUser();
         return ResponseEntity.ok(
-                friendshipService.getFriends()
+                friendshipService.getFriends(user)
         );
 
     }

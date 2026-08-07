@@ -131,6 +131,9 @@ public class FriendshipService {
         webSocketNotificationService.pedido_de_amizade_aceite(
                 user, notificãoAceitarAmizade
         );
+        webSocketNotificationService.sendOnlineFriends_amizade_aceite(
+                user.getUsername(), getFriends(user)
+        );
 
         //Criar conversa e adicionar elementos a conversa!!!!!!!!
         conversationService.createPrivateConversation(
@@ -265,9 +268,7 @@ public class FriendshipService {
     }
     //OBTER A LISTA DE AMIGOS A APRESENTAR NA LISTA LATERAL DO LAYOUT
     @Transactional()
-    public List<FriendDTO> getFriends() {
-
-        User user = authenticatedUserService.getAuthenticatedUser();
+    public List<FriendDTO> getFriends(User user) {
 
         List<FRIENDSHIP> friendships = getAcceptedFriendships(user);
 

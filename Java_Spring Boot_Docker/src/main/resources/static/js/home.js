@@ -967,6 +967,10 @@ async function loadFriendsPresenceFromApi(endpoint = API_CONFIG.friendsPresence)
     if (!response.ok) throw new Error("Não foi possível buscar amigos.");
     const friends = await response.json();
     if (!Array.isArray(friends)) throw new Error("Resposta de amigos inválida.");
+    atualizaramigosonline(friends);
+}
+
+function atualizaramigosonline(friends) {
 
     //////// Contagem do .lenght do array
     const onlineCount = friends.filter(friend => friend.online).length;
