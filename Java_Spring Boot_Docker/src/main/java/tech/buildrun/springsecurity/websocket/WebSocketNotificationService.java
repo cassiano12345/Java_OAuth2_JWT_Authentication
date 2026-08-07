@@ -4,6 +4,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import tech.buildrun.springsecurity.entities.User;
 
+import java.util.UUID;
+
 @Service
 public class WebSocketNotificationService {
 
@@ -99,9 +101,23 @@ public class WebSocketNotificationService {
 
                 receiver.getUsername(),
 
-                "/queue/messages",
+                "/queue/messages/mensagens",
 
                 "refresh"
+
+        );
+
+    }
+
+    public void sendPrivateM(User receiver, Object mensagens_nlidas) {
+
+        messagingTemplate.convertAndSendToUser(
+
+                receiver.getUsername(),
+
+                "/queue/messages/privadas",
+
+                mensagens_nlidas
 
         );
 

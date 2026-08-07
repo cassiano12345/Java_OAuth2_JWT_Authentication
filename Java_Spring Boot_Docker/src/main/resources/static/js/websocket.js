@@ -13,6 +13,7 @@ function connectWebSocket() {
         `ws://${window.location.host}/ws?token=${encodeURIComponent(token)}`
     );
 
+
     stompClient = Stomp.over(socket);
 
     // Desativa os logs da biblioteca
@@ -64,15 +65,20 @@ function onConnected() {
     /*
      * Mensagens privadas
      */
-    stompClient.subscribe("/user/queue/messages", function (message) {
+    stompClient.subscribe("/user/queue/messages/mensagens", function (message) {
 
 
         if (message.body === "refresh") {
             //loadPrivateMessagesFromApi();
-            loadnewmessages();
+             loadnewmessages();
             return;
 
         }
+        loadnewmessages();
+    });
+    stompClient.subscribe("/user/queue/messages/privadas", function (message) {
+
+        updatenewmessagesBadge(message.body);
     });
 
     /*

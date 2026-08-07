@@ -2,6 +2,7 @@ package tech.buildrun.springsecurity.repository.Chat;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import tech.buildrun.springsecurity.entities.Chat.Message;
 
 import java.util.List;
@@ -43,6 +44,20 @@ AND NOT EXISTS (
             UUID conversationId,
             UUID userId
     );
+
+    @Query("""
+    SELECT COUNT(m)
+    FROM Message m
+    WHERE m.sender.userId <> :userId
+      AND NOT EXISTS (
+            SELECT mr
+            FROM MessageRead mr
+            WHERE mr.message = m
+              AND mr.user.userId = :userId
+      )
+      AND m.deletedAt IS NULL
+""")
+    long countUnreadMessages_(@Param("userId") UUID userId);
 
     // Buscar todas as mensagens de uma conversa
     List<Message> findByConversation_ConversationIdOrderBySentAtAsc(UUID conversationId);

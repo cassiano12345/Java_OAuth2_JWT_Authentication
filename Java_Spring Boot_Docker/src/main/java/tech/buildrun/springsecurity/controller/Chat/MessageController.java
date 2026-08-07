@@ -22,7 +22,7 @@ public class MessageController {
     }
     // OBTER MENSAGENS NÃO LIDAS PARA O MENU
     @GetMapping("/unread-count")
-    public long getUnreadMessagesCount() {
+    public long getUnreadMessagesCount() throws InterruptedException {
         return messageService.getUnreadMessagesCount();
     }
 

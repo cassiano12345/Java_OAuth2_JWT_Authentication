@@ -33,6 +33,7 @@ public class MessageService {
     private final ConversationMemberRepository conversationMemberRepository;
     private final WebSocketNotificationService webSocketNotificationService;
     private final MessageReadRepository messageReadRepository;
+
     public MessageService(
             MessageRepository messageRepository,
             ConversationRepository conversationRepository,
@@ -226,7 +227,13 @@ public class MessageService {
         message.setSentAt(LocalDateTime.now());
 
         Message savedMessage = messageRepository.save(message);
+// Marca como lida para o remetente
+        MessageRead messageRead = new MessageRead();
+        messageRead.setMessage(savedMessage);
+        messageRead.setUser(user);
+        messageRead.setReadAt(LocalDateTime.now());
 
+        messageReadRepository.save(messageRead);
         // Atualiza a última mensagem da conversa
         conversation.setLastMessage(savedMessage);
         conversation.setLastMessageAt(savedMessage.getSentAt());
@@ -236,14 +243,13 @@ public class MessageService {
                         conversationId,
                         user.getUserId()
                 );
-        System.out.println("Passou daqui");
         for (User recipient : recipients) {
+            long unreadCount = messageRepository.countUnreadMessages(recipient.getUserId());
             // enviar websocket
-            webSocketNotificationService.sendPrivateMessage(
-                    recipient// ou MessageDTO
-            );
+            webSocketNotificationService.sendPrivateM(recipient, unreadCount);
 
         }
+
         conversationRepository.save(conversation);
 
         return savedMessage;
@@ -315,8 +321,9 @@ public class MessageService {
     public long getUnreadMessagesCount() {
 
         User user = authenticatedUserService.getAuthenticatedUser();
-
-        return messageRepository.countUnreadMessages(user.getUserId());
+        var xxx =messageRepository.countUnreadMessages(user.getUserId());
+        System.out.println(xxx);
+        return xxx;
     }
     public List<User> getRecipients(
             UUID conversationId,

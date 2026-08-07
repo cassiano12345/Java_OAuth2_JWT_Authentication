@@ -2,7 +2,7 @@
 // LUDO STAR — LAYOUT BASE
 // Interações da sidebar, chat, amizades e conta
 // ============================================================
-var conversa;
+
 // ============================================================
 // ELEMENTOS E ESTADO DA INTERFACE
 // ============================================================
@@ -414,10 +414,9 @@ function openFriendConversation(friend) {
     if (conversationId) conversation.conversationId = conversationId;
     sidebar.classList.remove("open");
     renderConversation(conversation);
-    conversa = conversation;
     // Carrega as mensagens pelo conversationId devolvido pelo endpoint de amigos.
     if (conversation.conversationId)
-        loadPrivateMessagesFromApi(conversation.conversationId).catch((error) => console.error("Erro ao carregar conversa privada.", error));
+        loadPrivateMessagesFromApi(conversation.conversationId, conversation).catch((error) => console.error("Erro ao carregar conversa privada.", error));
 }
 $(".sidebar").addEventListener("click", (event) => {
     const friend = event.target.closest(".friend-item");
@@ -554,9 +553,8 @@ $("#chatBody").addEventListener("click", async (e) => {
         renderConversation(conversation);
         // A lista de conversas já traz conversationId; usamos esse valor para
         // buscar o histórico completo quando o utilizador abre o chat.
-        conversa = conversation;
         if (conversation.conversationId)
-            loadPrivateMessagesFromApi(conversation.conversationId).catch((error) => console.error("Erro ao carregar conversa privada.", error));
+            loadPrivateMessagesFromApi(conversation.conversationId, conversation).catch((error) => console.error("Erro ao carregar conversa privada.", error));
         return;
     }
     const actionButton = e.target.closest("[data-action]");
@@ -1117,8 +1115,7 @@ async function markUnreadConversationMessagesAsRead(conversation) {
 }
 
 // conversationId é usado aqui porque é a chave da conversa, não o ID do amigo.
-async function loadPrivateMessagesFromApi(conversationId = state.conversation) {
-    conversation = conversa;
+async function loadPrivateMessagesFromApi(conversationId, conversation = state.conversation) {
     const id = entityId(conversationId || conversation?.conversationId);
     if (!id) throw new Error("conversationId indisponível.");
     const response = await fetch(API_CONFIG.privateMessages.replace(":conversationId", encodeURIComponent(id)), { headers: authHeaders() });
@@ -1597,15 +1594,7 @@ async function loadnewmessages() {
 function updatenewmessagesBadge(count) {
 
     const badge = document.getElementById("messageBadge");
-
-    if (count <= 0) {
-
-        badge.style.display = "none";
-        return;
-
-    }
-
-    //badge.style.display = "flex";
+    
 
     badge.textContent = count > 99 ? "99+" : count;
 
