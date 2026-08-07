@@ -246,9 +246,9 @@ public class MessageService {
         for (User recipient : recipients) {
             long unreadCount = messageRepository.countUnreadMessages(recipient.getUserId());
             // enviar websocket
-            webSocketNotificationService.sendPrivateM(recipient, unreadCount);
+            webSocketNotificationService.atualizacao_num_msglidas(recipient, unreadCount);
             //Object mensagens = getConversationMessages(conversationId);
-            webSocketNotificationService.atualizacao_num_msglidas(recipient,getConversationMessages(conversationId));
+            webSocketNotificationService.Atualizar_chat(recipient,getConversationMessages(conversationId, recipient));
         }
 
         conversationRepository.save(conversation);
@@ -257,9 +257,9 @@ public class MessageService {
     }
 
     @Transactional(readOnly = true)
-    public List<Message_listDTO> getConversationMessages(UUID conversationId) {
+    public List<Message_listDTO> getConversationMessages(UUID conversationId, User loggedUser) {
 
-        User loggedUser = authenticatedUserService.getAuthenticatedUser();
+
 
         // Verifica se o utilizador pertence à conversa
         boolean member = conversationMemberRepository

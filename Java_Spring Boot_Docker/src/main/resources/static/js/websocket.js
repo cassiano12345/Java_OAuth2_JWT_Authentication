@@ -92,18 +92,27 @@ function onConnected() {
 
     stompClient.subscribe("/user/queue/messages/privadas", function (message) {
 
-        updatenewmessagesBadge(message.body);
+        //updatenewmessagesBadge(message.body);
     });
 
     stompClient.subscribe("/user/queue/messages/atualizacao_num_msglidas", function (message) {
-
+        console.log("Numero de mensagens n lidas: "+message.body);
         updatenewmessagesBadge(message.body);
     });
 
 
-    stompClient.subscribe("/user/queue/messages/obter_msgprivada_usuario", function (message) {
-        console.log(JSON.parse(message.body));
-        //normalizeApiMessages(JSON.parse(message.body));
+    stompClient.subscribe("/user/queue/messages/atualizar_chat", async function (message) {
+        const response = new Response(message.body, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        const data = await response.json();
+
+        //console.log(data);
+        atualizar_chat(data);
+        //atualizar_chat(JSON.parse(message.body));
     });
     /*
     |--------------------------------------------------------------------------

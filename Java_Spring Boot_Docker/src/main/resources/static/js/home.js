@@ -91,7 +91,7 @@ const state = {
             isGroup: true,
             participants: [
                 { userId: "ludo-bot", name: "LudoBot", letter: "L", role: "Admin" },
-                { name: "AnaLudo", letter: "A", role: "Usuário normal" },
+                { userId: "ana-ludo", name: "AnaLudo", letter: "A", role: "Usuário normal" },
             ],
             messages: [
                 ["LudoBot", "L", "Os torneios da semana foram atualizados.", "10:00"],
@@ -104,7 +104,7 @@ const state = {
             isGroup: true,
             participants: [
                 { userId: "current-user", name: "Você", letter: "S", role: "Admin" },
-                { name: "AnaLudo", letter: "A", role: "Usuário normal" },
+                { userId: "ana-ludo", name: "AnaLudo", letter: "A", role: "Usuário normal" },
             ],
             messages: [["AnaLudo", "A", "Bem-vindos ao grupo!", "ontem"]],
         },
@@ -210,7 +210,13 @@ function renderMessages({ loadRemote = true } = {}) {
     title("Mensagens", "Escolha uma conversa");
     $("#chatBody").innerHTML =
         state.conversations
-            .map((c) => `<button class="conversation-item" data-conversation-id="${escapeHtml(String(c.id))}">${avatar(c.letter, c.online)}<span class="conversation-content"><b>${escapeHtml(c.name)}</b><small>${escapeHtml(c.preview || "")}</small></span><time>${escapeHtml(c.time || "")}</time></button>`)
+            .map((c) => {
+                const unreadCount = Number(c.unreadCount) || 0;
+                const unreadBadge = unreadCount > 0
+                    ? `<em class="conversation-unread-badge" aria-label="${unreadCount} mensagem${unreadCount === 1 ? "" : "s"} não lida${unreadCount === 1 ? "" : "s"}">${unreadCount > 99 ? "99+" : unreadCount}</em>`
+                    : "";
+                return `<button class="conversation-item" data-conversation-id="${escapeHtml(String(c.id))}">${avatar(c.letter, c.online)}<span class="conversation-content"><b>${escapeHtml(c.name)}</b><small>${escapeHtml(c.preview || "")}</small></span><span class="conversation-meta"><time>${escapeHtml(c.time || "")}</time>${unreadBadge}</span></button>`;
+            })
             .join("") || '<p class="list-empty">Nenhuma mensagem por aqui.</p>';
     showChat();
     if (loadRemote) loadConversationsFromApi().catch((error) => console.error("Erro ao listar conversas.", error));
@@ -329,13 +335,16 @@ function replyComposerHtml() {
 }
 
 function memberUserId(member) {
-    return entityId(member?.userId ?? member?.id);
+    // Aceita userId (frontend) e userID (algumas respostas do backend).
+    return entityId(member?.userId ?? member?.userID ?? member?.id);
 }
 function groupParticipantsHtml(item) {
     if (!item.isGroup) return "";
     return `<div class="participants-list hidden" id="participantsList">${item.participants.map((member) => {
         const userId = memberUserId(member);
-        const removeButton = userId ? `<button type="button" class="participant-remove" data-remove-group-member data-member-user-id="${escapeHtml(userId)}" data-member-name="${escapeHtml(member.name)}" aria-label="Eliminar ${escapeHtml(member.name)}" title="Eliminar participante"><i class="bi bi-x-lg"></i></button>` : "";
+        // O controlo é mostrado para todos os participantes, não apenas para admins.
+        // Se a API não disponibilizar userId/userID, fica desativado até esse campo existir.
+        const removeButton = `<button type="button" class="participant-remove" data-remove-group-member data-member-user-id="${escapeHtml(userId)}" data-member-name="${escapeHtml(member.name)}" aria-label="Eliminar ${escapeHtml(member.name)}" title="${userId ? "Eliminar participante" : "ID do participante indisponível"}"${userId ? "" : " disabled"}><i class="bi bi-x-lg"></i></button>`;
         return `<div class="participant-row">${avatar(member.letter)}<b>${escapeHtml(member.name)}</b>${member.role === "Admin" ? '<span class="participant-role">Admin</span>' : ""}${removeButton}</div>`;
     }).join("")}</div><section class="conversation-member-adder"><label for="groupMemberSearch">Adicionar participante</label><div class="friend-search-input"><i class="bi bi-search"></i><input id="groupMemberSearch" type="search" autocomplete="off" placeholder="Pesquisar jogador..."></div><div class="group-member-search-results" id="groupMemberSearchResults"></div></section>`;
 }
@@ -999,15 +1008,11 @@ function atualizaramigosonline(friends) {
     });
 }
 
-// Lista as conversas privadas da API. É chamada ao abrir "Mensagens".
-async function loadConversationsFromApi(endpoint = API_CONFIG.conversations) {
-    const response = await fetch(endpoint, { headers: authHeaders() });
-    if (!response.ok) throw new Error("Não foi possível listar as conversas.");
-    const data = await response.json();
-    console.log(data);
+// Recebe diretamente o resultado de `await response.json()` de API_CONFIG.conversations
+// e atualiza o estado e o menu de Mensagens sem precisar fechar a gaveta.
+function atualizar_loadConversationsFromApi(data) {
     if (!Array.isArray(data)) throw new Error("Resposta de conversas inválida.");
     state.conversations = data.map((conversation) => {
-        console.log(conversation);
         const name = String(conversation.friendName || "Jogador");
         return {
             id: entityId(conversation.conversationId) || `conversation-${entityId(conversation.friendId)}`,
@@ -1018,11 +1023,20 @@ async function loadConversationsFromApi(endpoint = API_CONFIG.conversations) {
             online: Boolean(conversation.online),
             preview: String(conversation.lastMessage || ""),
             time: conversation.lastMessageDate,
+            unreadCount: Math.max(0, Number(conversation.unreadCount) || 0),
             messages: [],
         };
     });
     if (state.view === "messages" && chatPanel.classList.contains("open")) renderMessages({ loadRemote: false });
     return state.conversations;
+}
+
+// Lista as conversas privadas da API. É chamada ao abrir "Mensagens".
+async function loadConversationsFromApi(endpoint = API_CONFIG.conversations) {
+    const response = await fetch(endpoint, { headers: authHeaders() });
+    if (!response.ok) throw new Error("Não foi possível listar as conversas.");
+    const data = await response.json();
+    return atualizar_loadConversationsFromApi(data);
 }
 
 async function deleteConversationViaApi(conversationId, endpoint = API_CONFIG.deleteConversation) {
@@ -1118,6 +1132,18 @@ async function markUnreadConversationMessagesAsRead(conversation) {
     }));
 }
 
+// Atualizador único do chat: recebe o `await response.json()` de qualquer endpoint
+// de mensagens, normaliza-o e apresenta-o no mesmo painel usado pela sidebar e por Mensagens.
+async function atualizar_chat(data, conversation = state.conversation) {
+    if (!conversation) throw new Error("Nenhuma conversa selecionada.");
+    conversation.messages = normalizeApiMessages(data);
+    if (state.conversation === conversation) renderConversation(conversation);
+    // Em conversas privadas, marca as mensagens recebidas depois de estas surgirem no ecrã.
+    if (!conversation.isGroup) await markUnreadConversationMessagesAsRead(conversation);
+    console.log(conversation);
+    return conversation.messages;
+}
+
 // conversationId é usado aqui porque é a chave da conversa, não o ID do amigo.
 async function loadPrivateMessagesFromApi(conversationId, conversation = state.conversation) {
     const id = entityId(conversationId || conversation?.conversationId);
@@ -1125,12 +1151,7 @@ async function loadPrivateMessagesFromApi(conversationId, conversation = state.c
     const response = await fetch(API_CONFIG.privateMessages.replace(":conversationId", encodeURIComponent(id)), { headers: authHeaders() });
     if (!response.ok) throw new Error("Não foi possível buscar mensagens privadas.");
     conversation.conversationId = id;
-    conversation.messages = normalizeApiMessages(await response.json());
-    console.log("Mensagem fora do websocker:  " +conversation.messages);
-    if (state.conversation === conversation) renderConversation(conversation);
-    // Só depois de apresentar as mensagens fazemos o POST de leitura.
-    await markUnreadConversationMessagesAsRead(conversation);
-    return conversation.messages;
+    return atualizar_chat(await response.json(), conversation);
 }
 
 async function loadGroupMessagesFromApi(groupId, conversation = state.conversation) {
@@ -1138,9 +1159,7 @@ async function loadGroupMessagesFromApi(groupId, conversation = state.conversati
     if (!groupId) throw new Error("ID do grupo indisponível.");
     const response = await fetch(`${API_CONFIG.groupMessages}/${encodeURIComponent(groupId)}/messages`, { headers: authHeaders() });
     if (!response.ok) throw new Error("Não foi possível buscar mensagens do grupo.");
-    conversation.messages = normalizeApiMessages(await response.json());
-    if (state.conversation === conversation) renderConversation(conversation);
-    return conversation.messages;
+    return atualizar_chat(await response.json(), conversation);
 }
 
 // Adiciona um participante ao grupo. O endpoint e o payload são placeholders configuráveis.
@@ -1486,6 +1505,8 @@ async function handleFriendshipWebSocketUpdate() {
 }
 window.handleFriendshipWebSocketUpdate = handleFriendshipWebSocketUpdate;
 window.loadConversationsFromApi = loadConversationsFromApi;
+window.atualizar_loadConversationsFromApi = atualizar_loadConversationsFromApi;
+window.atualizar_chat = atualizar_chat;
 
 // Define o estado offline no servidor e atualiza a indicação local.
 async function setOfflineModeViaApi(endpoint = API_CONFIG.offlineMode) {

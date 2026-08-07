@@ -1583,3 +1583,63 @@ body.light-mode .participant-remove { color: #ffd4dc; background: rgba(230, 66, 
 body.light-mode .message.is-unread .message-content {
     background: rgba(91, 215, 218, .18);
 }
+
+
+/* ============================================================
+   CONVERSAS NÃO LIDAS E MODO CLARO AZUL-CERCETA SUAVE
+   ============================================================ */
+.conversation-meta {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    min-width: 46px;
+}
+.conversation-unread-badge {
+    display: grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 50px;
+    color: #fff;
+    background: #e6425b;
+    font-size: 8px;
+    font-style: normal;
+    font-weight: 800;
+}
+/* Azul-cerceta com luminosidade controlada: sem branco intenso nem baixo contraste. */
+body.light-mode {
+    --bg: #075463;
+    --side: #063d49;
+    --panel: #0b6472;
+    --purple: #169aa7;
+    --gold: #ffd14d;
+    --text: #f0ffff;
+    --muted: #c7e8eb;
+    --muted2: #a6d2d7;
+    --line: rgba(179, 235, 237, .20);
+    background: radial-gradient(circle at 65% 0, #1593a0, transparent 39%), var(--bg);
+}
+body.light-mode .main-content {
+    background: radial-gradient(circle at 70% 0, rgba(56, 187, 194, .18), transparent 38%);
+}
+body.light-mode .layout-placeholder {
+    border-color: rgba(209, 250, 251, .32);
+    background: rgba(7, 86, 99, .72);
+}
+body.light-mode .layout-placeholder > p:last-child,
+body.light-mode .content-header p { color: var(--muted); }
+body.light-mode .group-modal-card {
+    color: var(--text);
+    background: linear-gradient(180deg, #0c6876, #074c59);
+}
+body.light-mode .modal-field > input:not([type="search"]) {
+    color: var(--text);
+    background: #084d5a;
+}
+body.light-mode .conversation-unread-badge {
+    color: #fff;
+    background: #e94c65;
+}

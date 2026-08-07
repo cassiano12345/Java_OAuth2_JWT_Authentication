@@ -149,13 +149,13 @@ public class WebSocketNotificationService {
 
     }
 
-    public void sendPrivateM(User receiver, Object mensagens_nlidas) {
+    public void atualizacao_num_msglidas(User receiver, Object mensagens_nlidas) {
 
         messagingTemplate.convertAndSendToUser(
 
                 receiver.getUsername(),
 
-                "/queue/messages/privadas",
+                "/queue/messages/atualizacao_num_msglidas",
 
                 mensagens_nlidas
 
@@ -163,13 +163,13 @@ public class WebSocketNotificationService {
 
     }
 
-    public void atualizacao_num_msglidas(User receiver, List<Message_listDTO> num_mensagens_lidas) {
+    public void Atualizar_chat(User receiver, List<Message_listDTO> num_mensagens_lidas) {
 
         messagingTemplate.convertAndSendToUser(
 
                 receiver.getUsername(),
 
-                "/queue/messages/atualizacao_num_msglidas",
+                "/queue/messages/atualizar_chat",
 
                 num_mensagens_lidas
 

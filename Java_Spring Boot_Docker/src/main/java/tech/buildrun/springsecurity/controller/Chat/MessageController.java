@@ -6,6 +6,8 @@ import tech.buildrun.springsecurity.dtos.Chat.MessageDTO;
 import tech.buildrun.springsecurity.dtos.Chat.MessageResponseDTO;
 import tech.buildrun.springsecurity.dtos.Chat.Message_listDTO;
 import tech.buildrun.springsecurity.entities.Chat.Message;
+import tech.buildrun.springsecurity.entities.User;
+import tech.buildrun.springsecurity.services.AuthenticatedUserService;
 import tech.buildrun.springsecurity.services.Chat.MessageService;
 
 import java.util.List;
@@ -16,9 +18,10 @@ import java.util.UUID;
 public class MessageController {
 
     private final MessageService messageService;
-
-    public MessageController(MessageService messageService) {
+    private final AuthenticatedUserService authenticatedUserService;
+    public MessageController(MessageService messageService, AuthenticatedUserService authenticatedUserService) {
         this.messageService = messageService;
+        this.authenticatedUserService = authenticatedUserService;
     }
     // OBTER MENSAGENS NÃO LIDAS PARA O MENU
     @GetMapping("/unread-count")
@@ -149,8 +152,8 @@ public class MessageController {
     public ResponseEntity<List<Message_listDTO>> getConversationMessages(
             @PathVariable UUID conversationId
     ) {
-
-        return ResponseEntity.ok(messageService.getConversationMessages(conversationId)
+        User loggedUser = authenticatedUserService.getAuthenticatedUser();
+        return ResponseEntity.ok(messageService.getConversationMessages(conversationId, loggedUser)
         );
     }
 
