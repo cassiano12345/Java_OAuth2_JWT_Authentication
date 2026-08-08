@@ -282,9 +282,7 @@ public class ConversationService {
 
 
     @Transactional(readOnly = true)
-    public List<GroupConversationDTO> getMyGroups() {
-
-        User user = authenticatedUserService.getAuthenticatedUser();
+    public List<GroupConversationDTO> getMyGroups(User user) {
 
         List<ConversationMember> memberships =
                 conversationMemberRepository
@@ -300,8 +298,7 @@ public class ConversationService {
 
                     Message lastMessage = conversation.getLastMessage();
 
-                    long unreadCount =
-                            messageRepository.countUnreadMessagesByConversation(
+                    long unreadCount = messageRepository.countUnreadMessagesByConversation(
                                     conversation.getConversationId(),
                                     user.getUserId()
                             );

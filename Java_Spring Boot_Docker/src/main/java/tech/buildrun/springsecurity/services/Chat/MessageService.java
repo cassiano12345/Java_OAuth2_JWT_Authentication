@@ -33,11 +33,11 @@ public class MessageService {
     private final ConversationMemberRepository conversationMemberRepository;
     private final WebSocketNotificationService webSocketNotificationService;
     private final MessageReadRepository messageReadRepository;
-
+    private final ConversationService conversationService;
     public MessageService(
             MessageRepository messageRepository,
             ConversationRepository conversationRepository,
-            UserRepository userRepository, AuthenticatedUserService authenticatedUserService, ConversationMemberRepository conversationMemberRepository, WebSocketNotificationService webSocketNotificationService, MessageReadRepository messageReadRepository
+            UserRepository userRepository, AuthenticatedUserService authenticatedUserService, ConversationMemberRepository conversationMemberRepository, WebSocketNotificationService webSocketNotificationService, MessageReadRepository messageReadRepository, ConversationService conversationService
     ) {
         this.messageRepository = messageRepository;
         this.conversationRepository = conversationRepository;
@@ -46,6 +46,7 @@ public class MessageService {
         this.conversationMemberRepository = conversationMemberRepository;
         this.webSocketNotificationService = webSocketNotificationService;
         this.messageReadRepository = messageReadRepository;
+        this.conversationService = conversationService;
     }
 
 /*
@@ -244,9 +245,10 @@ public class MessageService {
                         user.getUserId()
                 );
         for (User recipient : recipients) {
-            long unreadCount = messageRepository.countUnreadMessages(recipient.getUserId());
+            long unreadCount = messageRepository.countUnreadPrivateMessages(recipient.getUserId());
             // enviar websocket
             webSocketNotificationService.atualizacao_num_msglidas(recipient, unreadCount);
+            webSocketNotificationService.atualizacao_num_msglidas_grupos(recipient,conversationService.getMyGroups(recipient));
             //Object mensagens = getConversationMessages(conversationId);
             webSocketNotificationService.Atualizar_chat(recipient,getConversationMessages(conversationId, recipient));
         }

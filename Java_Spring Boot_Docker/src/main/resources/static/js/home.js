@@ -1184,8 +1184,12 @@ async function atualizar_chat(data, conversation = state.conversation) {
     if (!conversation) throw new Error("Nenhuma conversa selecionada.");
     conversation.messages = normalizeApiMessages(data);
     if (state.conversation === conversation) renderConversation(conversation);
-    // Em conversas privadas, marca as mensagens recebidas depois de estas surgirem no ecrã.
-    if (!conversation.isGroup) await markUnreadConversationMessagesAsRead(conversation);
+    // Conversas privadas e grupos usam o mesmo endpoint para confirmar leitura.
+    // Só mensagens recebidas (nunca as do próprio utilizador) são marcadas.
+    await markUnreadConversationMessagesAsRead(conversation);
+    conversation.unreadCount = 0;
+    // Atualiza logo as bolinhas do menu, sem esperar por uma nova consulta à API.
+    if (state.conversation === conversation) renderConversations();
     console.log(conversation);
     return conversation.messages;
 }

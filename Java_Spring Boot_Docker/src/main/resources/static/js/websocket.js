@@ -105,8 +105,21 @@ function onConnected() {
     });
 
     stompClient.subscribe("/user/queue/messages/atualizacao_num_msglidas", function (message) {
-        console.log("Numero de mensagens n lidas: "+message.body);
+        //console.log("Numero de mensagens n lidas: "+message.body);
         updatenewmessagesBadge(message.body);
+    });
+
+    stompClient.subscribe("/user/queue/messages/atualizacao_num_msglidas_grupos", async function (message) {
+        const response = new Response(message.body, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        const data = await response.json();
+        console.log("Numero de mensagens n lidas em grupos: " + await response.json());
+
+        atualizar_loadConversationsGruposFromApi(await response.json());
     });
 
 
@@ -118,10 +131,7 @@ function onConnected() {
         });
 
         const data = await response.json();
-
-        //console.log(data);
         atualizar_chat(data);
-        //atualizar_chat(JSON.parse(message.body));
     });
     /*
     |--------------------------------------------------------------------------

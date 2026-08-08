@@ -3,6 +3,7 @@ package tech.buildrun.springsecurity.websocket;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import tech.buildrun.springsecurity.dtos.Chat.FriendDTO;
+import tech.buildrun.springsecurity.dtos.Chat.GroupConversationDTO;
 import tech.buildrun.springsecurity.dtos.Chat.Message_listDTO;
 import tech.buildrun.springsecurity.entities.User;
 
@@ -171,6 +172,19 @@ public class WebSocketNotificationService {
                 receiver.getUsername(),
 
                 "/queue/messages/atualizacao_num_msglidas",
+
+                mensagens_nlidas
+
+        );
+
+    }
+    public void atualizacao_num_msglidas_grupos(User receiver, List<GroupConversationDTO> mensagens_nlidas) {
+
+        messagingTemplate.convertAndSendToUser(
+
+                receiver.getUsername(),
+
+                "/queue/messages/atualizacao_num_msglidas_grupos",
 
                 mensagens_nlidas
 

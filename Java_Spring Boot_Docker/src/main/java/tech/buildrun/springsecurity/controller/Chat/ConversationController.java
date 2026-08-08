@@ -8,6 +8,8 @@ import tech.buildrun.springsecurity.dtos.Chat.ConversationListItemDTO;
 import tech.buildrun.springsecurity.dtos.Chat.CreateGroupConversationDTO;
 import tech.buildrun.springsecurity.dtos.Chat.GroupConversationDTO;
 import tech.buildrun.springsecurity.entities.Chat.Conversation;
+import tech.buildrun.springsecurity.entities.User;
+import tech.buildrun.springsecurity.services.AuthenticatedUserService;
 import tech.buildrun.springsecurity.services.Chat.ConversationService;
 
 import java.util.List;
@@ -17,11 +19,12 @@ import java.util.List;
 public class ConversationController {
 
     private final ConversationService conversationService;
-
+    private final AuthenticatedUserService authenticatedUserService;
     public ConversationController(
-            ConversationService conversationService
+            ConversationService conversationService, AuthenticatedUserService authenticatedUserService
     ) {
         this.conversationService = conversationService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @PostMapping("/create")
@@ -110,6 +113,7 @@ public class ConversationController {
 
     @GetMapping("listar_conversas_grupos")
     public ResponseEntity<List<GroupConversationDTO>> getMyConversations_group() {
-        return ResponseEntity.ok(conversationService.getMyGroups());
+        User user = authenticatedUserService.getAuthenticatedUser();
+        return ResponseEntity.ok(conversationService.getMyGroups(user));
     }
 }

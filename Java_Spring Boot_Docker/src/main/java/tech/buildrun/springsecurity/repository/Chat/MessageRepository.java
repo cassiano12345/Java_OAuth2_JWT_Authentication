@@ -28,6 +28,47 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
     """)
     long countUnreadMessages(UUID userId);
 
+    // Numero de mensagens não lidas privadas
+    @Query("""
+    SELECT COUNT(m)
+    FROM Message m
+    WHERE m.conversation.type = tech.buildrun.springsecurity.entities.Chat.ConversationType.PRIVATE
+      AND EXISTS (
+          SELECT cm
+          FROM ConversationMember cm
+          WHERE cm.conversation = m.conversation
+            AND cm.user.userId = :userId
+      )
+      AND m.sender.userId <> :userId
+      AND NOT EXISTS (
+          SELECT mr
+          FROM MessageRead mr
+          WHERE mr.message = m
+            AND mr.user.userId = :userId
+      )
+""")
+    long countUnreadPrivateMessages(UUID userId);
+
+    // Numero de mensagens não lidas grupos
+    @Query("""
+    SELECT COUNT(m)
+    FROM Message m
+    WHERE m.conversation.type = tech.buildrun.springsecurity.entities.Chat.ConversationType.GROUP
+      AND EXISTS (
+          SELECT cm
+          FROM ConversationMember cm
+          WHERE cm.conversation = m.conversation
+            AND cm.user.userId = :userId
+      )
+      AND m.sender.userId <> :userId
+      AND NOT EXISTS (
+          SELECT mr
+          FROM MessageRead mr
+          WHERE mr.message = m
+            AND mr.user.userId = :userId
+      )
+""")
+    long countUnreadGroupMessages(UUID userId);
 
     @Query("""
 SELECT COUNT(m)
