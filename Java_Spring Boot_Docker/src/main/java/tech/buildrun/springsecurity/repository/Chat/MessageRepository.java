@@ -29,12 +29,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
         )
     """)
     long countUnreadMessages(UUID userId);
-
-    Optional<ConversationMember>
-    findByConversation_ConversationIdAndUser_UserId(
-            UUID conversationId,
-            UUID userId
-    );
+    
 
     // Numero de mensagens não lidas privadas
     @Query("""

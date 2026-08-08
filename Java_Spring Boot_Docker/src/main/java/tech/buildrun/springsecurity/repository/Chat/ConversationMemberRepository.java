@@ -35,7 +35,15 @@ public interface ConversationMemberRepository
             @Param("conversationId") UUID conversationId,
             @Param("senderId") UUID senderId
     );
-
+    @Query("""
+    SELECT cm
+    FROM ConversationMember cm
+    JOIN FETCH cm.user
+    WHERE cm.conversation.conversationId = :conversationId
+""")
+    List<ConversationMember> findMembersWithUser(
+            UUID conversationId
+    );
 
     Optional<ConversationMember> findByConversation_ConversationIdAndUser_UserId(
             UUID conversationId,

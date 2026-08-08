@@ -514,7 +514,7 @@ public class ConversationService {
         }
 
         return conversationMemberRepository
-                .findByConversation_ConversationId(conversationId)
+                .findMembersWithUser(conversationId)
                 .stream()
                 .map(member -> new GroupMemberDTO(
                         member.getUser().getUserId(),
