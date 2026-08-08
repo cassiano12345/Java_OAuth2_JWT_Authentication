@@ -279,6 +279,219 @@ public class ConversationService {
                 .toList();
     }
 
+    /*
+    *
+    * ADICIONAR NOVOS MEMBROS A UM GRUPO
+    * */
+    @Transactional
+    public ConversationMember addMemberToGroup(
+            UUID conversationId,
+            UUID userId,
+            ConversationMemberRole role
+    ) {
+        User authenticatedUser =
+                authenticatedUserService.getAuthenticatedUser();
+
+        // 1. Buscar conversa
+        Conversation conversation = conversationRepository
+                .findById(conversationId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Conversa não encontrada."
+                        )
+                );
+
+        // 2. Garantir que é um GROUP
+        if (conversation.getType() != ConversationType.GROUP) {
+            throw new RuntimeException(
+                    "Só é possível adicionar membros a grupos."
+            );
+        }
+
+        // 3. Buscar o membro que está tentando adicionar alguém
+        ConversationMember authenticatedMember =
+                conversationMemberRepository
+                        .findByConversation_ConversationIdAndUser_UserId(
+                                conversationId,
+                                authenticatedUser.getUserId()
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Você não pertence a este grupo."
+                                )
+                        );
+
+        // 4. Apenas ADMIN pode adicionar membros
+        if (authenticatedMember.getRole()
+                != ConversationMemberRole.ADMIN) {
+
+            throw new RuntimeException(
+                    "Apenas administradores podem adicionar membros."
+            );
+        }
+
+        // 5. Verificar se o utilizador já pertence ao grupo
+        boolean alreadyMember =
+                conversationMemberRepository
+                        .existsByConversation_ConversationIdAndUser_UserId(
+                                conversationId,
+                                userId
+                        );
+
+        if (alreadyMember) {
+            throw new RuntimeException(
+                    "Este utilizador já pertence ao grupo."
+            );
+        }
+
+        // 6. Buscar utilizador que será adicionado
+        User userToAdd = userRepository
+                .findById(userId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Usuário não encontrado."
+                        )
+                );
+
+        // 7. Criar membro
+        ConversationMember member = new ConversationMember();
+
+        member.setUser(userToAdd);
+
+        // IMPORTANTE:
+        // não confies cegamente no role enviado pelo frontend
+        member.setRole(
+                role != null
+                        ? role
+                        : ConversationMemberRole.MEMBER
+        );
+
+        member.setJoinedAt(LocalDateTime.now());
+
+        // 8. Adicionar à conversa
+        conversation.addMember(member);
+
+        // 9. Guardar
+        return conversationMemberRepository.save(member);
+    }
+
+    /*
+    *
+    * ADMIN ELIMINA MEMBRO DE UMA GRUPO
+    *
+    * */
+    @Transactional
+    public void removeMemberFromGroup(
+            UUID conversationId,
+            UUID userIdToRemove
+    ) {
+        User authenticatedUser =
+                authenticatedUserService.getAuthenticatedUser();
+
+        // 1. Procurar a conversa
+        Conversation conversation = conversationRepository
+                .findById(conversationId)
+                .orElseThrow(() ->
+                        new RuntimeException("Conversa não encontrada.")
+                );
+
+        // 2. Garantir que é um grupo
+        if (conversation.getType() != ConversationType.GROUP) {
+            throw new RuntimeException(
+                    "Esta conversa não é um grupo."
+            );
+        }
+
+        // 3. Procurar o membro que está a executar a operação
+        ConversationMember authenticatedMember =
+                conversationMemberRepository
+                        .findByConversation_ConversationIdAndUser_UserId(
+                                conversationId,
+                                authenticatedUser.getUserId()
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Você não pertence a este grupo."
+                                )
+                        );
+
+        // 4. Apenas ADMIN pode remover membros
+        if (authenticatedMember.getRole()
+                != ConversationMemberRole.ADMIN) {
+
+            throw new RuntimeException(
+                    "Apenas administradores podem remover membros."
+            );
+        }
+
+        // 5. Procurar o membro que será removido
+        ConversationMember memberToRemove =
+                conversationMemberRepository
+                        .findByConversation_ConversationIdAndUser_UserId(
+                                conversationId,
+                                userIdToRemove
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "O usuário não pertence a este grupo."
+                                )
+                        );
+
+        // 6. Não permitir remover o último ADMIN
+        if (memberToRemove.getRole()
+                == ConversationMemberRole.ADMIN) {
+
+            long adminCount =
+                    conversationMemberRepository
+                            .countByConversation_ConversationIdAndRole(
+                                    conversationId,
+                                    ConversationMemberRole.ADMIN
+                            );
+
+            if (adminCount <= 1) {
+                throw new RuntimeException(
+                        "Não é possível remover o último administrador do grupo."
+                );
+            }
+        }
+
+        // 7. Remover da relação
+        conversation.removeMember(memberToRemove);
+
+        conversationMemberRepository.delete(memberToRemove);
+    }
+
+    /*
+    * ELEMENTO SAI DO GRUPO POR LIVRE VONTADE!
+    * */
+    @Transactional
+    public void leaveGroup(UUID conversationId) {
+
+        User user = authenticatedUserService.getAuthenticatedUser();
+
+        ConversationMember member = conversationMemberRepository
+                .findByConversation_ConversationIdAndUser_UserId(
+                        conversationId,
+                        user.getUserId()
+                )
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Você não pertence a este grupo."
+                        )
+                );
+
+        Conversation conversation = member.getConversation();
+
+        if (conversation.getType() != ConversationType.GROUP) {
+            throw new RuntimeException(
+                    "Esta conversa não é um grupo."
+            );
+        }
+
+        conversation.removeMember(member);
+
+        conversationMemberRepository.delete(member);
+    }
 
 
     @Transactional(readOnly = true)

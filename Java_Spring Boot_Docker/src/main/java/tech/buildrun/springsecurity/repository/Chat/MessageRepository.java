@@ -3,9 +3,11 @@ package tech.buildrun.springsecurity.repository.Chat;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import tech.buildrun.springsecurity.entities.Chat.ConversationMember;
 import tech.buildrun.springsecurity.entities.Chat.Message;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface MessageRepository extends JpaRepository<Message, UUID> {
@@ -27,6 +29,12 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
         )
     """)
     long countUnreadMessages(UUID userId);
+
+    Optional<ConversationMember>
+    findByConversation_ConversationIdAndUser_UserId(
+            UUID conversationId,
+            UUID userId
+    );
 
     // Numero de mensagens não lidas privadas
     @Query("""

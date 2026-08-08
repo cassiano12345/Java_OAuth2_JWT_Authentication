@@ -55,6 +55,11 @@ public interface ConversationMemberRepository
             ConversationType type
     );
 
+    long countByConversation_ConversationIdAndRole(
+            UUID conversationId,
+            ConversationMemberRole role
+    );
+
     @Query("""
     SELECT DISTINCT cm
     FROM ConversationMember cm
