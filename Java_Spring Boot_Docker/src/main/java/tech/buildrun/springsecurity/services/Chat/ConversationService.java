@@ -218,9 +218,14 @@ public class ConversationService {
 
     @Transactional(readOnly = true)
     public List<ConversationListItemDTO> getMyConversations() {
+
         User user = authenticatedUserService.getAuthenticatedUser();
+
         List<ConversationMember> memberships =
-                conversationMemberRepository.findByUserWithConversation(user);
+                conversationMemberRepository.findByUserAndConversation_Type(
+                        user,
+                        ConversationType.PRIVATE
+                );
 
         return memberships.stream()
                 .map(member -> {
@@ -230,25 +235,31 @@ public class ConversationService {
                     User friend = conversation.getMembers()
                             .stream()
                             .map(ConversationMember::getUser)
-                            .filter(u -> !u.getUserId().equals(user.getUserId()))
+                            .filter(u ->
+                                    !u.getUserId().equals(user.getUserId())
+                            )
                             .findFirst()
                             .orElseThrow();
 
                     Message lastMessage = conversation.getLastMessage();
-                    long unreadCount = messageRepository.countUnreadMessagesByConversation(
-                            conversation.getConversationId(),
-                            user.getUserId()
-                    );
+
+                    long unreadCount =
+                            messageRepository.countUnreadMessagesByConversation(
+                                    conversation.getConversationId(),
+                                    user.getUserId()
+                            );
+
                     return new ConversationListItemDTO(
                             conversation.getConversationId(),
                             friend.getUserId(),
                             friend.getUsername(),
-                            presenceService.isOnline(friend.getUserId()), // adapta ao teu User
-                            lastMessage != null ? lastMessage.getContent() : null,
+                            presenceService.isOnline(friend.getUserId()),
+                            lastMessage != null
+                                    ? lastMessage.getContent()
+                                    : null,
                             conversation.getLastMessageAt(),
                             unreadCount
                     );
-
                 })
                 .toList();
     }

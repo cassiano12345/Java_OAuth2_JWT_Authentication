@@ -79,4 +79,6 @@ public interface ConversationRepository extends JpaRepository<Conversation, UUID
             @Param("user1") User user1,
             @Param("user2") User user2
     );
+
+
 }

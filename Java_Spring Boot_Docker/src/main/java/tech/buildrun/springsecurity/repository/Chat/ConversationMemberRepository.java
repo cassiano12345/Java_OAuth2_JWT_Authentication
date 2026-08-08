@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.buildrun.springsecurity.entities.Chat.ConversationMember;
 import tech.buildrun.springsecurity.entities.Chat.ConversationMemberRole;
+import tech.buildrun.springsecurity.entities.Chat.ConversationType;
 import tech.buildrun.springsecurity.entities.User;
 
 import java.util.List;
@@ -38,6 +39,10 @@ public interface ConversationMemberRepository
     Optional<ConversationMember> findByConversation_ConversationIdAndUser_UserId(
             UUID conversationId,
             UUID userId
+    );
+    List<ConversationMember> findByUserAndConversation_Type(
+            User user,
+            ConversationType type
     );
 
     List<ConversationMember> findByConversation_ConversationIdAndRole(
