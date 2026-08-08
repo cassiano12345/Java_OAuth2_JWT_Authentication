@@ -493,6 +493,37 @@ public class ConversationService {
         conversationMemberRepository.delete(member);
     }
 
+    /*
+    * OBTER NOME E ROLE DE TODOS ELEMENTOS DE UM DETERMINADO GRUPO!
+    * */
+    @Transactional(readOnly = true)
+    public List<GroupMemberDTO> getGroupMembers(UUID conversationId) {
+
+        Conversation conversation = conversationRepository
+                .findById(conversationId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Grupo não encontrado."
+                        )
+                );
+
+        if (conversation.getType() != ConversationType.GROUP) {
+            throw new RuntimeException(
+                    "Esta conversa não é um grupo."
+            );
+        }
+
+        return conversationMemberRepository
+                .findByConversation_ConversationId(conversationId)
+                .stream()
+                .map(member -> new GroupMemberDTO(
+                        member.getUser().getUserId(),
+                        member.getUser().getUsername(),
+                        member.getRole()
+                ))
+                .toList();
+    }
+
 
     @Transactional(readOnly = true)
     public List<GroupConversationDTO> getMyGroups(User user) {

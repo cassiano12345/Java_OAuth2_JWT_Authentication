@@ -36,6 +36,7 @@ public interface ConversationMemberRepository
             @Param("senderId") UUID senderId
     );
 
+
     Optional<ConversationMember> findByConversation_ConversationIdAndUser_UserId(
             UUID conversationId,
             UUID userId
