@@ -1261,7 +1261,7 @@ async function createGroupViaApi({ name, members, avatarImage = "" }, endpoint =
     const response = await fetch(endpoint, {
         method: "POST", headers: authHeaders(true),
         // Ajuste memberIds/avatarImage ao contrato efetivo da API.
-        body: JSON.stringify({ name: name.trim(), memberIds, avatarImage }),
+        body: JSON.stringify({ name: name.trim(), memberIds }),
     });
     if (!response.ok) throw new Error("Não foi possível criar o grupo.");
     return response.json();
@@ -1359,7 +1359,7 @@ $("#groupPlayerSearch").addEventListener("input", (event) => {
 $("#groupSearchResults").addEventListener("click", (event) => {
     const button = event.target.closest("[data-group-user-id]");
     if (!button) return;
-    groupDraft.members.push({ id: button.dataset.groupUserId, name: button.dataset.groupUserName, letter: button.dataset.groupUserName[0].toUpperCase(), role: "Usuário normal" });
+    groupDraft.members.push({ id: button.dataset.groupUserId, name: button.dataset.groupUserName, role: "MEMBER" });
     renderDraftMembers();
     $("#groupPlayerSearch").value = "";
     $("#groupSearchResults").innerHTML = "";
@@ -1379,6 +1379,7 @@ $("#createGroupForm").addEventListener("submit", async (event) => {
     if (!name) return toast("Indique o nome do grupo.");
     let remoteGroup = null;
     try {
+        console.log(groupDraft.members);
         // Exemplo controlado: ative a configuração somente com backend disponível.
         if (API_CONFIG.enableRemoteOnInteraction)
             remoteGroup = await createGroupViaApi({ name, members: groupDraft.members, avatarImage: groupDraft.avatarImage });

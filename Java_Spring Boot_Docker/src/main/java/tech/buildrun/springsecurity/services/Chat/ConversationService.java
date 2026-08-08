@@ -118,6 +118,63 @@ public class ConversationService {
     }
 
 
+    @Transactional
+    public Conversation createGroupConversation(
+            String name,
+            List<UUID> userIds
+    ) {
+
+        User authenticatedUser =
+                authenticatedUserService.getAuthenticatedUser();
+
+        // 1. Criar a conversa
+        Conversation conversation = new Conversation();
+
+        conversation.setType(ConversationType.GROUP);
+        conversation.setName(name);
+        conversation.setCreatedBy(authenticatedUser);
+        conversation.setCreatedAt(LocalDateTime.now());
+
+        // 2. Adicionar o criador como membro
+        ConversationMember creatorMember =
+                new ConversationMember();
+
+        creatorMember.setUser(authenticatedUser);
+        creatorMember.setRole(ConversationMemberRole.ADMIN);
+        creatorMember.setJoinedAt(LocalDateTime.now());
+
+        conversation.addMember(creatorMember);
+
+        // 3. Procurar os restantes utilizadores
+        for (UUID userId : userIds) {
+
+            // Não adicionar o criador duas vezes
+            if (userId.equals(authenticatedUser.getUserId())) {
+                continue;
+            }
+
+            User user = userRepository
+                    .findById(userId)
+                    .orElseThrow(() ->
+                            new RuntimeException(
+                                    "Usuário não encontrado: " + userId
+                            )
+                    );
+
+            ConversationMember member =
+                    new ConversationMember();
+
+            member.setUser(user);
+            member.setRole(ConversationMemberRole.MEMBER);
+            member.setJoinedAt(LocalDateTime.now());
+
+            conversation.addMember(member);
+        }
+
+        // 4. Guardar tudo
+        return conversationRepository.save(conversation);
+    }
+
     // Buscar uma conversa pelo ID
     public Conversation findById(UUID conversationId) {
 
