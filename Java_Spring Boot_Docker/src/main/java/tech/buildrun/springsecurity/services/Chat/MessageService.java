@@ -325,9 +325,8 @@ public class MessageService {
     public long getUnreadMessagesCount() {
 
         User user = authenticatedUserService.getAuthenticatedUser();
-        var xxx =messageRepository.countUnreadMessages(user.getUserId());
-        System.out.println(xxx);
-        return xxx;
+        long unreadCount = messageRepository.countUnreadPrivateMessages(user.getUserId());
+        return unreadCount;
     }
     public List<User> getRecipients(
             UUID conversationId,
