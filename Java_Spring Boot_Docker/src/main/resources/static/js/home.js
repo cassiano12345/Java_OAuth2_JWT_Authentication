@@ -123,7 +123,7 @@ const API_CONFIG = {
     groupConversations: "/api/conversations/listar_conversas_grupos", // GET — devolve conversationId, groupName, lastMessage, lastMessageAt e unreadCount
     privateMessages: "/api/messages/conversation/:conversationId", // GET — mensagens de uma conversa privada
     markMessagesAsRead: "/api/message-reads/mark-as-read", // POST JSON — messageID e conversationId
-    sendPrivateMessage: "/api/messages/send", // POST JSON — conversationId, messageType e content
+    sendPrivateMessage: "/api/messages/send", // POST JSON — conversationId, messageType e content (privadas e grupos)
     deleteConversation: "/api/conversations/:conversationId", // DELETE — ajuste se necessário
     groupMessages: "/api/groups", // GET /:groupId/messages
     leaveGroup: "/api/groups/:groupId/leave", // POST — ajuste se necessário
@@ -634,17 +634,14 @@ $("#chatBody").addEventListener("submit", async (e) => {
     const sendButton = $(".message-form .send");
     sendButton.disabled = true;
     try {
-        // Mensagens privadas usam a API fornecida; grupos preservam o fluxo local existente.
-        if (!conversation.isGroup) {
-            // Conversas devolvidas pela API usam conversationId; o id local serve
-            // apenas como alternativa para a interface de demonstração.
-            const conversationId = entityId(conversation.conversationId || conversation.id);
-            if (!conversationId) throw new Error("conversationId indisponível.");
-            if (text) await sendPrivateMessageViaApi(conversationId, "TEXT", text);
-            for (const file of files) {
-                const content = await readImageAsDataUrl(file);
-                await sendPrivateMessageViaApi(conversationId, "IMAGE", content);
-            }
+        // Todas as conversas, privadas ou de grupo, enviam pelo mesmo endpoint.
+        // A API identifica o destino exclusivamente pelo conversationId.
+        const conversationId = entityId(conversation.conversationId || conversation.id);
+        if (!conversationId) throw new Error("conversationId indisponível.");
+        if (text) await sendMessageViaApi(conversationId, "TEXT", text);
+        for (const file of files) {
+            const content = await readImageAsDataUrl(file);
+            await sendMessageViaApi(conversationId, "IMAGE", content);
         }
         if (text) conversation.messages.push(["Você", "S", text, "agora", reply]);
         files.forEach((file) => conversation.messages.push(["Você", "S", `📷 ${file.name}`, "agora", reply]));
@@ -1098,9 +1095,9 @@ async function leaveGroupViaApi(groupId, endpoint = API_CONFIG.leaveGroup) {
     return response.status === 204 ? null : response.json().catch(() => null);
 }
 
-// Envia uma mensagem privada para /api/messages/send.
-// Exemplo: await sendPrivateMessageViaApi("42", "TEXT", "Olá!");
-async function sendPrivateMessageViaApi(conversationId, messageType, content, endpoint = API_CONFIG.sendPrivateMessage) {
+// Envia mensagens de conversas privadas e de grupos pelo mesmo endpoint.
+// Exemplo: await sendMessageViaApi("42", "TEXT", "Olá!");
+async function sendMessageViaApi(conversationId, messageType, content, endpoint = API_CONFIG.sendPrivateMessage) {
     const id = entityId(conversationId);
     if (!id) throw new Error("conversationId indisponível.");
     if (messageType !== "TEXT" && messageType !== "IMAGE") throw new Error("Tipo de mensagem inválido.");
@@ -1113,6 +1110,11 @@ async function sendPrivateMessageViaApi(conversationId, messageType, content, en
     });
     if (!response.ok) throw new Error("Não foi possível enviar a mensagem.");
     return response.status === 204 ? null : response.json().catch(() => null);
+}
+
+// Compatibilidade com código externo que já usava o nome anterior.
+async function sendPrivateMessageViaApi(conversationId, messageType, content, endpoint = API_CONFIG.sendPrivateMessage) {
+    return sendMessageViaApi(conversationId, messageType, content, endpoint);
 }
 
 function readImageAsDataUrl(file) {
@@ -1550,6 +1552,7 @@ window.loadConversationsFromApi = loadConversationsFromApi;
 window.atualizar_loadConversationsFromApi = atualizar_loadConversationsFromApi;
 window.loadGroupConversationsFromApi = loadGroupConversationsFromApi;
 window.atualizar_loadConversationsGruposFromApi = atualizar_loadConversationsGruposFromApi;
+window.sendMessageViaApi = sendMessageViaApi;
 window.atualizar_chat = atualizar_chat;
 
 // Define o estado offline no servidor e atualiza a indicação local.
