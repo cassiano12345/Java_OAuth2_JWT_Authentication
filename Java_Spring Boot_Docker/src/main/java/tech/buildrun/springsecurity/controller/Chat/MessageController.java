@@ -148,6 +148,9 @@ public class MessageController {
         return ResponseEntity.noContent().build();
     }
 
+    /*
+    * OBTER AS MENSAGENS E PASSAR PARA O CHAT
+    * */
     @GetMapping("/conversation/{conversationId}")
     public ResponseEntity<List<Message_listDTO>> getConversationMessages(
             @PathVariable UUID conversationId

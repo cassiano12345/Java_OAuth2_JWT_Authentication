@@ -5,10 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.buildrun.springsecurity.dtos.Chat.GroupConversationDTO;
 import tech.buildrun.springsecurity.dtos.Chat.MessageDTO;
 import tech.buildrun.springsecurity.dtos.Chat.Message_listDTO;
-import tech.buildrun.springsecurity.entities.Chat.Conversation;
-import tech.buildrun.springsecurity.entities.Chat.Message;
-import tech.buildrun.springsecurity.entities.Chat.MessageRead;
-import tech.buildrun.springsecurity.entities.Chat.MessageType;
+import tech.buildrun.springsecurity.entities.Chat.*;
 import tech.buildrun.springsecurity.entities.User;
 import tech.buildrun.springsecurity.repository.Chat.ConversationMemberRepository;
 import tech.buildrun.springsecurity.repository.Chat.ConversationRepository;
@@ -260,20 +257,25 @@ public class MessageService {
     }
 
     @Transactional(readOnly = true)
-    public List<Message_listDTO> getConversationMessages(UUID conversationId, User loggedUser) {
+    public List<Message_listDTO> getConversationMessages(
+            UUID conversationId,
+            User loggedUser
+    ) {
 
-
-
-        // Verifica se o utilizador pertence à conversa
-        boolean member = conversationMemberRepository
-                .existsByConversation_ConversationIdAndUser_UserId(
+        // Obtém o membro do utilizador nesta conversa
+        ConversationMember member = conversationMemberRepository
+                .findByConversation_ConversationIdAndUser_UserId(
                         conversationId,
                         loggedUser.getUserId()
+                )
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Você não pertence a esta conversa."
+                        )
                 );
 
-        if (!member) {
-            throw new RuntimeException("Você não pertence a esta conversa.");
-        }
+        // Role do utilizador nesta conversa
+        ConversationMemberRole role = member.getRole();
 
         // Busca todas as mensagens da conversa
         List<Message> messages = messageRepository
@@ -316,11 +318,14 @@ public class MessageService {
 
                         message.getSender()
                                 .getUserId()
-                                .equals(loggedUser.getUserId())
+                                .equals(loggedUser.getUserId()),
+
+                        role
 
                 ))
                 .toList();
     }
+
 
     public long getUnreadMessagesCount() {
 

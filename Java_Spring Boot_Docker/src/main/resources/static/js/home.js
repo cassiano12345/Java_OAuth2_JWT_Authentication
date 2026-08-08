@@ -1181,6 +1181,7 @@ async function markUnreadConversationMessagesAsRead(conversation) {
 // Atualizador único do chat: recebe o `await response.json()` de qualquer endpoint
 // de mensagens, normaliza-o e apresenta-o no mesmo painel usado pela sidebar e por Mensagens.
 async function atualizar_chat(data, conversation = state.conversation) {
+    console.log(data);
     if (!conversation) throw new Error("Nenhuma conversa selecionada.");
     conversation.messages = normalizeApiMessages(data);
     if (state.conversation === conversation) renderConversation(conversation);

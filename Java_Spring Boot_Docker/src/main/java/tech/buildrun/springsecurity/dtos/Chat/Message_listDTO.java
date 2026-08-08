@@ -1,5 +1,6 @@
 package tech.buildrun.springsecurity.dtos.Chat;
 
+import tech.buildrun.springsecurity.entities.Chat.ConversationMemberRole;
 import tech.buildrun.springsecurity.entities.Chat.MessageType;
 
 import java.time.LocalDateTime;
@@ -22,5 +23,6 @@ public record Message_listDTO(
 
                               LocalDateTime readAt,
 
-                              boolean mine) {
+                              boolean mine,
+                              ConversationMemberRole role) {
 }

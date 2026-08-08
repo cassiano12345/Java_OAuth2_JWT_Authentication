@@ -29,7 +29,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
         )
     """)
     long countUnreadMessages(UUID userId);
-    
+
 
     // Numero de mensagens não lidas privadas
     @Query("""

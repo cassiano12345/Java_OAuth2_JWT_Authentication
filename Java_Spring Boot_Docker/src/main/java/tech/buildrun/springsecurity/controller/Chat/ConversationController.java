@@ -160,7 +160,6 @@ public class ConversationController {
     /*
     * OBTER NOME E ROLE DE TODOS ELEMENTOS DE UM DETERMINADO GRUPO!
     * */
-
     @GetMapping("/{conversationId}/members")
     public ResponseEntity<List<GroupMemberDTO>> getGroupMembers(
             @PathVariable UUID conversationId
