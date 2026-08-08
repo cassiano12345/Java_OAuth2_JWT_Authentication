@@ -64,6 +64,19 @@ public class WebSocketNotificationService {
         );
     }
 
+    public void sendNotifications_new_group_add(User user, Object resposta) {
+
+        messagingTemplate.convertAndSendToUser(
+
+                user.getUsername(),
+
+                "/queue/notifications/adcionado_a_grupo",
+
+                resposta
+
+        );
+    }
+
     public void pedido_de_amizade_recebido(User user, Object resposta) {
 
         messagingTemplate.convertAndSendToUser(

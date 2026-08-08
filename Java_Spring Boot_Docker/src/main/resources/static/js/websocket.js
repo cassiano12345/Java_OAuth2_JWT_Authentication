@@ -55,6 +55,14 @@ function onConnected() {
         renderNotifications(data.notificacoes);
     });
 
+    stompClient.subscribe("/user/queue/notifications/adcionado_a_grupo", function (message) {
+
+        const data = JSON.parse(message.body);
+        console.log(message.body);
+        toast(data.mensagem);
+        renderNotifications(data.notificacoes);
+    });
+
 
  /*
 |--------------------------------------------------------------------------

@@ -4,14 +4,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.buildrun.springsecurity.dtos.Chat.ConversationListItemDTO;
 import tech.buildrun.springsecurity.dtos.Chat.GroupMemberDTO;
+import tech.buildrun.springsecurity.dtos.Chat.NotificationResponseDTO;
+import tech.buildrun.springsecurity.dtos.Chat.Notificão_aceitar_amizade;
 import tech.buildrun.springsecurity.entities.Chat.*;
 import tech.buildrun.springsecurity.entities.User;
 import tech.buildrun.springsecurity.repository.Chat.ConversationMemberRepository;
 import tech.buildrun.springsecurity.repository.Chat.ConversationRepository;
 import tech.buildrun.springsecurity.repository.Chat.MessageRepository;
+import tech.buildrun.springsecurity.repository.Chat.NotificationRepository;
 import tech.buildrun.springsecurity.repository.UserRepository;
 import tech.buildrun.springsecurity.services.AuthenticatedUserService;
 import tech.buildrun.springsecurity.services.PresenceService;
+import tech.buildrun.springsecurity.websocket.WebSocketNotificationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,10 +32,14 @@ public class ConversationService {
     ConversationMemberRole ConversationRole;
     private final PresenceService presenceService;;
     private final MessageRepository messageRepository;
+    private final NotificationService notificationService;
+    NotificationType notificationType;
+    private final NotificationRepository notificationRepository;
+    private final WebSocketNotificationService webSocketNotificationService;
     public ConversationService(
             ConversationRepository conversationRepository,
             ConversationMemberRepository conversationMemberRepository,
-            UserRepository userRepository, AuthenticatedUserService authenticatedUserService, PresenceService presenceService, MessageRepository messageRepository
+            UserRepository userRepository, AuthenticatedUserService authenticatedUserService, PresenceService presenceService, MessageRepository messageRepository, NotificationService notificationService, NotificationRepository notificationRepository, WebSocketNotificationService webSocketNotificationService
     ) {
         this.conversationRepository = conversationRepository;
         this.conversationMemberRepository = conversationMemberRepository;
@@ -39,6 +47,9 @@ public class ConversationService {
         this.authenticatedUserService = authenticatedUserService;
         this.presenceService = presenceService;
         this.messageRepository = messageRepository;
+        this.notificationService = notificationService;
+        this.notificationRepository = notificationRepository;
+        this.webSocketNotificationService = webSocketNotificationService;
     }
 
     // Criar uma nova conversa
@@ -177,6 +188,13 @@ public class ConversationService {
             );
 
             conversation.addMember(conversationMember);
+            notificationService.createNotification(userId, notificationType.GROUP_ADDED,"💬 Adicionado a grupo de mensagens.", "💬 Você foi adicionado ao grupo de mensagens "+ name + " por: " + authenticatedUser.getUsername());
+            Notificão_aceitar_amizade notificcoAceitarAmizade = new Notificão_aceitar_amizade("💬 Adicionado a grupo de mensagens.", notificationRepository.findByUser_UserIdOrderByCreatedAtDesc(userId).stream().map(this::toDTO).toList());
+
+            webSocketNotificationService.sendNotifications_new_group_add(
+                    user, notificcoAceitarAmizade
+            );
+
         }
 
         return conversationRepository.save(conversation);
@@ -262,5 +280,25 @@ public class ConversationService {
                     );
                 })
                 .toList();
+    }
+
+    private NotificationResponseDTO toDTO(Notification notification) {
+
+        return new NotificationResponseDTO(
+
+                notification.getNotificationId(),
+
+                notification.getUser().getUserId(),
+
+                notification.getTitle(),
+
+                notification.getContent(),
+
+                notification.isRead(),
+
+                notification.getCreatedAt()
+
+        );
+
     }
 }
