@@ -2,10 +2,7 @@ package tech.buildrun.springsecurity.services.Chat;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.buildrun.springsecurity.dtos.Chat.ConversationListItemDTO;
-import tech.buildrun.springsecurity.dtos.Chat.GroupMemberDTO;
-import tech.buildrun.springsecurity.dtos.Chat.NotificationResponseDTO;
-import tech.buildrun.springsecurity.dtos.Chat.Notificão_aceitar_amizade;
+import tech.buildrun.springsecurity.dtos.Chat.*;
 import tech.buildrun.springsecurity.entities.Chat.*;
 import tech.buildrun.springsecurity.entities.User;
 import tech.buildrun.springsecurity.repository.Chat.ConversationMemberRepository;
@@ -272,6 +269,46 @@ public class ConversationService {
                             friend.getUserId(),
                             friend.getUsername(),
                             presenceService.isOnline(friend.getUserId()),
+                            lastMessage != null
+                                    ? lastMessage.getContent()
+                                    : null,
+                            conversation.getLastMessageAt(),
+                            unreadCount
+                    );
+                })
+                .toList();
+    }
+
+
+
+    @Transactional(readOnly = true)
+    public List<GroupConversationDTO> getMyGroups() {
+
+        User user = authenticatedUserService.getAuthenticatedUser();
+
+        List<ConversationMember> memberships =
+                conversationMemberRepository
+                        .findByUser_UserIdAndConversation_Type(
+                                user.getUserId(),
+                                ConversationType.GROUP
+                        );
+
+        return memberships.stream()
+                .map(member -> {
+
+                    Conversation conversation = member.getConversation();
+
+                    Message lastMessage = conversation.getLastMessage();
+
+                    long unreadCount =
+                            messageRepository.countUnreadMessagesByConversation(
+                                    conversation.getConversationId(),
+                                    user.getUserId()
+                            );
+
+                    return new GroupConversationDTO(
+                            conversation.getConversationId(),
+                            conversation.getName(),
                             lastMessage != null
                                     ? lastMessage.getContent()
                                     : null,

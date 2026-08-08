@@ -28,6 +28,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
     """)
     long countUnreadMessages(UUID userId);
 
+
     @Query("""
 SELECT COUNT(m)
 FROM Message m

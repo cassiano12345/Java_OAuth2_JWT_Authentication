@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import tech.buildrun.springsecurity.dtos.Chat.ConversationDTO;
 import tech.buildrun.springsecurity.dtos.Chat.ConversationListItemDTO;
 import tech.buildrun.springsecurity.dtos.Chat.CreateGroupConversationDTO;
+import tech.buildrun.springsecurity.dtos.Chat.GroupConversationDTO;
 import tech.buildrun.springsecurity.entities.Chat.Conversation;
 import tech.buildrun.springsecurity.services.Chat.ConversationService;
 
@@ -105,5 +106,10 @@ public class ConversationController {
     @GetMapping("listar_conversas")
     public ResponseEntity<List<ConversationListItemDTO>> getMyConversations() {
         return ResponseEntity.ok(conversationService.getMyConversations());
+    }
+
+    @GetMapping("listar_conversas_grupos")
+    public ResponseEntity<List<GroupConversationDTO>> getMyConversations_group() {
+        return ResponseEntity.ok(conversationService.getMyGroups());
     }
 }

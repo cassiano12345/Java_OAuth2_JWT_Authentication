@@ -1643,3 +1643,40 @@ body.light-mode .conversation-unread-badge {
     color: #fff;
     background: #e94c65;
 }
+
+
+/* ============================================================
+   LISTA DINÂMICA DE GRUPOS
+   ============================================================ */
+.group-content {
+    display: block;
+    min-width: 0;
+    flex: 1;
+}
+.group-content b,
+.group-content small {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.group-content b {
+    font-size: 12px;
+}
+.group-content small {
+    margin-top: 2px;
+    color: var(--muted2);
+    font-size: 9px;
+    font-weight: 400;
+}
+.group.active .group-content small,
+.group:hover .group-content small {
+    color: var(--muted);
+}
+.groups-empty {
+    margin: 5px 4px;
+    padding: 10px 7px;
+    color: var(--muted2);
+    font-size: 10px;
+    text-align: center;
+}

@@ -120,6 +120,7 @@ const API_CONFIG = {
     notifications: "/api/notifications/my", // GET — substitua se necessário
     friendsPresence: "/api/friendships/friends", // GET — substitua se necessário
     conversations: "/api/conversations/listar_conversas", // GET — devolve conversationId, friendId, friendName, online e lastMessage
+    groupConversations: "/api/conversations/listar_conversas_grupos", // GET — devolve conversationId, groupName, lastMessage, lastMessageAt e unreadCount
     privateMessages: "/api/messages/conversation/:conversationId", // GET — mensagens de uma conversa privada
     markMessagesAsRead: "/api/message-reads/mark-as-read", // POST JSON — messageID e conversationId
     sendPrivateMessage: "/api/messages/send", // POST JSON — conversationId, messageType e content
@@ -400,10 +401,13 @@ $("#groupsList").addEventListener("click", (event) => {
     button.classList.add("active");
     sidebar.classList.remove("open");
     const conversation = state.groups[button.dataset.conversation];
+    if (!conversation) return;
     renderConversation(conversation);
-    // Chamada controlada: habilite após configurar os endpoints reais.
-    if (API_CONFIG.enableRemoteOnInteraction)
-        loadGroupMessagesFromApi(button.dataset.conversation, conversation).catch((error) => console.error("Erro ao carregar grupo.", error));
+    // Grupos e conversas privadas usam o mesmo histórico por conversationId.
+    // Assim, o painel único de chat é reutilizado em todos os pontos da interface.
+    const conversationId = entityId(conversation.conversationId || conversation.id);
+    if (conversationId)
+        loadPrivateMessagesFromApi(conversationId, conversation).catch((error) => console.error("Erro ao carregar mensagens do grupo.", error));
 });
 
 // Conversas privadas e filtro de amigos diretamente na barra lateral.
@@ -1031,6 +1035,45 @@ function atualizar_loadConversationsFromApi(data) {
     return state.conversations;
 }
 
+// Atualiza a lista da sidebar com os grupos devolvidos pela API.
+// Cada grupo usa o mesmo conversationId e o mesmo painel de mensagens das conversas privadas.
+function atualizar_loadConversationsGruposFromApi(data) {
+    if (!Array.isArray(data)) throw new Error("Resposta de grupos inválida.");
+
+    const groupsList = $("#groupsList");
+    state.groups = {};
+    groupsList.innerHTML = data.map((group) => {
+        const conversationId = entityId(group.conversationId);
+        if (!conversationId) return "";
+        const name = String(group.groupName || "Grupo sem nome");
+        const unreadCount = Math.max(0, Number(group.unreadCount) || 0);
+        state.groups[conversationId] = {
+            id: conversationId,
+            conversationId,
+            name,
+            subtitle: "Grupo de mensagens",
+            letter: "👥",
+            isGroup: true,
+            participants: [],
+            messages: [],
+            preview: String(group.lastMessage || ""),
+            lastMessageAt: group.lastMessageAt || null,
+            unreadCount,
+        };
+        const badge = unreadCount > 0
+            ? `<em aria-label="${unreadCount} mensagem${unreadCount === 1 ? "" : "s"} não lida${unreadCount === 1 ? "" : "s"}">${unreadCount > 99 ? "99+" : unreadCount}</em>`
+            : "";
+        return `<button class="group" data-conversation="${escapeHtml(conversationId)}"><span class="group-icon">👥</span><span class="group-content"><b>${escapeHtml(name)}</b><small>${escapeHtml(String(group.lastMessage || ""))}</small></span>${badge}</button>`;
+    }).join("") || '<p class="groups-empty">Ainda não participa em nenhum grupo.</p>';
+    return state.groups;
+}
+
+async function loadGroupConversationsFromApi(endpoint = API_CONFIG.groupConversations) {
+    const response = await fetch(endpoint, { headers: authHeaders() });
+    if (!response.ok) throw new Error("Não foi possível listar os grupos.");
+    return atualizar_loadConversationsGruposFromApi(await response.json());
+}
+
 // Lista as conversas privadas da API. É chamada ao abrir "Mensagens".
 async function loadConversationsFromApi(endpoint = API_CONFIG.conversations) {
     const response = await fetch(endpoint, { headers: authHeaders() });
@@ -1505,6 +1548,8 @@ async function handleFriendshipWebSocketUpdate() {
 window.handleFriendshipWebSocketUpdate = handleFriendshipWebSocketUpdate;
 window.loadConversationsFromApi = loadConversationsFromApi;
 window.atualizar_loadConversationsFromApi = atualizar_loadConversationsFromApi;
+window.loadGroupConversationsFromApi = loadGroupConversationsFromApi;
+window.atualizar_loadConversationsGruposFromApi = atualizar_loadConversationsGruposFromApi;
 window.atualizar_chat = atualizar_chat;
 
 // Define o estado offline no servidor e atualiza a indicação local.
@@ -1633,6 +1678,7 @@ updateBadges();
 updateNotificationsBadge();
 loadUser();
 loadFriendsPresenceFromApi();
+loadGroupConversationsFromApi().catch((error) => console.error("Erro ao listar grupos.", error));
 loadFriendRequestCount();
 loadBlockedFriendRequests();
 fetchNotificationsFromApi();

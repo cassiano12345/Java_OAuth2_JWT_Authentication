@@ -50,7 +50,10 @@ public interface ConversationMemberRepository
             ConversationMemberRole role
     );
 
-
+    List<ConversationMember> findByUser_UserIdAndConversation_Type(
+            UUID userId,
+            ConversationType type
+    );
 
     @Query("""
     SELECT DISTINCT cm
