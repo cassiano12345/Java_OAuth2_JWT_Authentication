@@ -3,6 +3,7 @@ package tech.buildrun.springsecurity.services.Chat;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.buildrun.springsecurity.dtos.Chat.ConversationListItemDTO;
+import tech.buildrun.springsecurity.dtos.Chat.GroupMemberDTO;
 import tech.buildrun.springsecurity.entities.Chat.*;
 import tech.buildrun.springsecurity.entities.User;
 import tech.buildrun.springsecurity.repository.Chat.ConversationMemberRepository;
@@ -121,13 +122,12 @@ public class ConversationService {
     @Transactional
     public Conversation createGroupConversation(
             String name,
-            List<UUID> userIds
+            List<GroupMemberDTO> members
     ) {
 
         User authenticatedUser =
                 authenticatedUserService.getAuthenticatedUser();
 
-        // 1. Criar a conversa
         Conversation conversation = new Conversation();
 
         conversation.setType(ConversationType.GROUP);
@@ -135,7 +135,8 @@ public class ConversationService {
         conversation.setCreatedBy(authenticatedUser);
         conversation.setCreatedAt(LocalDateTime.now());
 
-        // 2. Adicionar o criador como membro
+
+        // Criador do grupo
         ConversationMember creatorMember =
                 new ConversationMember();
 
@@ -145,10 +146,13 @@ public class ConversationService {
 
         conversation.addMember(creatorMember);
 
-        // 3. Procurar os restantes utilizadores
-        for (UUID userId : userIds) {
 
-            // Não adicionar o criador duas vezes
+        // Adicionar os membros selecionados
+        for (GroupMemberDTO memberDTO : members) {
+
+            UUID userId = memberDTO.id();
+
+            // Evitar adicionar o próprio utilizador novamente
             if (userId.equals(authenticatedUser.getUserId())) {
                 continue;
             }
@@ -161,17 +165,20 @@ public class ConversationService {
                             )
                     );
 
-            ConversationMember member =
+            ConversationMember conversationMember =
                     new ConversationMember();
 
-            member.setUser(user);
-            member.setRole(ConversationMemberRole.MEMBER);
-            member.setJoinedAt(LocalDateTime.now());
+            conversationMember.setUser(user);
+            conversationMember.setRole(
+                    memberDTO.role()
+            );
+            conversationMember.setJoinedAt(
+                    LocalDateTime.now()
+            );
 
-            conversation.addMember(member);
+            conversation.addMember(conversationMember);
         }
 
-        // 4. Guardar tudo
         return conversationRepository.save(conversation);
     }
 

@@ -127,7 +127,7 @@ const API_CONFIG = {
     groupMessages: "/api/groups", // GET /:groupId/messages
     leaveGroup: "/api/groups/:groupId/leave", // POST — ajuste se necessário
     offlineMode: "/api/presence/offline", // POST — ajuste se necessário
-    createGroup: "/api/groups", // POST JSON
+    createGroup: "/api/conversations/group", // POST JSON
     addGroupMember: "/api/groups", // POST /:groupId/members — substitua conforme a API
     removeGroupParticipant: "/api/groups/:groupId/members/:userId", // DELETE — ajuste se necessário
     acceptFriendRequest: "/api/friendships/accept", // POST JSON
@@ -1255,13 +1255,13 @@ function renderConversationGroupSearchResults(users) {
 // Demonstra POST JSON de criação. Não é chamado automaticamente.
 async function createGroupViaApi({ name, members, avatarImage = "" }, endpoint = API_CONFIG.createGroup) {
     await loadUser();
+    console.log(JSON.stringify({ name: name, members: members }));
     if (!name?.trim()) throw new Error("Indique o nome do grupo.");
     if (!Array.isArray(members)) throw new Error("Participantes inválidos.");
-    const memberIds = members.map((member) => member.id).filter(Boolean);
     const response = await fetch(endpoint, {
         method: "POST", headers: authHeaders(true),
         // Ajuste memberIds/avatarImage ao contrato efetivo da API.
-        body: JSON.stringify({ name: name.trim(), memberIds }),
+        body: JSON.stringify({ name: name.trim(), members: members }),
     });
     if (!response.ok) throw new Error("Não foi possível criar o grupo.");
     return response.json();
@@ -1302,7 +1302,7 @@ function closeGroupModal() {
 function renderDraftMembers() {
     const target = $("#selectedGroupMembers");
     target.innerHTML = groupDraft.members.map((member, index) =>
-        `<div class="selected-member">${avatar(member.letter)}<span>${escapeHtml(member.name)}</span><select class="member-role" data-member-role="${index}"><option value="Admin" ${member.role === "Admin" ? "selected" : ""}>Admin</option><option value="Usuário normal" ${member.role !== "Admin" ? "selected" : ""}>Usuário normal</option></select><button type="button" class="remove-member" data-remove-member="${index}" aria-label="Remover ${escapeHtml(member.name)}"><i class="bi bi-x-lg"></i></button></div>`
+        `<div class="selected-member">${avatar(member.letter)}<span>${escapeHtml(member.name)}</span><select class="member-role" data-member-role="${index}"><option value="ADMIN" ${member.role === "Admin" ? "selected" : ""}>Admin</option><option value="Usuário normal" ${member.role !== "Admin" ? "selected" : ""}>Usuário normal</option></select><button type="button" class="remove-member" data-remove-member="${index}" aria-label="Remover ${escapeHtml(member.name)}"><i class="bi bi-x-lg"></i></button></div>`
     ).join("") || '<p class="friend-search-empty">Nenhum participante adicionado.</p>';
 }
 function renderGroupSearchResults(users) {
@@ -1379,10 +1379,7 @@ $("#createGroupForm").addEventListener("submit", async (event) => {
     if (!name) return toast("Indique o nome do grupo.");
     let remoteGroup = null;
     try {
-        console.log(groupDraft.members);
-        // Exemplo controlado: ative a configuração somente com backend disponível.
-        if (API_CONFIG.enableRemoteOnInteraction)
-            remoteGroup = await createGroupViaApi({ name, members: groupDraft.members, avatarImage: groupDraft.avatarImage });
+        remoteGroup = await createGroupViaApi({ name, members: groupDraft.members, avatarImage: groupDraft.avatarImage });
     } catch (error) {
         console.error("Erro ao criar grupo pela API.", error);
         return toast("Não foi possível criar o grupo na API.");

@@ -1,9 +1,11 @@
 package tech.buildrun.springsecurity.controller.Chat;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.buildrun.springsecurity.dtos.Chat.ConversationDTO;
 import tech.buildrun.springsecurity.dtos.Chat.ConversationListItemDTO;
+import tech.buildrun.springsecurity.dtos.Chat.CreateGroupConversationDTO;
 import tech.buildrun.springsecurity.entities.Chat.Conversation;
 import tech.buildrun.springsecurity.services.Chat.ConversationService;
 
@@ -33,6 +35,22 @@ public class ConversationController {
                 );
 
         return ResponseEntity.ok(conversation);
+    }
+
+    @PostMapping("/group")
+    public ResponseEntity<Conversation> createGroupConversation(
+            @RequestBody CreateGroupConversationDTO dto
+    ) {
+
+        Conversation conversation =
+                conversationService.createGroupConversation(
+                        dto.name(),
+                        dto.members()
+                );
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(conversation);
     }
 
     @PostMapping("/find")
