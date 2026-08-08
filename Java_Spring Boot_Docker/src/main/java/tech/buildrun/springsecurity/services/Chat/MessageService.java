@@ -2,6 +2,7 @@ package tech.buildrun.springsecurity.services.Chat;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.buildrun.springsecurity.dtos.Chat.GroupConversationDTO;
 import tech.buildrun.springsecurity.dtos.Chat.MessageDTO;
 import tech.buildrun.springsecurity.dtos.Chat.Message_listDTO;
 import tech.buildrun.springsecurity.entities.Chat.Conversation;
@@ -249,7 +250,7 @@ public class MessageService {
             // enviar websocket
             webSocketNotificationService.atualizacao_num_msglidas(recipient, unreadCount);
             webSocketNotificationService.atualizacao_num_msglidas_grupos(recipient,conversationService.getMyGroups(recipient));
-            //Object mensagens = getConversationMessages(conversationId);
+            //List<GroupConversationDTO> mensagens = conversationService.getMyGroups(recipient);
             webSocketNotificationService.Atualizar_chat(recipient,getConversationMessages(conversationId, recipient));
         }
 

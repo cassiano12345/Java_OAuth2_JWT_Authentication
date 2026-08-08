@@ -109,18 +109,18 @@ function onConnected() {
         updatenewmessagesBadge(message.body);
     });
 
-    stompClient.subscribe("/user/queue/messages/atualizacao_num_msglidas_grupos", async function (message) {
-        const response = new Response(message.body, {
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
+    stompClient.subscribe("/user/queue/messages/atualizacao_num_msglidas_grupos",function (message) {
 
-        const data = await response.json();
-        console.log("Numero de mensagens n lidas em grupos: " + await response.json());
+            const data = JSON.parse(message.body);
 
-        atualizar_loadConversationsGruposFromApi(await response.json());
-    });
+            console.log(
+                "Número de mensagens não lidas em grupos:",
+                data
+            );
+
+            atualizar_loadConversationsGruposFromApi(data);
+        }
+    );
 
 
     stompClient.subscribe("/user/queue/messages/atualizar_chat", async function (message) {
